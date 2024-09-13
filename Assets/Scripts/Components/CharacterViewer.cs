@@ -4,12 +4,15 @@ using System.IO;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Gilzoide.SerializableCollections;
+using Kiraio.Azure.Core;
 using Kiraio.Azure.Utils;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.Json;
 using Live2D.Cubism.Framework.Motion;
 using Live2D.Cubism.Framework.MotionFade;
+using Live2D.Cubism.Framework.Raycasting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Kiraio.Azure.Components
 {
@@ -25,9 +28,32 @@ namespace Kiraio.Azure.Components
         CubismModel model;
         CubismMotionController motionController;
         CubismFadeController fadeController;
+        CubismRaycaster raycaster;
+
+        // TouchBody = Upper Body, TouchHead = Head, TouchSpecial = Bust
+        readonly string[] touchAreas = { "TouchBody", "TouchHead", "TouchSpecial" };
+        InputManager inputManager;
+
+        public SerializableDictionary<string, AnimationClip> Animations
+        {
+            get => animations;
+        }
+        public CubismMotionController MotionController
+        {
+            get => motionController;
+        }
+        public CubismRaycaster Raycaster
+        {
+            get => raycaster;
+        }
+        public InputManager InputManager
+        {
+            get => inputManager;
+        }
 
         void Awake()
         {
+            inputManager = FindObjectsByType<InputManager>(FindObjectsSortMode.None)[0];
             Initialize();
         }
 
@@ -38,6 +64,9 @@ namespace Kiraio.Azure.Components
             model.transform.parent = transform;
             gameObject.name = model.name;
             model.gameObject.SetActive(false); // Disable the model gameObject to stop the components being initialized
+
+            // Add Raycaster
+            raycaster = model.gameObject.AddComponent<CubismRaycaster>();
 
             // Add CubismMotionController after assigning CubismFadeMotionList
             motionController = model.gameObject.AddComponent<CubismMotionController>();
@@ -100,14 +129,29 @@ namespace Kiraio.Azure.Components
             fadeMotionList.CubismFadeMotionObjects = motionsData.Values.ToArray();
             fadeController.CubismFadeMotionList = fadeMotionList;
 
+            // Add touch area
+            foreach (string area in touchAreas)
+            {
+                GameObject target = transform.Find($"{transform.name}/Drawables/{area}").gameObject;
+                if (target != null)
+                {
+                    Touch touchArea = target.AddComponent<Touch>();
+                    touchArea.CharacterViewer = this;
+                }
+            }
+
             // Enable the model gameObject to initialize the components
             motionController.enabled = true;
             model.gameObject.SetActive(true);
 
             // Play the intro animation
-            motionController.PlayAnimation(animations["home"], isLoop: false);
-            motionController.AnimationEndHandler += _ =>
-                motionController.PlayAnimation(animations["idle"]);
+            motionController.PlayAnimation(animations["login"], isLoop: false);
+            motionController.AnimationEndHandler += ResetToIdle;
+        }
+
+        void ResetToIdle(float instanceId)
+        {
+            motionController.PlayAnimation(animations["idle"]);
         }
 
         object BuiltinLoadAssetAtPath(Type assetType, string absolutePath)
