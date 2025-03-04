@@ -8,22 +8,19 @@
 
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework.MotionFade
 {
     [CreateAssetMenu(menuName = "Live2D Cubism/Fade Motion List")]
     public class CubismFadeMotionList : ScriptableObject
     {
         /// <summary>
-        /// Cubism fade motion instance ids.
+        ///     Cubism fade motion instance ids.
         /// </summary>
-        [SerializeField]
-        public int[] MotionInstanceIds;
+        [SerializeField] public int[] MotionInstanceIds;
 
         /// <summary>
-        /// Cubism fade motion objects.
+        ///     Cubism fade motion objects.
         /// </summary>
-        [SerializeField]
-        public CubismFadeMotionData[] CubismFadeMotionObjects;
+        [SerializeField] public CubismFadeMotionData[] CubismFadeMotionObjects;
     }
 }

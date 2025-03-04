@@ -6,15 +6,14 @@
  */
 
 
+using System;
+using System.IO;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Editor;
 using Live2D.Cubism.Editor.Importers;
-using System;
-using System.IO;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Framework.MotionFade
 {
@@ -23,7 +22,7 @@ namespace Live2D.Cubism.Framework.MotionFade
         #region Unity Event Handling
 
         /// <summary>
-        /// Register fadeMotion importer.
+        ///     Register fadeMotion importer.
         /// </summary>
         [InitializeOnLoadMethod]
         private static void RegisterMotionImporter()
@@ -37,7 +36,7 @@ namespace Live2D.Cubism.Framework.MotionFade
         #region Cubism Import Event Handling
 
         /// <summary>
-        /// Create animator controller for MotionFade.
+        ///     Create animator controller for MotionFade.
         /// </summary>
         /// <param name="importer">Event source.</param>
         /// <param name="model">Imported model.</param>
@@ -53,33 +52,23 @@ namespace Live2D.Cubism.Framework.MotionFade
                 var controller = CreateAnimatorController(assetPath);
 
                 if (!CubismUnityEditorMenu.ShouldImportAsOriginalWorkflow)
-                {
                     if (animator != null)
-                    {
                         animator.runtimeAnimatorController = controller;
-                    }
-                }
             }
             else
             {
                 if (animator != null)
                 {
                     if (CubismUnityEditorMenu.ShouldImportAsOriginalWorkflow)
-                    {
                         animator.runtimeAnimatorController = null;
-                    }
                     else
-                    {
-                        animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(assetPath);
-                    }
+                        animator.runtimeAnimatorController =
+                            AssetDatabase.LoadAssetAtPath<AnimatorController>(assetPath);
                 }
             }
 
             var fadeController = model.GetComponent<CubismFadeController>();
-            if (importer.Model3Json.FileReferences.Motions.Motions == null || fadeController == null)
-            {
-                return;
-            }
+            if (importer.Model3Json.FileReferences.Motions.Motions == null || fadeController == null) return;
 
             var modelDir = Path.GetDirectoryName(importer.AssetPath).Replace("\\", "/");
             var modelName = Path.GetFileName(modelDir);
@@ -87,16 +76,13 @@ namespace Live2D.Cubism.Framework.MotionFade
 
             var fadeMotions = GetFadeMotionList(fadeMotionListPath);
 
-            if (fadeMotions == null)
-            {
-                return;
-            }
+            if (fadeMotions == null) return;
 
             fadeController.CubismFadeMotionList = fadeMotions;
         }
 
         /// <summary>
-        /// Create oldFadeMotion.
+        ///     Create oldFadeMotion.
         /// </summary>
         /// <param name="importer">Event source.</param>
         /// <param name="animationClip">Imported motion.</param>
@@ -121,20 +107,14 @@ namespace Live2D.Cubism.Framework.MotionFade
             var events = animationClip.events;
             for (var k = 0; k < events.Length; ++k)
             {
-                if (events[k].functionName != "InstanceId")
-                {
-                    continue;
-                }
+                if (events[k].functionName != "InstanceId") continue;
 
                 instanceId = events[k].intParameter;
                 isExistInstanceId = true;
                 break;
             }
 
-            if (!isExistInstanceId)
-            {
-                instanceId = animationClip.GetInstanceID();
-            }
+            if (!isExistInstanceId) instanceId = animationClip.GetInstanceID();
 
 
             var motionName = Path.GetFileName(importer.AssetPath);
@@ -142,10 +122,7 @@ namespace Live2D.Cubism.Framework.MotionFade
 
             for (var i = 0; i < fadeMotions.CubismFadeMotionObjects.Length; i++)
             {
-                if (Path.GetFileName(fadeMotions.CubismFadeMotionObjects[i].MotionName) != motionName)
-                {
-                    continue;
-                }
+                if (Path.GetFileName(fadeMotions.CubismFadeMotionObjects[i].MotionName) != motionName) continue;
 
                 motionIndex = i;
                 break;
@@ -200,18 +177,15 @@ namespace Live2D.Cubism.Framework.MotionFade
                 var sourceAnimationEvents = AnimationUtility.GetAnimationEvents(animationClip);
                 var index = -1;
 
-                for(var i = 0; i < sourceAnimationEvents.Length; ++i)
+                for (var i = 0; i < sourceAnimationEvents.Length; ++i)
                 {
-                    if(sourceAnimationEvents[i].functionName != "InstanceId")
-                    {
-                        continue;
-                    }
+                    if (sourceAnimationEvents[i].functionName != "InstanceId") continue;
 
                     index = i;
                     break;
                 }
 
-                if(index == -1)
+                if (index == -1)
                 {
                     index = sourceAnimationEvents.Length;
                     Array.Resize(ref sourceAnimationEvents, sourceAnimationEvents.Length + 1);
@@ -233,7 +207,7 @@ namespace Live2D.Cubism.Framework.MotionFade
         #region Functions
 
         /// <summary>
-        /// Create animator controller for MotionFade.
+        ///     Create animator controller for MotionFade.
         /// </summary>
         /// <param name="assetPath"></param>
         /// <returns>Animator controller attached CubismFadeStateObserver.</returns>
@@ -246,8 +220,8 @@ namespace Live2D.Cubism.Framework.MotionFade
         }
 
         /// <summary>
-        /// Load the .fadeMotionList.
-        /// If it does not exist, create a new one.
+        ///     Load the .fadeMotionList.
+        ///     If it does not exist, create a new one.
         /// </summary>
         /// <param name="fadeMotionListPath">The path of the .fadeMotionList.asset relative to the project.</param>
         /// <returns>.fadeMotionList.asset.</returns>

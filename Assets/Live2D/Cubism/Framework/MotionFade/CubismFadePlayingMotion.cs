@@ -9,51 +9,44 @@
 using System;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework.MotionFade
 {
     public struct CubismFadePlayingMotion
     {
         /// <summary>
-        /// Animation clip start time.
+        ///     Animation clip start time.
         /// </summary>
-        [SerializeField]
-        public float StartTime;
+        [SerializeField] public float StartTime;
 
         /// <summary>
-        /// Animation clip end time.
+        ///     Animation clip end time.
         /// </summary>
-        [SerializeField]
-        public float EndTime;
+        [SerializeField] public float EndTime;
 
         /// <summary>
-        /// Cubism fade in start time.
+        ///     Cubism fade in start time.
         /// </summary>
-        [SerializeField]
-        public float FadeInStartTime;
+        [SerializeField] public float FadeInStartTime;
 
         /// <summary>
-        /// Animation playing speed.
+        ///     Animation playing speed.
         /// </summary>
-        [SerializeField, Range(0.0f, float.MaxValue)]
+        [SerializeField] [Range(0.0f, float.MaxValue)]
         public float Speed;
 
         /// <summary>
-        /// Cubism fade motion data.
+        ///     Cubism fade motion data.
         /// </summary>
-        [SerializeField]
-        public CubismFadeMotionData Motion;
+        [SerializeField] public CubismFadeMotionData Motion;
 
         /// <summary>
-        /// Is animation loop.
+        ///     Is animation loop.
         /// </summary>
-        [SerializeField]
-        public bool IsLooping;
+        [SerializeField] public bool IsLooping;
 
         /// <summary>
-        /// Motion weight.
+        ///     Motion weight.
         /// </summary>
-        [NonSerialized]
-        public float Weight;
+        [NonSerialized] public float Weight;
     }
 }

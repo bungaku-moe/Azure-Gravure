@@ -6,49 +6,48 @@
  */
 
 
-using Live2D.Cubism.Framework.UserData;
 using System;
 using System.Collections.Generic;
+using Live2D.Cubism.Framework.UserData;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    /// Handles user data from cdi3.json.
+    ///     Handles user data from cdi3.json.
     /// </summary>
     [Serializable]
     public sealed class CubismUserData3Json
     {
         /// <summary>
-        /// Loads a cdi3.json asset.
+        ///     Loads a cdi3.json asset.
         /// </summary>
         /// <param name="userData3Json">cdi3.json to deserialize.</param>
-        /// <returns>Deserialized cdi3.json on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized cdi3.json on success; <see langword="null" /> otherwise.</returns>
         public static CubismUserData3Json LoadFrom(string userData3Json)
         {
-            return (string.IsNullOrEmpty(userData3Json))
+            return string.IsNullOrEmpty(userData3Json)
                 ? null
                 : JsonUtility.FromJson<CubismUserData3Json>(userData3Json);
         }
 
         /// <summary>
-        /// Loads a cdi3.json asset.
+        ///     Loads a cdi3.json asset.
         /// </summary>
         /// <param name="userData3JsonAsset">cdi3.json to deserialize.</param>
-        /// <returns>Deserialized cdi3.json on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized cdi3.json on success; <see langword="null" /> otherwise.</returns>
         public static CubismUserData3Json LoadFrom(TextAsset userData3JsonAsset)
         {
-            return (userData3JsonAsset == null)
+            return userData3JsonAsset == null
                 ? null
                 : LoadFrom(userData3JsonAsset.text);
         }
 
         /// <summary>
-        /// Makes <see cref="CubismUserDataBody"/> array that was selected by <see cref="CubismUserDataTargetType"/>.
+        ///     Makes <see cref="CubismUserDataBody" /> array that was selected by <see cref="CubismUserDataTargetType" />.
         /// </summary>
         /// <param name="targetType">Target object type.</param>
-        /// <returns><see cref="CubismUserDataBody"/> array. Selected by <see cref="CubismUserDataTargetType"/>.</returns>
+        /// <returns><see cref="CubismUserDataBody" /> array. Selected by <see cref="CubismUserDataTargetType" />.</returns>
         public CubismUserDataBody[] ToBodyArray(CubismUserDataTargetType targetType)
         {
             var userDataList = new List<CubismUserDataBody>();
@@ -67,15 +66,8 @@ namespace Live2D.Cubism.Framework.Json
                     case CubismUserDataTargetType.ArtMesh:
                     {
                         // Only drawables.
-                        if (UserData[i].Target == "ArtMesh")
-                        {
-                            userDataList.Add(body);
-                        }
+                        if (UserData[i].Target == "ArtMesh") userDataList.Add(body);
 
-                        break;
-                    }
-                    default:
-                    {
                         break;
                     }
                 }
@@ -89,22 +81,19 @@ namespace Live2D.Cubism.Framework.Json
         #region Json Data
 
         /// <summary>
-        /// Json file format version.
+        ///     Json file format version.
         /// </summary>
-        [SerializeField]
-        public int Version;
+        [SerializeField] public int Version;
 
         /// <summary>
-        /// Additional data describing physics.
+        ///     Additional data describing physics.
         /// </summary>
-        [SerializeField]
-        public SerializableMeta Meta;
+        [SerializeField] public SerializableMeta Meta;
 
         /// <summary>
-        /// Array of user data.
+        ///     Array of user data.
         /// </summary>
-        [SerializeField]
-        public SerializableUserData[] UserData;
+        [SerializeField] public SerializableUserData[] UserData;
 
         #endregion
 
@@ -112,47 +101,42 @@ namespace Live2D.Cubism.Framework.Json
         #region Json Helpers
 
         /// <summary>
-        /// Additional data describing user data.
+        ///     Additional data describing user data.
         /// </summary>
         [Serializable]
         public struct SerializableMeta
         {
             /// <summary>
-            /// Number of user data.
+            ///     Number of user data.
             /// </summary>
-            [SerializeField]
-            public int UserDataCount;
+            [SerializeField] public int UserDataCount;
 
             /// <summary>
-            /// Total number of user data.
+            ///     Total number of user data.
             /// </summary>
-            [SerializeField]
-            public int TotalUserDataCount;
+            [SerializeField] public int TotalUserDataCount;
         }
 
         /// <summary>
-        /// User data.
+        ///     User data.
         /// </summary>
         [Serializable]
         public struct SerializableUserData
         {
             /// <summary>
-            /// Type of target object.
+            ///     Type of target object.
             /// </summary>
-            [SerializeField]
-            public string Target;
+            [SerializeField] public string Target;
 
             /// <summary>
-            /// Name of target object.
+            ///     Name of target object.
             /// </summary>
-            [SerializeField]
-            public string Id;
+            [SerializeField] public string Id;
 
             /// <summary>
-            /// Value.
+            ///     Value.
             /// </summary>
-            [SerializeField]
-            public string Value;
+            [SerializeField] public string Value;
         }
 
         #endregion

@@ -9,37 +9,62 @@
 using System;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    /// Cubism exp3.json data.
+    ///     Cubism exp3.json data.
     /// </summary>
     [Serializable]
     public sealed class CubismExp3Json
     {
+        #region Json Helpers
+
+        /// <summary>
+        ///     Expression Parameter
+        /// </summary>
+        [Serializable]
+        public struct SerializableExpressionParameter
+        {
+            /// <summary>
+            ///     Expression Parameter Id
+            /// </summary>
+            [SerializeField] public string Id;
+
+            /// <summary>
+            ///     Expression Parameter Value
+            /// </summary>
+            [SerializeField] public float Value;
+
+            /// <summary>
+            ///     Expression Parameter Blend Mode
+            /// </summary>
+            [SerializeField] public string Blend;
+        }
+
+        #endregion
+
         #region Load Methods
 
         /// <summary>
-        /// Loads a exp3.json asset.
+        ///     Loads a exp3.json asset.
         /// </summary>
         /// <param name="exp3Json">exp3.json to deserialize.</param>
-        /// <returns>Deserialized exp3.json on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized exp3.json on success; <see langword="null" /> otherwise.</returns>
         public static CubismExp3Json LoadFrom(string exp3Json)
         {
-            return (string.IsNullOrEmpty(exp3Json))
+            return string.IsNullOrEmpty(exp3Json)
                 ? null
                 : JsonUtility.FromJson<CubismExp3Json>(exp3Json);
         }
 
         /// <summary>
-        /// Loads a exp3.json asset.
+        ///     Loads a exp3.json asset.
         /// </summary>
         /// <param name="exp3JsonAsset">exp3.json to deserialize.</param>
-        /// <returns>Deserialized exp3.json on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized exp3.json on success; <see langword="null" /> otherwise.</returns>
         public static CubismExp3Json LoadFrom(TextAsset exp3JsonAsset)
         {
-            return (exp3JsonAsset == null)
+            return exp3JsonAsset == null
                 ? null
                 : LoadFrom(exp3JsonAsset.text);
         }
@@ -49,59 +74,25 @@ namespace Live2D.Cubism.Framework.Json
         #region Json Data
 
         /// <summary>
-        /// Expression Type
+        ///     Expression Type
         /// </summary>
-        [SerializeField]
-        public string Type;
+        [SerializeField] public string Type;
 
         /// <summary>
-        /// Expression FadeInTime
+        ///     Expression FadeInTime
         /// </summary>
-        [SerializeField]
-        public float FadeInTime = 1.0f;
+        [SerializeField] public float FadeInTime = 1.0f;
 
         /// <summary>
-        /// Expression FadeOutTime
+        ///     Expression FadeOutTime
         /// </summary>
-        [SerializeField]
-        public float FadeOutTime = 1.0f;
+        [SerializeField] public float FadeOutTime = 1.0f;
 
         /// <summary>
-        /// Expression Parameters
+        ///     Expression Parameters
         /// </summary>
-        [SerializeField]
-        public SerializableExpressionParameter[] Parameters;
+        [SerializeField] public SerializableExpressionParameter[] Parameters;
 
         #endregion
-
-        #region Json Helpers
-
-        /// <summary>
-        /// Expression Parameter
-        /// </summary>
-        [Serializable]
-        public struct SerializableExpressionParameter
-        {
-            /// <summary>
-            /// Expression Parameter Id
-            /// </summary>
-            [SerializeField]
-            public string Id;
-
-            /// <summary>
-            /// Expression Parameter Value
-            /// </summary>
-            [SerializeField]
-            public float Value;
-
-            /// <summary>
-            /// Expression Parameter Blend Mode
-            /// </summary>
-            [SerializeField]
-            public string Blend;
-        }
-
-        #endregion
-
     }
 }

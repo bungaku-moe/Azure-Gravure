@@ -9,18 +9,95 @@
 using Live2D.Cubism.Core.Unmanaged;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// Dynamic <see cref="CubismDrawable"/> data.
+    ///     Dynamic <see cref="CubismDrawable" /> data.
     /// </summary>
     public sealed class CubismDynamicDrawableData
     {
+        /// <summary>
+        ///     Dirty flags.
+        /// </summary>
+        internal byte Flags { private get; set; }
+
+
+        /// <summary>
+        ///     Current opacity.
+        /// </summary>
+        public float Opacity { get; internal set; }
+
+        /// <summary>
+        ///     Current draw order.
+        /// </summary>
+        public int DrawOrder { get; internal set; }
+
+        /// <summary>
+        ///     Current render order.
+        /// </summary>
+        public int RenderOrder { get; internal set; }
+
+        /// <summary>
+        ///     Current vertex position.
+        /// </summary>
+        public Vector3[] VertexPositions { get; internal set; }
+
+        /// <summary>
+        ///     Current multiply color.
+        /// </summary>
+        public Color MultiplyColor { get; internal set; }
+
+        /// <summary>
+        ///     Current screen color.
+        /// </summary>
+        public Color ScreenColor { get; internal set; }
+
+
+        /// <summary>
+        ///     True if currently visible.
+        /// </summary>
+        public bool IsVisible => Flags.HasIsVisibleFlag();
+
+
+        /// <summary>
+        ///     True if <see cref="IsVisible" /> did change.
+        /// </summary>
+        public bool IsVisibilityDirty => Flags.HasVisibilityDidChangeFlag();
+
+        /// <summary>
+        ///     True if <see cref="Opacity" /> did change.
+        /// </summary>
+        public bool IsOpacityDirty => Flags.HasOpacityDidChangeFlag();
+
+        /// <summary>
+        ///     True if <see cref="DrawOrder" /> did change.
+        /// </summary>
+        public bool IsDrawOrderDirty => Flags.HasDrawOrderDidChangeFlag();
+
+        /// <summary>
+        ///     True if <see cref="RenderOrder" /> did change.
+        /// </summary>
+        public bool IsRenderOrderDirty => Flags.HasRenderOrderDidChangeFlag();
+
+        /// <summary>
+        ///     True if <see cref="VertexPositions" /> did change.
+        /// </summary>
+        public bool AreVertexPositionsDirty => Flags.HasVertexPositionsDidChangeFlag();
+
+        /// <summary>
+        ///     True if <see cref="MultiplyColor" /> and <see cref="ScreenColor" /> did change.
+        /// </summary>
+        public bool IsBlendColorDirty => Flags.HasBlendColorDidChangeFlag();
+
+        /// <summary>
+        ///     True if any data did change.
+        /// </summary>
+        public bool IsAnyDirty => Flags != 0;
+
         #region Factory Methods
 
         /// <summary>
-        /// Creates buffer for dynamic <see cref="CubismDrawable"/> data.
+        ///     Creates buffer for dynamic <see cref="CubismDrawable" /> data.
         /// </summary>
         /// <param name="unmanagedModel">Unmanaged model to create buffer for.</param>
         /// <returns>Buffer.</returns>
@@ -35,119 +112,15 @@ namespace Live2D.Cubism.Core
 
 
             for (var i = 0; i < buffer.Length; ++i)
-            {
                 buffer[i] = new CubismDynamicDrawableData
                 {
                     VertexPositions = new Vector3[vertexCounts[i]]
                 };
-            }
 
 
             return buffer;
         }
 
         #endregion
-
-        /// <summary>
-        /// Dirty flags.
-        /// </summary>
-        internal byte Flags { private get; set; }
-
-
-        /// <summary>
-        /// Current opacity.
-        /// </summary>
-        public float Opacity { get; internal set; }
-
-        /// <summary>
-        /// Current draw order.
-        /// </summary>
-        public int DrawOrder { get; internal set; }
-
-        /// <summary>
-        /// Current render order.
-        /// </summary>
-        public int RenderOrder { get; internal set; }
-
-        /// <summary>
-        /// Current vertex position.
-        /// </summary>
-        public Vector3[] VertexPositions { get; internal set; }
-
-        /// <summary>
-        /// Current multiply color.
-        /// </summary>
-        public Color MultiplyColor{ get; internal set; }
-
-        /// <summary>
-        /// Current screen color.
-        /// </summary>
-        public Color ScreenColor { get; internal set; }
-
-
-        /// <summary>
-        /// True if currently visible.
-        /// </summary>
-        public bool IsVisible
-        {
-            get { return Flags.HasIsVisibleFlag(); }
-        }
-
-
-        /// <summary>
-        /// True if <see cref="IsVisible"/> did change.
-        /// </summary>
-        public bool IsVisibilityDirty
-        {
-            get { return Flags.HasVisibilityDidChangeFlag(); }
-        }
-
-        /// <summary>
-        /// True if <see cref="Opacity"/> did change.
-        /// </summary>
-        public bool IsOpacityDirty
-        {
-            get { return Flags.HasOpacityDidChangeFlag(); }
-        }
-
-        /// <summary>
-        /// True if <see cref="DrawOrder"/> did change.
-        /// </summary>
-        public bool IsDrawOrderDirty
-        {
-            get { return Flags.HasDrawOrderDidChangeFlag(); }
-        }
-
-        /// <summary>
-        /// True if <see cref="RenderOrder"/> did change.
-        /// </summary>
-        public bool IsRenderOrderDirty
-        {
-            get { return Flags.HasRenderOrderDidChangeFlag(); }
-        }
-
-        /// <summary>
-        /// True if <see cref="VertexPositions"/> did change.
-        /// </summary>
-        public bool AreVertexPositionsDirty
-        {
-            get { return Flags.HasVertexPositionsDidChangeFlag(); }
-        }
-
-        /// <summary>
-        /// True if <see cref="MultiplyColor"/> and <see cref="ScreenColor"/> did change.
-        /// </summary>
-        public bool IsBlendColorDirty
-        {
-            get { return Flags.HasBlendColorDidChangeFlag(); }
-        }
-
-        /// <summary>
-        /// True if any data did change.
-        /// </summary>
-        public bool IsAnyDirty
-        {
-            get { return Flags != 0; }
-        }
     }
 }

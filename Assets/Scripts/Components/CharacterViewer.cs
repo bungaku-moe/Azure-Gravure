@@ -3,174 +3,163 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Gilzoide.SerializableCollections;
-using Kiraio.Azure.Core;
 using Kiraio.Azure.Utils;
-using Live2D.Cubism.Core;
+using Live2D.Cubism.Framework;
+using Live2D.Cubism.Framework.Expression;
 using Live2D.Cubism.Framework.Json;
 using Live2D.Cubism.Framework.Motion;
 using Live2D.Cubism.Framework.MotionFade;
+using Live2D.Cubism.Framework.Pose;
 using Live2D.Cubism.Framework.Raycasting;
+using Live2D.Cubism.Rendering;
 using UnityEngine;
-using UnityEngine.InputSystem;
+// using Live2D.Cubism.Framework.Physics;
 
 namespace Kiraio.Azure.Components
 {
     [AddComponentMenu("Azure Gravure/Components/Character Viewer")]
-    public class CharacterViewer : MonoBehaviour
+    public class CharacterViewer : CubismViewerBase
     {
-        [SerializeField]
-        string m_Path;
-
-        readonly SerializableDictionary<string, AnimationClip> animations =
-            new SerializableDictionary<string, AnimationClip>();
-        CubismModel3Json modelJson;
-        CubismModel model;
-        CubismMotionController motionController;
-        CubismFadeController fadeController;
-        CubismRaycaster raycaster;
+        [SerializeField] private string m_Path;
 
         // TouchBody = Upper Body, TouchHead = Head, TouchSpecial = Bust
-        readonly string[] touchAreas = { "TouchBody", "TouchHead", "TouchSpecial" };
-        InputManager inputManager;
+        private readonly string[] _touchAreas = { "TouchBody", "TouchHead", "TouchSpecial" };
 
-        public SerializableDictionary<string, AnimationClip> Animations
+        public override void Awake()
         {
-            get => animations;
-        }
-        public CubismMotionController MotionController
-        {
-            get => motionController;
-        }
-        public CubismRaycaster Raycaster
-        {
-            get => raycaster;
-        }
-        public InputManager InputManager
-        {
-            get => inputManager;
+            base.Awake();
+            Initialize().AsAsyncUnitUniTask();
         }
 
-        void Awake()
+        private async UniTask Initialize()
         {
-            inputManager = FindObjectsByType<InputManager>(FindObjectsSortMode.None)[0];
-            Initialize();
-        }
+            ModelJson = CubismModel3Json.LoadAtPath(StorageHelper.NormalizePath(m_Path), LoadAssetAtPath);
+            ModelJson.FileReferences.Physics = Path.GetFileName(m_Path.Replace(".model3.json", ".physics3.json"));
 
-        async void Initialize()
-        {
-            modelJson = CubismModel3Json.LoadAtPath(m_Path, BuiltinLoadAssetAtPath);
-            model = modelJson.ToModel();
-            model.transform.parent = transform;
-            gameObject.name = model.name;
-            model.gameObject.SetActive(false); // Disable the model gameObject to stop the components being initialized
+            Model = ModelJson.ToModel();
+            Model.transform.parent = transform;
+            gameObject.name = Model.name;
+            Model.gameObject.SetActive(false); // Disable the model gameObject to stop the components being initialized
+
+            Model.gameObject.AddComponent<CubismUpdateController>();
+            Model.gameObject.AddComponent<CubismParameterStore>();
+            Model.gameObject.AddComponent<CubismPoseController>();
+            Model.gameObject.AddComponent<CubismExpressionController>();
+            //! Physics Rig is somehow became null after the initialization, disable the Physics for now
+            // Model.gameObject.AddComponent<CubismPhysicsController>();
 
             // Add Raycaster
-            raycaster = model.gameObject.AddComponent<CubismRaycaster>();
+            Raycaster = Model.gameObject.AddComponent<CubismRaycaster>();
 
             // Add CubismMotionController after assigning CubismFadeMotionList
-            motionController = model.gameObject.AddComponent<CubismMotionController>();
-            fadeController = model.gameObject.GetComponent<CubismFadeController>();
-            motionController.enabled = false;
+            MotionController = Model.gameObject.AddComponent<CubismMotionController>();
+            FadeController = Model.gameObject.GetComponent<CubismFadeController>();
+            MotionController.enabled = false;
+            MotionController.LayerCount = 2;
 
-            // Fix AnimationEvent errors by bypassing the AnimationEvent with empty callback
-            model.gameObject.AddComponent<FixAnimationEvent>();
+            // Fix AnimationEvent errors by bypassing the "InstanceId" AnimationEvent with empty callback
+            Model.gameObject.AddComponent<FixAnimationEvent>();
+            Animator = GetComponentInChildren<Animator>(true);
 
             // Create Fade Motion List
-            CubismFadeMotionList fadeMotionList =
+            var fadeMotionList =
                 ScriptableObject.CreateInstance<CubismFadeMotionList>();
             fadeMotionList.name = $"{Path.GetFileNameWithoutExtension(m_Path).Split(".")[0]}";
 
-            Dictionary<int, CubismFadeMotionData> motionsData =
+            var motionsData =
                 new Dictionary<int, CubismFadeMotionData>();
 
             foreach (
-                CubismModel3Json.SerializableMotion[] motion in modelJson
+                var motion in ModelJson
                     .FileReferences
                     .Motions
                     .Motions
             )
             {
-                string motionName = motion[0].File.Split('/', '.')[1];
-
-                string motionJsonPath = Path.Combine(Path.GetDirectoryName(m_Path), motion[0].File);
-                CubismMotion3Json motionJson = CubismMotion3Json.LoadFrom(
+                var motionName = motion[0].File.Split('/', '.')[1];
+                var motionJsonPath = Path.Combine(Path.GetDirectoryName(m_Path) ?? string.Empty, motion[0].File);
+                var motionJson = CubismMotion3Json.LoadFrom(
                     await WebRequestHelper.GetTextDataAsync(motionJsonPath)
                 );
 
                 // Create FadeMotionData
-                CubismFadeMotionData fadeMotion = CubismFadeMotionData.CreateInstance(
+                var fadeMotion = CubismFadeMotionData.CreateInstance(
                     motionJson,
                     Path.GetFileName(motionJsonPath),
-                    motionJson.Meta.Duration
+                    motionJson.Meta.Duration,
+                    true,
+                    true
                 );
                 fadeMotion.name = $"{motionName}.fade";
 
-                // Create AnimationClip
-                AnimationClip animation = motionJson.ToAnimationClip();
-                animation.name = motionName;
+                // fadeMotion.FadeOutTime = 2f;
+                // fadeMotion.FadeInTime = 2f;
+                // for (int i = 0; i < fadeMotion.ParameterFadeInTimes.Length; i++)
+                // {
+                //     fadeMotion.ParameterFadeInTimes[i] = 2f;
+                //     fadeMotion.ParameterFadeOutTimes[i] = 2f;
+                // }
 
-                // Create AnimationEvent "InstanceId" at the start
-                AnimationEvent instanceEvent = new AnimationEvent()
+                // Create AnimationClip
+                var animationClip = motionJson.ToAnimationClip();
+                animationClip.name = motionName;
+
+                // Create "InstanceId" AnimationEvent at the start
+                var instanceEvent = new AnimationEvent
                 {
                     functionName = "InstanceId",
                     time = 0,
-                    intParameter = animation.GetInstanceID(),
+                    intParameter = animationClip.GetInstanceID()
                 };
-                animation.events = new AnimationEvent[0];
-                animation.AddEvent(instanceEvent);
+                animationClip.events = Array.Empty<AnimationEvent>(); // Clear any events
+                animationClip.AddEvent(instanceEvent);
 
-                motionsData.Add(animation.GetInstanceID(), fadeMotion);
-                animations.Add(motionName, animation);
+                motionsData.Add(animationClip.GetInstanceID(), fadeMotion);
+                Animations.Add(motionName, animationClip);
             }
 
-            // Assign the CubismFadeMotionList to the fade controller
+            // Assign the CubismFadeMotionList to the CubismFadeController
             fadeMotionList.MotionInstanceIds = motionsData.Keys.ToArray();
             fadeMotionList.CubismFadeMotionObjects = motionsData.Values.ToArray();
-            fadeController.CubismFadeMotionList = fadeMotionList;
+            FadeController.CubismFadeMotionList = fadeMotionList;
 
             // Add touch area
-            foreach (string area in touchAreas)
-            {
-                GameObject target = transform.Find($"{transform.name}/Drawables/{area}").gameObject;
-                if (target != null)
+            _touchAreas
+                .Select(area => transform.Find($"{transform.name}/Drawables/{area}").gameObject)
+                .Where(target => target != null)
+                .ToList()
+                .ForEach(target =>
                 {
-                    Touch touchArea = target.AddComponent<Touch>();
+                    var touchArea = target.AddComponent<Touch>();
                     touchArea.CharacterViewer = this;
-                }
-            }
+                });
 
             // Enable the model gameObject to initialize the components
-            motionController.enabled = true;
-            model.gameObject.SetActive(true);
+            MotionController.enabled = true;
+            Model.gameObject.SetActive(true);
 
-            // Play the intro animation
-            motionController.PlayAnimation(animations["login"], isLoop: false);
-            motionController.AnimationEndHandler += ResetToIdle;
+            // Animator.runtimeAnimatorController =
+            //     Instantiate(Resources.Load<RuntimeAnimatorController>("BaseController"));
+            // Animator.runtimeAnimatorController.name = Model.name;
+
+            UpdateController = GetComponentInChildren<CubismUpdateController>();
+            PoseController = GetComponentInChildren<CubismPoseController>();
+            PoseController.Refresh();
+            FadeController.Refresh();
+            UpdateController.Refresh();
+
+            // Play the login animation
+            await UniTask.WaitForSeconds(0.1f);
+            PlayMotion("login");
+            MotionController.AnimationEndHandler += OnLoginComplete;
         }
 
-        void ResetToIdle(float instanceId)
+        private void OnLoginComplete(float instanceId)
         {
-            motionController.PlayAnimation(animations["idle"]);
-        }
-
-        object BuiltinLoadAssetAtPath(Type assetType, string absolutePath)
-        {
-            if (assetType == typeof(byte[]))
-            {
-                return WebRequestHelper.GetBinaryData(absolutePath);
-            }
-            else if (assetType == typeof(string))
-            {
-                return WebRequestHelper.GetTextData(absolutePath);
-            }
-            else if (assetType == typeof(Texture2D))
-            {
-                Texture2D texture = new Texture2D(1, 1);
-                texture.LoadImage(WebRequestHelper.GetBinaryData(absolutePath));
-                return texture;
-            }
-            throw new NotSupportedException();
+            PlayMotion("idle", true);
+            MotionController.AnimationEndHandler -= OnLoginComplete;
+            ResetMotionPriorities(MotionController);
+            AllowInteraction = true;
         }
     }
 }

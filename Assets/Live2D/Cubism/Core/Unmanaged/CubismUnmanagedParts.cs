@@ -11,40 +11,17 @@
 using System;
 using System.Runtime.InteropServices;
 
-
 namespace Live2D.Cubism.Core.Unmanaged
 {
     /// <summary>
-    /// Unmanaged parts interface.
-    /// </sumamry>
+    ///     Unmanaged parts interface.
+    ///     </sumamry>
     public sealed class CubismUnmanagedParts
     {
-        /// <summary>
-        /// Part count.
-        /// </summary>>
-        public int Count { get; private set; }
-
-        /// <summary>
-        /// Part IDs.
-        /// </summary>>
-        public string[] Ids { get; private set; }
-
-        /// <summary>
-        /// Opacity values.
-        /// </summary>>
-        public CubismUnmanagedFloatArrayView Opacities { get; private set; }
-
-        /// <summary>
-        /// Part's parent part indices.
-        /// </summary>>
-        public CubismUnmanagedIntArrayView ParentIndices { get; private set; }
-
-
-
         #region Ctors
 
         /// <summary>
-        /// Initializes instance.
+        ///     Initializes instance.
         /// </summary>
         internal unsafe CubismUnmanagedParts(IntPtr modelPtr)
         {
@@ -56,11 +33,8 @@ namespace Live2D.Cubism.Core.Unmanaged
 
             length = CubismCoreDll.GetPartCount(modelPtr);
             Ids = new string[length];
-            var _ids = (IntPtr *)(CubismCoreDll.GetPartIds(modelPtr));
-            for (var i = 0; i < length; ++i)
-            {
-                Ids[i] = Marshal.PtrToStringAnsi(_ids[i]);
-            }
+            var _ids = (IntPtr*)CubismCoreDll.GetPartIds(modelPtr);
+            for (var i = 0; i < length; ++i) Ids[i] = Marshal.PtrToStringAnsi(_ids[i]);
 
 
             length = CubismCoreDll.GetPartCount(modelPtr);
@@ -68,9 +42,32 @@ namespace Live2D.Cubism.Core.Unmanaged
 
             length = CubismCoreDll.GetPartCount(modelPtr);
             ParentIndices = new CubismUnmanagedIntArrayView(CubismCoreDll.GetPartParentPartIndices(modelPtr), length);
-
         }
 
         #endregion
+
+        /// <summary>
+        ///     Part count.
+        /// </summary>
+        /// >
+        public int Count { get; private set; }
+
+        /// <summary>
+        ///     Part IDs.
+        /// </summary>
+        /// >
+        public string[] Ids { get; }
+
+        /// <summary>
+        ///     Opacity values.
+        /// </summary>
+        /// >
+        public CubismUnmanagedFloatArrayView Opacities { get; private set; }
+
+        /// <summary>
+        ///     Part's parent part indices.
+        /// </summary>
+        /// >
+        public CubismUnmanagedIntArrayView ParentIndices { get; private set; }
     }
 }

@@ -14,27 +14,24 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
     public class CubismLookTarget : MonoBehaviour, ICubismLookTarget
     {
         /// <summary>
-        /// Get mouse coordinates while dragging.
+        ///     Get mouse coordinates while dragging.
         /// </summary>
         /// <returns>Mouse coordinates.</returns>
         public Vector3 GetPosition()
         {
-            if (!Input.GetMouseButton(0))
-            {
-                return Vector3.zero;
-            }
+            if (!Input.GetMouseButton(0)) return Vector3.zero;
 
             var targetPosition = Input.mousePosition;
 
-            targetPosition = (Camera.main.ScreenToViewportPoint(targetPosition) * 2) - Vector3.one;
+            targetPosition = Camera.main.ScreenToViewportPoint(targetPosition) * 2 - Vector3.one;
 
             return targetPosition;
         }
 
         /// <summary>
-        /// Gets whether the target is active.
+        ///     Gets whether the target is active.
         /// </summary>
-        /// <returns><see langword="true"/> if the target is active; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> if the target is active; <see langword="false" /> otherwise.</returns>
         public bool IsActive()
         {
             return true;

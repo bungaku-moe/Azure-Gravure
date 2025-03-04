@@ -7,11 +7,10 @@
 
 using System.Collections.Generic;
 
-
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    /// Cubism update order.
+    ///     Cubism update order.
     /// </summary>
     public static class CubismUpdateExecutionOrder
     {

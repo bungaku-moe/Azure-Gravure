@@ -9,12 +9,11 @@
 using System;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    /// When attached to a <see cref="MonoBehaviour"/>,
-    /// prevents the <see cref="MonoBehaviour"/> from getting moved on Cubism model reimport.
+    ///     When attached to a <see cref="MonoBehaviour" />,
+    ///     prevents the <see cref="MonoBehaviour" /> from getting moved on Cubism model reimport.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class CubismMoveOnReimportCopyComponentsOnly : Attribute

@@ -9,43 +9,64 @@
 using Live2D.Cubism.Core;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework.MouthMovement
 {
     /// <summary>
-    /// Controls <see cref="CubismMouthParameter"/>s.
+    ///     Controls <see cref="CubismMouthParameter" />s.
     /// </summary>
     public sealed class CubismMouthController : MonoBehaviour, ICubismUpdatable
     {
         /// <summary>
-        /// The blend mode.
+        ///     The blend mode.
         /// </summary>
-        [SerializeField]
-        public CubismParameterBlendMode BlendMode = CubismParameterBlendMode.Multiply;
+        [SerializeField] public CubismParameterBlendMode BlendMode = CubismParameterBlendMode.Multiply;
 
 
         /// <summary>
-        /// The opening of the mouth.
+        ///     The opening of the mouth.
         /// </summary>
-        [SerializeField, Range(0f, 1f)]
-        public float MouthOpening = 1f;
+        [SerializeField] [Range(0f, 1f)] public float MouthOpening = 1f;
 
 
         /// <summary>
-        /// Mouth parameters.
+        ///     Mouth parameters.
         /// </summary>
         private CubismParameter[] Destinations { get; set; }
 
         /// <summary>
-        /// Model has update controller component.
+        ///     Model has update controller component.
         /// </summary>
-        [HideInInspector]
         public bool HasUpdateController { get; set; }
 
+        /// <summary>
+        ///     Called by cubism update controller. Order to invoke OnLateUpdate.
+        /// </summary>
+        public int ExecutionOrder => CubismUpdateExecutionOrder.CubismMouthController;
+
+        /// <summary>
+        ///     Called by cubism update controller. Needs to invoke OnLateUpdate on Editing.
+        /// </summary>
+        public bool NeedsUpdateOnEditing => false;
+
+        /// <summary>
+        ///     Called by cubism update controller. Updates controller.
+        /// </summary>
+        /// <remarks>
+        ///     Make sure this method is called after any animations are evaluated.
+        /// </remarks>
+        public void OnLateUpdate()
+        {
+            // Fail silently.
+            if (!enabled || Destinations == null) return;
+
+
+            // Apply value.
+            Destinations.BlendToValue(BlendMode, MouthOpening);
+        }
 
 
         /// <summary>
-        /// Refreshes controller. Call this method after adding and/or removing <see cref="CubismMouthParameter"/>s.
+        ///     Refreshes controller. Call this method after adding and/or removing <see cref="CubismMouthParameter" />s.
         /// </summary>
         public void Refresh()
         {
@@ -53,10 +74,7 @@ namespace Live2D.Cubism.Framework.MouthMovement
 
 
             // Fail silently...
-            if (model == null)
-            {
-                return;
-            }
+            if (model == null) return;
 
 
             // Cache destinations.
@@ -68,54 +86,16 @@ namespace Live2D.Cubism.Framework.MouthMovement
             Destinations = new CubismParameter[tags.Length];
 
 
-            for (var i = 0; i < tags.Length; ++i)
-            {
-                Destinations[i] = tags[i].GetComponent<CubismParameter>();
-            }
+            for (var i = 0; i < tags.Length; ++i) Destinations[i] = tags[i].GetComponent<CubismParameter>();
 
             // Get cubism update controller.
-            HasUpdateController = (GetComponent<CubismUpdateController>() != null);
-        }
-
-        /// <summary>
-        /// Called by cubism update controller. Order to invoke OnLateUpdate.
-        /// </summary>
-        public int ExecutionOrder
-        {
-            get { return CubismUpdateExecutionOrder.CubismMouthController; }
-        }
-
-        /// <summary>
-        /// Called by cubism update controller. Needs to invoke OnLateUpdate on Editing.
-        /// </summary>
-        public bool NeedsUpdateOnEditing
-        {
-            get { return false; }
-        }
-
-        /// <summary>
-        /// Called by cubism update controller. Updates controller.
-        /// </summary>
-        /// <remarks>
-        /// Make sure this method is called after any animations are evaluated.
-        /// </remarks>
-        public void OnLateUpdate()
-        {
-            // Fail silently.
-            if (!enabled || Destinations == null)
-            {
-                return;
-            }
-
-
-            // Apply value.
-            Destinations.BlendToValue(BlendMode, MouthOpening);
+            HasUpdateController = GetComponent<CubismUpdateController>() != null;
         }
 
         #region Unity Events Handling
 
         /// <summary>
-        /// Called by Unity. Makes sure cache is initialized.
+        ///     Called by Unity. Makes sure cache is initialized.
         /// </summary>
         private void Start()
         {
@@ -124,14 +104,11 @@ namespace Live2D.Cubism.Framework.MouthMovement
         }
 
         /// <summary>
-        /// Called by Unity.
+        ///     Called by Unity.
         /// </summary>
         private void LateUpdate()
         {
-            if(!HasUpdateController)
-            {
-                OnLateUpdate();
-            }
+            if (!HasUpdateController) OnLateUpdate();
         }
 
         #endregion

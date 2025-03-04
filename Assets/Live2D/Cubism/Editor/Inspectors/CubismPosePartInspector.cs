@@ -12,23 +12,21 @@ using UnityEditor;
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    /// Inspector for <see cref="CubismPosePart"/>s.
+    ///     Inspector for <see cref="CubismPosePart" />s.
     /// </summary>
-    [CustomEditor(typeof(CubismPosePart)), CanEditMultipleObjects]
+    [CustomEditor(typeof(CubismPosePart))]
+    [CanEditMultipleObjects]
     public class CubismPosePartInspector : UnityEditor.Editor
     {
         #region Editor
 
         /// <summary>
-        /// Draws inspector.
+        ///     Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
             // Fail silently.
-            if (serializedObject == null)
-            {
-                return;
-            }
+            if (serializedObject == null) return;
 
 
             serializedObject.Update();
@@ -48,12 +46,8 @@ namespace Live2D.Cubism.Editor.Inspectors
             EditorGUILayout.PropertyField(link);
 
 
-
             // Save any changes.
-            if (EditorGUI.EndChangeCheck())
-            {
-                serializedObject.ApplyModifiedProperties();
-            }
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         }
 
         #endregion

@@ -8,18 +8,17 @@
 
 using UnityEngine.Rendering;
 
-
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    /// Common interface for mask command sources.
+    ///     Common interface for mask command sources.
     /// </summary>
     public interface ICubismMaskCommandSource
     {
         int CountOfCommandBuffers { get; }
 
         /// <summary>
-        /// Called to enqueue source.
+        ///     Called to enqueue source.
         /// </summary>
         /// <param name="buffer">Buffer to enqueue in.</param>
         void AddToCommandBuffer(CommandBuffer buffer, bool isUsingMultipleBuffer, int bufferIndex);

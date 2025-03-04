@@ -6,49 +6,48 @@
  */
 
 
-using Live2D.Cubism.Core;
 using System.Collections.Generic;
 using System.Threading;
+using Live2D.Cubism.Core;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Framework.Tasking
 {
     /// <summary>
-    /// Built-in task handler, works async.
+    ///     Built-in task handler, works async.
     /// </summary>
     public static class CubismBuiltinAsyncTaskHandler
     {
         #region Workers
 
         /// <summary>
-        /// <see cref="ICubismTask"/>s waiting for execution.
+        ///     <see cref="ICubismTask" />s waiting for execution.
         /// </summary>
         private static Queue<ICubismTask> Tasks { get; set; }
 
         /// <summary>
-        /// Background worker threads.
+        ///     Background worker threads.
         /// </summary>
         private static Thread Worker { get; set; }
 
         /// <summary>
-        /// Lock for syncing access to <see cref="Tasks"/> and <see cref="CallItADay"/>.
+        ///     Lock for syncing access to <see cref="Tasks" /> and <see cref="CallItADay" />.
         /// </summary>
         private static object Lock { get; set; }
 
         /// <summary>
-        /// Signal for waking up workers.
+        ///     Signal for waking up workers.
         /// </summary>
         private static ManualResetEvent Signal { get; set; }
 
 
         /// <summary>
-        /// <see cref="CallItADay"/> backing field. ALWAYS ACCESS THROUGH PROPERTY!
+        ///     <see cref="CallItADay" /> backing field. ALWAYS ACCESS THROUGH PROPERTY!
         /// </summary>
         private static bool _callItADay;
 
         /// <summary>
-        /// True if workers should exit.
+        ///     True if workers should exit.
         /// </summary>
         private static bool CallItADay
         {
@@ -70,7 +69,7 @@ namespace Live2D.Cubism.Framework.Tasking
 
 
         /// <summary>
-        /// Initializes async task handling.
+        ///     Initializes async task handling.
         /// </summary>
         public static void Activate()
         {
@@ -102,15 +101,12 @@ namespace Live2D.Cubism.Framework.Tasking
 
 
         /// <summary>
-        /// Cleanup workers.
+        ///     Cleanup workers.
         /// </summary>
         public static void Deactivate()
         {
             // Return early if self isn' handler.
-            if (CubismTaskQueue.OnTask != EnqueueTask)
-            {
-                return;
-            }
+            if (CubismTaskQueue.OnTask != EnqueueTask) return;
 
 
             // Unbecome handler.
@@ -137,7 +133,7 @@ namespace Live2D.Cubism.Framework.Tasking
 
 
         /// <summary>
-        /// Enqueues a new task.
+        ///     Enqueues a new task.
         /// </summary>
         /// <param name="task">Task to enqueue.</param>
         private static void EnqueueTask(ICubismTask task)
@@ -150,14 +146,14 @@ namespace Live2D.Cubism.Framework.Tasking
         }
 
         /// <summary>
-        /// Dequeues a task.
+        ///     Dequeues a task.
         /// </summary>
-        /// <returns>A valid task on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>A valid task on success; <see langword="null" /> otherwise.</returns>
         private static ICubismTask DequeueTask()
         {
             lock (Lock)
             {
-                return (Tasks.Count > 0)
+                return Tasks.Count > 0
                     ? Tasks.Dequeue()
                     : null;
             }
@@ -165,7 +161,7 @@ namespace Live2D.Cubism.Framework.Tasking
 
 
         /// <summary>
-        /// Entry point for workers.
+        ///     Entry point for workers.
         /// </summary>
         private static void Work()
         {
@@ -180,7 +176,6 @@ namespace Live2D.Cubism.Framework.Tasking
                 {
                     task.Execute();
                 }
-
 
                 // Wait for a task to become available.
                 else

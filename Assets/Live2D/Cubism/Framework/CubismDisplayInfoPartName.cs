@@ -10,20 +10,18 @@ using UnityEngine;
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    /// Get the part name from cdi3.json and save the display name.
+    ///     Get the part name from cdi3.json and save the display name.
     /// </summary>
     public class CubismDisplayInfoPartName : MonoBehaviour
     {
         /// <summary>
-        /// Original name of the part from cdi3.json.
+        ///     Original name of the part from cdi3.json.
         /// </summary>
-        [SerializeField,HideInInspector]
-        public string Name;
+        [SerializeField] [HideInInspector] public string Name;
 
         /// <summary>
-        /// Name for display that can be changed by the user.
+        ///     Name for display that can be changed by the user.
         /// </summary>
-        [SerializeField]
-        public string DisplayName;
+        [SerializeField] public string DisplayName;
     }
 }

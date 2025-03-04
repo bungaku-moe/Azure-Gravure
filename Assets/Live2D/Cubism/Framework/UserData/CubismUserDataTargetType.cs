@@ -9,13 +9,13 @@
 namespace Live2D.Cubism.Framework.UserData
 {
     /// <summary>
-    /// Target type of user data.
+    ///     Target type of user data.
     /// </summary>
     public enum CubismUserDataTargetType
     {
         /// <summary>
-        /// Drawable.
+        ///     Drawable.
         /// </summary>
-        ArtMesh,
+        ArtMesh
     }
 }

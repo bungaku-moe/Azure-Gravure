@@ -10,100 +10,17 @@
 
 using System;
 
-
 namespace Live2D.Cubism.Core.Unmanaged
 {
     /// <summary>
-    /// Unmanaged model.
+    ///     Unmanaged model.
     /// </summary>
     public sealed class CubismUnmanagedModel
     {
-        #region Factory Methods
-
-        /// <summary>
-        /// Instantiates <see cref="CubismUnmanagedMoc"/>.
-        /// </summary>
-        /// <param name="moc">Moc.</param>
-        /// <returns>Instance on success; <see langword="null"/> otherwise.</returns>
-        public static CubismUnmanagedModel FromMoc(CubismUnmanagedMoc moc)
-        {
-            if (moc == null)
-            {
-                return null;
-            }
-
-
-            var model = new CubismUnmanagedModel(moc);
-
-
-            return (model.Ptr != IntPtr.Zero)
-                ? model
-                : null;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Unmanaged parameters.
-        /// </summary>
-        public CubismUnmanagedParameters Parameters { get; private set; }
-
-        /// <summary>
-        /// Unmanaged parts.
-        /// </summary>
-        public CubismUnmanagedParts Parts { get; private set; }
-
-        /// <summary>
-        /// Unmanaged drawables.
-        /// </summary>
-        public CubismUnmanagedDrawables Drawables { get; private set; }
-
-        /// <summary>
-        /// Unmanaged canvas information(size, origin, ppu).
-        /// </summary>
-        public CubismUnmanagedCanvasInformation CanvasInformation { get; private set; }
-
-        /// <summary>
-        /// Native model pointer.
-        /// </summary>
-        public IntPtr Ptr { get; private set; }
-
-
-        /// <summary>
-        /// Updates instance.
-        /// </summary>
-        public void Update()
-        {
-            if (Ptr == IntPtr.Zero)
-            {
-                return;
-            }
-
-
-            CubismCoreDll.UpdateModel(Ptr);
-        }
-
-        /// <summary>
-        /// Releases instance.
-        /// </summary>
-        public void Release()
-        {
-            if (Ptr == IntPtr.Zero)
-            {
-                return;
-            }
-
-
-            CubismUnmanagedMemory.Deallocate(Ptr);
-
-
-            Ptr = IntPtr.Zero;
-        }
-
         #region Ctors
 
         /// <summary>
-        /// Initializes instance.
+        ///     Initializes instance.
         /// </summary>
         /// <param name="moc">Moc.</param>
         private CubismUnmanagedModel(CubismUnmanagedMoc moc)
@@ -113,10 +30,7 @@ namespace Live2D.Cubism.Core.Unmanaged
             var memory = CubismUnmanagedMemory.Allocate((int)size, CubismCoreDll.AlignofModel);
 
 
-            if (memory == IntPtr.Zero)
-            {
-                return;
-            }
+            if (memory == IntPtr.Zero) return;
 
 
             // Initialize native model (cleaning up and returning on fail).
@@ -140,5 +54,78 @@ namespace Live2D.Cubism.Core.Unmanaged
         }
 
         #endregion
+
+        /// <summary>
+        ///     Unmanaged parameters.
+        /// </summary>
+        public CubismUnmanagedParameters Parameters { get; private set; }
+
+        /// <summary>
+        ///     Unmanaged parts.
+        /// </summary>
+        public CubismUnmanagedParts Parts { get; private set; }
+
+        /// <summary>
+        ///     Unmanaged drawables.
+        /// </summary>
+        public CubismUnmanagedDrawables Drawables { get; private set; }
+
+        /// <summary>
+        ///     Unmanaged canvas information(size, origin, ppu).
+        /// </summary>
+        public CubismUnmanagedCanvasInformation CanvasInformation { get; private set; }
+
+        /// <summary>
+        ///     Native model pointer.
+        /// </summary>
+        public IntPtr Ptr { get; private set; }
+
+        #region Factory Methods
+
+        /// <summary>
+        ///     Instantiates <see cref="CubismUnmanagedMoc" />.
+        /// </summary>
+        /// <param name="moc">Moc.</param>
+        /// <returns>Instance on success; <see langword="null" /> otherwise.</returns>
+        public static CubismUnmanagedModel FromMoc(CubismUnmanagedMoc moc)
+        {
+            if (moc == null) return null;
+
+
+            var model = new CubismUnmanagedModel(moc);
+
+
+            return model.Ptr != IntPtr.Zero
+                ? model
+                : null;
+        }
+
+        #endregion
+
+
+        /// <summary>
+        ///     Updates instance.
+        /// </summary>
+        public void Update()
+        {
+            if (Ptr == IntPtr.Zero) return;
+
+
+            CubismCoreDll.UpdateModel(Ptr);
+        }
+
+        /// <summary>
+        ///     Releases instance.
+        /// </summary>
+        public void Release()
+        {
+            if (Ptr == IntPtr.Zero) return;
+
+
+            CubismUnmanagedMemory.Deallocate(Ptr);
+
+
+            Ptr = IntPtr.Zero;
+        }
     }
 }

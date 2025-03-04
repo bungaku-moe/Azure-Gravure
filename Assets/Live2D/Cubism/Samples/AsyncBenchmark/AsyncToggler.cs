@@ -9,45 +9,37 @@
 using Live2D.Cubism.Framework.Tasking;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Samples.AsyncBenchmark
 {
     /// <summary>
-    /// Shows how to enable the <see cref="CubismBuiltinAsyncTaskHandler"/> from script.
+    ///     Shows how to enable the <see cref="CubismBuiltinAsyncTaskHandler" /> from script.
     /// </summary>
     public sealed class AsyncToggler : MonoBehaviour
     {
         /// <summary>
-        /// Controls async task handling.
+        ///     Controls async task handling.
         /// </summary>
         public bool EnableAsync = true;
 
         /// <summary>
-        /// Last <see cref="EnableAsync"/> state.
+        ///     Last <see cref="EnableAsync" /> state.
         /// </summary>
         private bool LastEnableSync { get; set; }
 
-       #region Unity Event Handling
+        #region Unity Event Handling
 
         /// <summary>
-        /// Called by Unity. Enables/Disables async task handler.
+        ///     Called by Unity. Enables/Disables async task handler.
         /// </summary>
         private void Update()
         {
-            if (EnableAsync == LastEnableSync)
-            {
-                return;
-            }
+            if (EnableAsync == LastEnableSync) return;
 
 
             if (EnableAsync)
-            {
                 CubismBuiltinAsyncTaskHandler.Activate();
-            }
             else
-            {
                 CubismBuiltinAsyncTaskHandler.Deactivate();
-            }
 
 
             LastEnableSync = EnableAsync;
@@ -55,7 +47,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
 
 
         /// <summary>
-        /// Called by Unity. Disables async task handler.
+        ///     Called by Unity. Disables async task handler.
         /// </summary>
         private void OnDestroy()
         {

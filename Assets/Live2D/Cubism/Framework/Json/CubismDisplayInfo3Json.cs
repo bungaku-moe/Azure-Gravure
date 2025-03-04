@@ -12,22 +12,19 @@ using UnityEngine;
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    /// Handles display info from cdi3.json.
+    ///     Handles display info from cdi3.json.
     /// </summary>
     [Serializable]
     public sealed class CubismDisplayInfo3Json
     {
         /// <summary>
-        /// Loads a cdi3.json.
+        ///     Loads a cdi3.json.
         /// </summary>
         /// <param name="cdi3Json">cdi3.json to deserialize.</param>
-        /// <returns>Deserialized cdi3.json on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized cdi3.json on success; <see langword="null" /> otherwise.</returns>
         public static CubismDisplayInfo3Json LoadFrom(string cdi3Json)
         {
-            if (string.IsNullOrEmpty(cdi3Json))
-            {
-                return null;
-            }
+            if (string.IsNullOrEmpty(cdi3Json)) return null;
 
             var ret = JsonUtility.FromJson<CubismDisplayInfo3Json>(cdi3Json);
 
@@ -38,28 +35,24 @@ namespace Live2D.Cubism.Framework.Json
         #region Json Data
 
         /// <summary>
-        /// Json file format version.
+        ///     Json file format version.
         /// </summary>
-        [SerializeField]
-        public int Version;
+        [SerializeField] public int Version;
 
         /// <summary>
-        /// Array of model parameters.
+        ///     Array of model parameters.
         /// </summary>
-        [SerializeField]
-        public SerializableParameters[] Parameters;
+        [SerializeField] public SerializableParameters[] Parameters;
 
         /// <summary>
-        /// Array of ParameterGroups.
+        ///     Array of ParameterGroups.
         /// </summary>
-        [SerializeField]
-        public SerializableParameterGroups[] ParameterGroups;
+        [SerializeField] public SerializableParameterGroups[] ParameterGroups;
 
         /// <summary>
-        /// Array of Parts.
+        ///     Array of Parts.
         /// </summary>
-        [SerializeField]
-        public SerializableParts[] Parts;
+        [SerializeField] public SerializableParts[] Parts;
 
         #endregion
 
@@ -69,60 +62,52 @@ namespace Live2D.Cubism.Framework.Json
         public struct SerializableParameters
         {
             /// <summary>
-            /// The ID of the parameter.
+            ///     The ID of the parameter.
             /// </summary>
-            [SerializeField]
-            public string Id;
+            [SerializeField] public string Id;
 
             /// <summary>
-            /// The Group ID of the parameter.
+            ///     The Group ID of the parameter.
             /// </summary>
-            [SerializeField]
-            public string GroupId;
+            [SerializeField] public string GroupId;
 
             /// <summary>
-            /// The Name of the parameter.
+            ///     The Name of the parameter.
             /// </summary>
-            [SerializeField]
-            public string Name;
+            [SerializeField] public string Name;
         }
 
         [Serializable]
         public struct SerializableParameterGroups
         {
             /// <summary>
-            /// The ID of the parameter.
+            ///     The ID of the parameter.
             /// </summary>
-            [SerializeField]
-            public string Id;
+            [SerializeField] public string Id;
 
             /// <summary>
-            /// The Group ID of the parameter.
+            ///     The Group ID of the parameter.
             /// </summary>
-            [SerializeField]
-            public string GroupId;
+            [SerializeField] public string GroupId;
 
             /// <summary>
-            /// The Name of the parameter.
+            ///     The Name of the parameter.
             /// </summary>
-            [SerializeField]
-            public string Name;
+            [SerializeField] public string Name;
         }
 
         [Serializable]
         public struct SerializableParts
         {
             /// <summary>
-            /// The ID of the part.
+            ///     The ID of the part.
             /// </summary>
-            [SerializeField]
-            public string Id;
+            [SerializeField] public string Id;
 
             /// <summary>
-            /// The Name of the part.
+            ///     The Name of the part.
             /// </summary>
-            [SerializeField]
-            public string Name;
+            [SerializeField] public string Name;
         }
 
         #endregion

@@ -8,17 +8,26 @@
 
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework.UserData
 {
     /// <summary>
-    /// Tag of user data.
+    ///     Tag of user data.
     /// </summary>
     [CubismDontMoveOnReimport]
     public class CubismUserDataTag : MonoBehaviour
     {
         /// <summary>
-        /// Value.
+        ///     Value backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private string _value;
+
+        /// <summary>
+        ///     Body backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private CubismUserDataBody _body;
+
+        /// <summary>
+        ///     Value.
         /// </summary>
         public string Value
         {
@@ -26,38 +35,24 @@ namespace Live2D.Cubism.Framework.UserData
             {
                 if (string.IsNullOrEmpty(_value) &&
                     !string.IsNullOrEmpty(Body.Value))
-                {
                     _value = Body.Value;
-                }
 
                 return _value;
             }
-            set { _value = value; }
+            set => _value = value;
         }
 
         /// <summary>
-        /// Value backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private string _value;
-
-        /// <summary>
-        /// Body backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private CubismUserDataBody _body;
-
-        /// <summary>
-        /// Body.
+        ///     Body.
         /// </summary>
         private CubismUserDataBody Body
         {
-            get { return _body; }
-            set { _body = value; }
+            get => _body;
+            set => _body = value;
         }
 
         /// <summary>
-        /// Initializes tag.
+        ///     Initializes tag.
         /// </summary>
         /// <param name="body">Body for initialization.</param>
         public void Initialize(CubismUserDataBody body)

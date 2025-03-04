@@ -8,27 +8,23 @@
 
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// Extends <see cref="GameObject"/>s.
+    ///     Extends <see cref="GameObject" />s.
     /// </summary>
     public static class GameObjectExtensionMethods
     {
         /// <summary>
-        /// Finds a <see cref="CubismModel"/> relative to a <see cref="GameObject"/>.
+        ///     Finds a <see cref="CubismModel" /> relative to a <see cref="GameObject" />.
         /// </summary>
-        /// <param name="self"><see langword="this"/>.</param>
+        /// <param name="self"><see langword="this" />.</param>
         /// <param name="includeParents">Condition for including parents in search.</param>
-        /// <returns>The relative <see cref="CubismModel"/> if found; <see langword="null"/> otherwise.</returns>
+        /// <returns>The relative <see cref="CubismModel" /> if found; <see langword="null" /> otherwise.</returns>
         public static CubismModel FindCubismModel(this GameObject self, bool includeParents = false)
         {
             // Validate arguments.
-            if (self == null)
-            {
-                return null;
-            }
+            if (self == null) return null;
 
 
             return self.transform.FindCubismModel(includeParents);

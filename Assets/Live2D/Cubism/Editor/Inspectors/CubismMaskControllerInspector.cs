@@ -9,11 +9,10 @@
 using Live2D.Cubism.Rendering.Masking;
 using UnityEditor;
 
-
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    /// Inspects <see cref="CubismMaskController"/>s.
+    ///     Inspects <see cref="CubismMaskController" />s.
     /// </summary>
     [CustomEditor(typeof(CubismMaskController))]
     internal sealed class CubismMaskControllerInspector : UnityEditor.Editor
@@ -21,7 +20,7 @@ namespace Live2D.Cubism.Editor.Inspectors
         #region Editor
 
         /// <summary>
-        /// Draws the inspector.
+        ///     Draws the inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
@@ -29,10 +28,7 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Fail silently.
-            if (controller == null)
-            {
-                return;
-            }
+            if (controller == null) return;
 
 
             // Draw default inspector.
@@ -43,14 +39,13 @@ namespace Live2D.Cubism.Editor.Inspectors
             EditorGUI.BeginChangeCheck();
 
 
-            controller.MaskTexture = EditorGUILayout.ObjectField("Mask Texture", controller.MaskTexture, typeof(CubismMaskTexture), true) as CubismMaskTexture;
+            controller.MaskTexture =
+                EditorGUILayout.ObjectField("Mask Texture", controller.MaskTexture, typeof(CubismMaskTexture), true) as
+                    CubismMaskTexture;
 
 
             // Apply changes.
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(controller);
-            }
+            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(controller);
         }
 
         #endregion

@@ -6,16 +6,15 @@
  */
 
 
-using Live2D.Cubism.Framework;
 using System;
 using System.Linq;
+using Live2D.Cubism.Framework;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Editor.Importers
 {
     /// <summary>
-    /// Extensions for <see cref="MonoBehaviour"/>s.
+    ///     Extensions for <see cref="MonoBehaviour" />s.
     /// </summary>
     internal static class ComponentExtensionMethods
     {
@@ -24,10 +23,7 @@ namespace Live2D.Cubism.Editor.Importers
             var component = self.GetComponent(type);
 
 
-            if (component != null)
-            {
-                return component;
-            }
+            if (component != null) return component;
 
 
             return self.gameObject.AddComponent(type);
@@ -35,7 +31,7 @@ namespace Live2D.Cubism.Editor.Importers
 
 
         /// <summary>
-        /// Checks whether a component should be moved on reimport.
+        ///     Checks whether a component should be moved on reimport.
         /// </summary>
         /// <param name="self">Component to check against.</param>
         /// <returns>True if component should be moved; false otherwise.</returns>
@@ -44,7 +40,9 @@ namespace Live2D.Cubism.Editor.Importers
             return self
                 .GetType()
                 .GetCustomAttributes(false)
-                .FirstOrDefault(a => (a.GetType() == typeof(CubismDontMoveOnReimportAttribute)) || (a.GetType() == typeof(CubismMoveOnReimportCopyComponentsOnly) && !componentsOnly)) == null;
+                .FirstOrDefault(a =>
+                    a.GetType() == typeof(CubismDontMoveOnReimportAttribute) ||
+                    (a.GetType() == typeof(CubismMoveOnReimportCopyComponentsOnly) && !componentsOnly)) == null;
         }
     }
 }

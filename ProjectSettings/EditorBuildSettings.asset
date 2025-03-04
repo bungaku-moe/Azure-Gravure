@@ -6,7 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Main.unity
-    guid: 878db02780eec9343b2059b379777747
+    path: Assets/Scenes/Azur.unity
+    guid: 86fc91d0cfbfa69448873cc2d993430c
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 5d7555ebb48604d44aad056a46bd9918, type: 2}
+  m_UseUCBPForAssetBundles: 0

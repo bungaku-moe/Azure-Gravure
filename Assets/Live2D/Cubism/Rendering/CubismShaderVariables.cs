@@ -9,46 +9,46 @@
 namespace Live2D.Cubism.Rendering
 {
     /// <summary>
-    /// Cubism shader variables.
+    ///     Cubism shader variables.
     /// </summary>
     internal static class CubismShaderVariables
     {
         /// <summary>
-        /// Main texture shader variable name.
+        ///     Main texture shader variable name.
         /// </summary>
         public const string MainTexture = "_MainTex";
 
 
         /// <summary>
-        /// Model opacity shader variable name.
+        ///     Model opacity shader variable name.
         /// </summary>
         public const string ModelOpacity = "cubism_ModelOpacity";
 
 
         /// <summary>
-        /// Diffuse color shader variable name.
+        ///     Diffuse color shader variable name.
         /// </summary>
         public const string MultiplyColor = "cubism_MultiplyColor";
 
 
         /// <summary>
-        /// Tint color shader variable name.
+        ///     Tint color shader variable name.
         /// </summary>
         public const string ScreenColor = "cubism_ScreenColor";
 
 
         /// <summary>
-        /// Mask texture shader variable name.
+        ///     Mask texture shader variable name.
         /// </summary>
         public const string MaskTexture = "cubism_MaskTexture";
 
         /// <summary>
-        /// Mask tile shader variable name.
+        ///     Mask tile shader variable name.
         /// </summary>
         public const string MaskTile = "cubism_MaskTile";
 
         /// <summary>
-        /// Mask transform shader variable name.
+        ///     Mask transform shader variable name.
         /// </summary>
         public const string MaskTransform = "cubism_MaskTransform";
     }

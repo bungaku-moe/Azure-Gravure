@@ -9,17 +9,17 @@
 namespace Live2D.Cubism.Framework.Raycasting
 {
     /// <summary>
-    /// Precision for casting rays against a <see cref="CubismRaycastable"/>.
+    ///     Precision for casting rays against a <see cref="CubismRaycastable" />.
     /// </summary>
     public enum CubismRaycastablePrecision
     {
         /// <summary>
-        /// Cast against bounding box.
+        ///     Cast against bounding box.
         /// </summary>
         BoundingBox,
 
         /// <summary>
-        /// Cast against triangles.
+        ///     Cast against triangles.
         /// </summary>
         Triangles
     }

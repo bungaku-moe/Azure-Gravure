@@ -12,33 +12,30 @@ using UnityEngine;
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    /// Handles pose from pose3.json.
+    ///     Handles pose from pose3.json.
     /// </summary>
     [Serializable]
     public sealed class CubismPose3Json
     {
         /// <summary>
-        /// Loads a pose3.json.
+        ///     Loads a pose3.json.
         /// </summary>
         /// <param name="pose3Json">pose3.json to deserialize.</param>
-        /// <returns>Deserialized pose3.json on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized pose3.json on success; <see langword="null" /> otherwise.</returns>
         public static CubismPose3Json LoadFrom(string pose3Json)
         {
-            if (string.IsNullOrEmpty(pose3Json))
-            {
-                return null;
-            }
+            if (string.IsNullOrEmpty(pose3Json)) return null;
 
             var ret = new CubismPose3Json();
             var value = CubismJsonParser.ParseFromString(pose3Json);
 
-            ret.Type = (value.Get("Type") == null) ? null : value.Get("Type").toString();
+            ret.Type = value.Get("Type") == null ? null : value.Get("Type").toString();
 
-            ret.FadeInTime = (value.Get("FadeInTime") == null) ? 0.5f : value.Get("FadeInTime").ToFloat();
+            ret.FadeInTime = value.Get("FadeInTime") == null ? 0.5f : value.Get("FadeInTime").ToFloat();
 
-            var groups = (value.Get("Groups") == null) ? null : value.Get("Groups").GetVector(null);
+            var groups = value.Get("Groups") == null ? null : value.Get("Groups").GetVector(null);
 
-            if(groups != null)
+            if (groups != null)
             {
                 ret.Groups = new SerializablePoseGroup[groups.Count][];
 
@@ -52,17 +49,12 @@ namespace Live2D.Cubism.Framework.Json
                         ret.Groups[i][j].Id = groups[i].GetVector(null)[j].Get("Id").toString();
                         var link = groups[i].GetVector(null)[j].Get("Link").GetVector(null);
 
-                        if(link.Count == 0)
-                        {
-                            continue;
-                        }
+                        if (link.Count == 0) continue;
 
                         ret.Groups[i][j].Link = new string[link.Count];
 
-                        for (var linkCount = 0; linkCount < link.Count; ++ linkCount)
-                        {
+                        for (var linkCount = 0; linkCount < link.Count; ++linkCount)
                             ret.Groups[i][j].Link[linkCount] = link[linkCount].toString();
-                        }
                     }
                 }
             }
@@ -71,38 +63,16 @@ namespace Live2D.Cubism.Framework.Json
         }
 
         /// <summary>
-        /// Loads a pose3.json asset.
+        ///     Loads a pose3.json asset.
         /// </summary>
         /// <param name="pose3JsonAsset">pose3.json asset to deserialize.</param>
-        /// <returns>Deserialized pose3.json asset on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Deserialized pose3.json asset on success; <see langword="null" /> otherwise.</returns>
         public static CubismPose3Json LoadFrom(TextAsset pose3JsonAsset)
         {
-            return (pose3JsonAsset == null)
+            return pose3JsonAsset == null
                 ? null
                 : LoadFrom(pose3JsonAsset.text);
         }
-
-        #region Json Data
-
-        /// <summary>
-        /// The type of cubism pose.
-        /// </summary>
-        [SerializeField]
-        public string Type;
-
-        /// <summary>
-        /// [Optional] Time of the Fade-in for easing in seconds..
-        /// </summary>
-        [SerializeField]
-        public float FadeInTime;
-
-        /// <summary>
-        /// Array of Groups.
-        /// </summary>
-        [SerializeField]
-        public SerializablePoseGroup[][] Groups;
-
-        #endregion
 
         #region Json Helpers
 
@@ -110,20 +80,35 @@ namespace Live2D.Cubism.Framework.Json
         public struct SerializablePoseGroup
         {
             /// <summary>
-            /// The part id of group.
+            ///     The part id of group.
             /// </summary>
-            [SerializeField]
-            public string Id;
+            [SerializeField] public string Id;
 
             /// <summary>
-            /// The link part ids.
+            ///     The link part ids.
             /// </summary>
-            [SerializeField]
-            public string[] Link;
+            [SerializeField] public string[] Link;
         }
 
         #endregion
 
-    }
+        #region Json Data
 
+        /// <summary>
+        ///     The type of cubism pose.
+        /// </summary>
+        [SerializeField] public string Type;
+
+        /// <summary>
+        ///     [Optional] Time of the Fade-in for easing in seconds..
+        /// </summary>
+        [SerializeField] public float FadeInTime;
+
+        /// <summary>
+        ///     Array of Groups.
+        /// </summary>
+        public SerializablePoseGroup[][] Groups;
+
+        #endregion
+    }
 }

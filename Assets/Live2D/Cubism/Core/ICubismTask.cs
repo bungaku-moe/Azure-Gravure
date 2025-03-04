@@ -9,12 +9,12 @@
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// Thread-safe task.
+    ///     Thread-safe task.
     /// </summary>
     public interface ICubismTask
     {
         /// <summary>
-        /// Executes the task.
+        ///     Executes the task.
         /// </summary>
         void Execute();
     }

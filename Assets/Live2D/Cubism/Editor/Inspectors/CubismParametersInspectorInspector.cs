@@ -11,27 +11,39 @@ using Live2D.Cubism.Framework;
 using UnityEditor;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    /// Allows inspecting <see cref="CubismParameter"/>s.
+    ///     Allows inspecting <see cref="CubismParameter" />s.
     /// </summary>
     [CustomEditor(typeof(CubismParametersInspector))]
     internal sealed class CubismParametersInspectorInspector : UnityEditor.Editor
     {
+        /// <summary>
+        ///     <see cref="CubismParameter" />s cache.
+        /// </summary>
+        private CubismParameter[] Parameters { get; set; }
+
+        /// <summary>
+        ///     Array of <see cref="CubismDisplayInfoParameterName.Name" /> obtained from
+        ///     <see cref="CubismDisplayInfoParameterName" />s.
+        /// </summary>
+        private string[] ParametersNameFromJson { get; set; }
+
+        /// <summary>
+        ///     Gets whether <see langword="this" /> is initialized.
+        /// </summary>
+        private bool IsInitialized => Parameters != null;
+
         #region Editor
 
         /// <summary>
-        /// Draws the inspector.
+        ///     Draws the inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
             // Lazily initialize.
-            if (!IsInitialized)
-            {
-                Initialize();
-            }
+            if (!IsInitialized) Initialize();
 
 
             // Show parameters.
@@ -42,7 +54,7 @@ namespace Live2D.Cubism.Editor.Inspectors
             {
                 EditorGUI.BeginChangeCheck();
 
-                var name = (string.IsNullOrEmpty(ParametersNameFromJson[i]))
+                var name = string.IsNullOrEmpty(ParametersNameFromJson[i])
                     ? Parameters[i].Id
                     : ParametersNameFromJson[i];
 
@@ -51,7 +63,7 @@ namespace Live2D.Cubism.Editor.Inspectors
                     Parameters[i].Value,
                     Parameters[i].MinimumValue,
                     Parameters[i].MaximumValue
-                    );
+                );
 
 
                 if (EditorGUI.EndChangeCheck())
@@ -69,7 +81,7 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             resetPosition.width *= 0.25f;
-            resetPosition.x += (resetPosition.width*3f);
+            resetPosition.x += resetPosition.width * 3f;
 
 
             if (GUI.Button(resetPosition, "Reset"))
@@ -88,39 +100,16 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             if (didParametersChange)
-            {
                 (target as Component)
                     .FindCubismModel()
                     .ForceUpdateNow();
-            }
         }
 
         #endregion
 
-        /// <summary>
-        /// <see cref="CubismParameter"/>s cache.
-        /// </summary>
-        private CubismParameter[] Parameters { get; set; }
 
         /// <summary>
-        /// Array of <see cref="CubismDisplayInfoParameterName.Name"/> obtained from <see cref="CubismDisplayInfoParameterName"/>s.
-        /// </summary>
-        private string[] ParametersNameFromJson { get; set; }
-
-        /// <summary>
-        /// Gets whether <see langword="this"/> is initialized.
-        /// </summary>
-        private bool IsInitialized
-        {
-            get
-            {
-                return Parameters != null;
-            }
-        }
-
-
-        /// <summary>
-        /// Initializes <see langword="this"/>.
+        ///     Initializes <see langword="this" />.
         /// </summary>
         private void Initialize()
         {
@@ -135,7 +124,9 @@ namespace Live2D.Cubism.Editor.Inspectors
             {
                 var displayInfoParameterName = Parameters[i].GetComponent<CubismDisplayInfoParameterName>();
                 ParametersNameFromJson[i] = displayInfoParameterName != null
-                    ? (string.IsNullOrEmpty(displayInfoParameterName.DisplayName) ? displayInfoParameterName.Name : displayInfoParameterName.DisplayName)
+                    ? string.IsNullOrEmpty(displayInfoParameterName.DisplayName)
+                        ? displayInfoParameterName.Name
+                        : displayInfoParameterName.DisplayName
                     : string.Empty;
             }
         }

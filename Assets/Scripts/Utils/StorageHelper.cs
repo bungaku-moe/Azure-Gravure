@@ -8,7 +8,7 @@ namespace Kiraio.Azure.Utils
     public static class StorageHelper
     {
         /// <summary>
-        /// Get current application/project root directory.
+        ///     Get current application/project root directory.
         /// </summary>
         /// <returns>Application/project root full path.</returns>
         public static string GetApplicationPath()
@@ -23,7 +23,7 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Open file dialog and fill the <paramref name="inputField"/>.
+        ///     Open file dialog and fill the <paramref name="inputField" />.
         /// </summary>
         /// <param name="inputField"></param>
         /// <param name="windowTitle"></param>
@@ -33,9 +33,9 @@ namespace Kiraio.Azure.Utils
             bool allowMultiple = false
         )
         {
-            string[] selectedPaths = new string[0];
+            var selectedPaths = new string[0];
             FileBrowser.ShowLoadDialog(
-                (paths) =>
+                paths =>
                 {
                     selectedPaths = paths;
                     inputField.text = string.Join(", ", paths);
@@ -51,7 +51,7 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Open directory dialog and fill the <paramref name="inputField"/>.
+        ///     Open directory dialog and fill the <paramref name="inputField" />.
         /// </summary>
         /// <param name="inputField"></param>
         public static string[] OpenDirectoryDialog(
@@ -60,9 +60,9 @@ namespace Kiraio.Azure.Utils
             bool allowMultiple = false
         )
         {
-            string[] directories = new string[0];
+            var directories = new string[0];
             FileBrowser.ShowLoadDialog(
-                (paths) =>
+                paths =>
                 {
                     directories = paths;
                     inputField.text = string.Join(", ", paths);
@@ -75,6 +75,19 @@ namespace Kiraio.Azure.Utils
                 windowTitle
             );
             return directories;
+        }
+
+        /// <summary>
+        ///     Normalize the path by removing invalid characters.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string NormalizePath(string path)
+        {
+            foreach (var invalidChar in Path.GetInvalidPathChars())
+                path = path.Replace(invalidChar.ToString(), "");
+
+            return Path.GetFullPath(path);
         }
     }
 }

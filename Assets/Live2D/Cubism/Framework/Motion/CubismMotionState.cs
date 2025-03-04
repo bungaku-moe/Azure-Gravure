@@ -12,37 +12,19 @@ using UnityEngine.Playables;
 namespace Live2D.Cubism.Framework.Motion
 {
     /// <summary>
-    /// Cubism motion state.
+    ///     Cubism motion state.
     /// </summary>
     public class CubismMotionState
     {
-        #region Variable
-
         /// <summary>
-        /// Cubism motion state clip.
-        /// </summary>
-        public AnimationClip Clip { get; private set; }
-
-        /// <summary>
-        /// Animation clip mixer.
-        /// </summary>
-        public AnimationMixerPlayable ClipMixer { get; private set; }
-
-        /// <summary>
-        /// Animation clip playable.
-        /// </summary>
-        public AnimationClipPlayable ClipPlayable { get; private set; }
-
-        #endregion
-
-        /// <summary>
-        /// Create motion state.
+        ///     Create motion state.
         /// </summary>
         /// <param name="playableGraph">Playable graph.</param>
         /// <param name="clip">Animation clip.</param>
         /// <param name="isLoop">Animation is loop.</param>
         /// <param name="speed">Animation speed.</param>
-        public static CubismMotionState CreateCubismMotionState(PlayableGraph playableGraph, AnimationClip clip, bool isLoop = true, float speed = 1.0f)
+        public static CubismMotionState CreateCubismMotionState(PlayableGraph playableGraph, AnimationClip clip,
+            bool isLoop = true, float speed = 1.0f)
         {
             var ret = new CubismMotionState();
 
@@ -55,10 +37,7 @@ namespace Live2D.Cubism.Framework.Motion
             // Connect AnimationClip Playable
             ret.ClipPlayable = AnimationClipPlayable.Create(playableGraph, ret.Clip);
 
-            if(!isLoop)
-            {
-                ret.ClipPlayable.SetDuration(clip.length - 0.0001f);
-            }
+            if (!isLoop) ret.ClipPlayable.SetDuration(clip.length - 0.0001f);
 
             ret.ClipMixer.ConnectInput(0, ret.ClipPlayable, 0);
             ret.ClipMixer.SetInputWeight(0, 1.0f);
@@ -67,7 +46,7 @@ namespace Live2D.Cubism.Framework.Motion
         }
 
         /// <summary>
-        /// Connect motion state clip mixer.
+        ///     Connect motion state clip mixer.
         /// </summary>
         /// <param name="clipMixer">.</param>
         public void ConnectClipMixer(AnimationMixerPlayable clipMixer)
@@ -81,5 +60,24 @@ namespace Live2D.Cubism.Framework.Motion
             ClipMixer.ConnectInput(lastInput, clipMixer, 0);
             ClipMixer.SetInputWeight(lastInput, 1.0f);
         }
+
+        #region Variable
+
+        /// <summary>
+        ///     Cubism motion state clip.
+        /// </summary>
+        public AnimationClip Clip { get; private set; }
+
+        /// <summary>
+        ///     Animation clip mixer.
+        /// </summary>
+        public AnimationMixerPlayable ClipMixer { get; private set; }
+
+        /// <summary>
+        ///     Animation clip playable.
+        /// </summary>
+        public AnimationClipPlayable ClipPlayable { get; private set; }
+
+        #endregion
     }
 }

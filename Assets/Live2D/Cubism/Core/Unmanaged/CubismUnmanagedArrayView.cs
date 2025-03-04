@@ -10,26 +10,25 @@
 
 using System;
 
-
 namespace Live2D.Cubism.Core.Unmanaged
 {
     /// <summary>
-    /// Float array view.
+    ///     Float array view.
     /// </summary>
     public sealed class CubismUnmanagedFloatArrayView
     {
         /// <summary>
-        /// Array length of unmanaged buffer.
+        ///     Array length of unmanaged buffer.
         /// </summary>
-        public int Length { get; private set; }
+        public int Length { get; }
 
         /// <summary>
-        /// Return true if instance is valid.
+        ///     Return true if instance is valid.
         /// </summary>
-        public unsafe bool IsValid { get { return (UnmanagedFixedAddress != (float*)0) && (Length > 0); } }
+        public unsafe bool IsValid => UnmanagedFixedAddress != (float*)0 && Length > 0;
 
         /// <summary>
-        /// Gets element at index.
+        ///     Gets element at index.
         /// </summary>
         /// <param name="index">Index of array.</param>
         /// <returns>Element of array.</returns>
@@ -43,15 +42,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -67,15 +61,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -86,38 +75,12 @@ namespace Live2D.Cubism.Core.Unmanaged
 
 
         /// <summary>
-        /// Unmanaged buffer address.
+        ///     Unmanaged buffer address.
         /// </summary>
-        private unsafe float* UnmanagedFixedAddress { get; set; }
-
-        #region Ctors
+        private unsafe float* UnmanagedFixedAddress { get; }
 
         /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedFloatArrayView(float* address, int length)
-        {
-            UnmanagedFixedAddress = address;
-            Length = length;
-        }
-
-        /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedFloatArrayView(IntPtr address, int length)
-        {
-            UnmanagedFixedAddress = (float*)address.ToPointer();
-            Length = length;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Reads data.
+        ///     Reads data.
         /// </summary>
         /// <param name="buffer">Destination managed array.</param>
         public unsafe void Read(float[] buffer)
@@ -130,15 +93,11 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert buffer.Length >= Length
                 if (destinationLength < Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
@@ -146,15 +105,12 @@ namespace Live2D.Cubism.Core.Unmanaged
             // Read data into managed.
             fixed (float* destinationAddress = buffer)
             {
-                for (var i = 0; i < Length; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < Length; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
 
         /// <summary>
-        /// Writes data.
+        ///     Writes data.
         /// </summary>
         /// <param name="buffer">Source managed array.</param>
         public unsafe void Write(float[] buffer)
@@ -167,15 +123,11 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert both length.
                 if (sourceLength > Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
@@ -183,31 +135,54 @@ namespace Live2D.Cubism.Core.Unmanaged
             // Write data into unmanaged.
             fixed (float* sourceAddress = buffer)
             {
-                for (var i = 0; i < sourceLength; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < sourceLength; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
+
+        #region Ctors
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedFloatArrayView(float* address, int length)
+        {
+            UnmanagedFixedAddress = address;
+            Length = length;
+        }
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedFloatArrayView(IntPtr address, int length)
+        {
+            UnmanagedFixedAddress = (float*)address.ToPointer();
+            Length = length;
+        }
+
+        #endregion
     }
 
     /// <summary>
-    /// Int array view.
+    ///     Int array view.
     /// </summary>
     public sealed class CubismUnmanagedIntArrayView
     {
         /// <summary>
-        /// Array length of unmanaged buffer.
+        ///     Array length of unmanaged buffer.
         /// </summary>
-        public int Length { get; private set; }
+        public int Length { get; }
 
         /// <summary>
-        /// Return true if instance is valid.
+        ///     Return true if instance is valid.
         /// </summary>
-        public unsafe bool IsValid { get { return (UnmanagedFixedAddress != (int*)0) && (Length > 0); } }
+        public unsafe bool IsValid => UnmanagedFixedAddress != (int*)0 && Length > 0;
 
         /// <summary>
-        /// Gets element at index.
+        ///     Gets element at index.
         /// </summary>
         /// <param name="index">Index of array.</param>
         /// <returns>Element of array.</returns>
@@ -221,15 +196,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -245,15 +215,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -264,38 +229,12 @@ namespace Live2D.Cubism.Core.Unmanaged
 
 
         /// <summary>
-        /// Unmanaged buffer address.
+        ///     Unmanaged buffer address.
         /// </summary>
-        private unsafe int* UnmanagedFixedAddress { get; set; }
-
-        #region Ctors
+        private unsafe int* UnmanagedFixedAddress { get; }
 
         /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedIntArrayView(int* address, int length)
-        {
-            UnmanagedFixedAddress = address;
-            Length = length;
-        }
-
-        /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedIntArrayView(IntPtr address, int length)
-        {
-            UnmanagedFixedAddress = (int*)address.ToPointer();
-            Length = length;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Reads data.
+        ///     Reads data.
         /// </summary>
         /// <param name="buffer">Destination managed array.</param>
         public unsafe void Read(int[] buffer)
@@ -308,15 +247,11 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert buffer.Length >= Length
                 if (destinationLength < Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
@@ -324,15 +259,12 @@ namespace Live2D.Cubism.Core.Unmanaged
             // Read data into managed.
             fixed (int* destinationAddress = buffer)
             {
-                for (var i = 0; i < Length; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < Length; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
 
         /// <summary>
-        /// Writes data.
+        ///     Writes data.
         /// </summary>
         /// <param name="buffer">Source managed array.</param>
         public unsafe void Write(int[] buffer)
@@ -345,15 +277,11 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert both length.
                 if (sourceLength > Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
@@ -361,35 +289,58 @@ namespace Live2D.Cubism.Core.Unmanaged
             // Write data into unmanaged.
             fixed (int* sourceAddress = buffer)
             {
-                for (var i = 0; i < sourceLength; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < sourceLength; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
+
+        #region Ctors
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedIntArrayView(int* address, int length)
+        {
+            UnmanagedFixedAddress = address;
+            Length = length;
+        }
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedIntArrayView(IntPtr address, int length)
+        {
+            UnmanagedFixedAddress = (int*)address.ToPointer();
+            Length = length;
+        }
+
+        #endregion
     }
 
     /// <summary>
-    /// Byte array view.
+    ///     Byte array view.
     /// </summary>
     public sealed class CubismUnmanagedByteArrayView
     {
         /// <summary>
-        /// Array length of unmanaged buffer.
+        ///     Array length of unmanaged buffer.
         /// </summary>
-        public int Length { get; private set; }
+        public int Length { get; }
 
         /// <summary>
-        /// Return true if instance is valid.
+        ///     Return true if instance is valid.
         /// </summary>
-        public unsafe bool IsValid { get { return (UnmanagedFixedAddress != (Byte*)0) && (Length > 0); } }
+        public unsafe bool IsValid => UnmanagedFixedAddress != (byte*)0 && Length > 0;
 
         /// <summary>
-        /// Gets element at index.
+        ///     Gets element at index.
         /// </summary>
         /// <param name="index">Index of array.</param>
         /// <returns>Element of array.</returns>
-        public unsafe Byte this[int index]
+        public unsafe byte this[int index]
         {
             get
             {
@@ -399,15 +350,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -423,15 +369,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -442,41 +383,15 @@ namespace Live2D.Cubism.Core.Unmanaged
 
 
         /// <summary>
-        /// Unmanaged buffer address.
+        ///     Unmanaged buffer address.
         /// </summary>
-        private unsafe Byte* UnmanagedFixedAddress { get; set; }
-
-        #region Ctors
+        private unsafe byte* UnmanagedFixedAddress { get; }
 
         /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedByteArrayView(Byte* address, int length)
-        {
-            UnmanagedFixedAddress = address;
-            Length = length;
-        }
-
-        /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedByteArrayView(IntPtr address, int length)
-        {
-            UnmanagedFixedAddress = (Byte*)address.ToPointer();
-            Length = length;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Reads data.
+        ///     Reads data.
         /// </summary>
         /// <param name="buffer">Destination managed array.</param>
-        public unsafe void Read(Byte[] buffer)
+        public unsafe void Read(byte[] buffer)
         {
             var sourceAddress = UnmanagedFixedAddress;
             var destinationLength = buffer.Length;
@@ -486,34 +401,27 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert buffer.Length >= Length
                 if (destinationLength < Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
 
             // Read data into managed.
-            fixed (Byte* destinationAddress = buffer)
+            fixed (byte* destinationAddress = buffer)
             {
-                for (var i = 0; i < Length; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < Length; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
 
         /// <summary>
-        /// Writes data.
+        ///     Writes data.
         /// </summary>
         /// <param name="buffer">Source managed array.</param>
-        public unsafe void Write(Byte[] buffer)
+        public unsafe void Write(byte[] buffer)
         {
             var sourceLength = buffer.Length;
             var destinationAddress = UnmanagedFixedAddress;
@@ -523,47 +431,66 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert both length.
                 if (sourceLength > Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
 
             // Write data into unmanaged.
-            fixed (Byte* sourceAddress = buffer)
+            fixed (byte* sourceAddress = buffer)
             {
-                for (var i = 0; i < sourceLength; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < sourceLength; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
+
+        #region Ctors
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedByteArrayView(byte* address, int length)
+        {
+            UnmanagedFixedAddress = address;
+            Length = length;
+        }
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedByteArrayView(IntPtr address, int length)
+        {
+            UnmanagedFixedAddress = (byte*)address.ToPointer();
+            Length = length;
+        }
+
+        #endregion
     }
 
     /// <summary>
-    /// Ushort array view.
+    ///     Ushort array view.
     /// </summary>
     public sealed class CubismUnmanagedUshortArrayView
     {
         /// <summary>
-        /// Array length of unmanaged buffer.
+        ///     Array length of unmanaged buffer.
         /// </summary>
-        public int Length { get; private set; }
+        public int Length { get; }
 
         /// <summary>
-        /// Return true if instance is valid.
+        ///     Return true if instance is valid.
         /// </summary>
-        public unsafe bool IsValid { get { return (UnmanagedFixedAddress != (ushort*)0) && (Length > 0); } }
+        public unsafe bool IsValid => UnmanagedFixedAddress != (ushort*)0 && Length > 0;
 
         /// <summary>
-        /// Gets element at index.
+        ///     Gets element at index.
         /// </summary>
         /// <param name="index">Index of array.</param>
         /// <returns>Element of array.</returns>
@@ -577,15 +504,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -601,15 +523,10 @@ namespace Live2D.Cubism.Core.Unmanaged
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 {
                     // Assert instance is valid.
-                    if (!IsValid)
-                    {
-                        throw new InvalidOperationException("Array is empty, or not valid.");
-                    }
+                    if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
 
-                    if ((index >= Length) || (index < 0))
-                    {
+                    if (index >= Length || index < 0)
                         throw new IndexOutOfRangeException("Array index is out of range.");
-                    }
                 }
 #endif
 
@@ -620,38 +537,12 @@ namespace Live2D.Cubism.Core.Unmanaged
 
 
         /// <summary>
-        /// Unmanaged buffer address.
+        ///     Unmanaged buffer address.
         /// </summary>
-        private unsafe ushort* UnmanagedFixedAddress { get; set; }
-
-        #region Ctors
+        private unsafe ushort* UnmanagedFixedAddress { get; }
 
         /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedUshortArrayView(ushort* address, int length)
-        {
-            UnmanagedFixedAddress = address;
-            Length = length;
-        }
-
-        /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="address">Unmanaged buffer address.</param>
-        /// <param name="length">Length of unmanaged buffer (in types).</param>
-        public unsafe CubismUnmanagedUshortArrayView(IntPtr address, int length)
-        {
-            UnmanagedFixedAddress = (ushort*)address.ToPointer();
-            Length = length;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Reads data.
+        ///     Reads data.
         /// </summary>
         /// <param name="buffer">Destination managed array.</param>
         public unsafe void Read(ushort[] buffer)
@@ -664,15 +555,11 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert buffer.Length >= Length
                 if (destinationLength < Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
@@ -680,15 +567,12 @@ namespace Live2D.Cubism.Core.Unmanaged
             // Read data into managed.
             fixed (ushort* destinationAddress = buffer)
             {
-                for (var i = 0; i < Length; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < Length; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
 
         /// <summary>
-        /// Writes data.
+        ///     Writes data.
         /// </summary>
         /// <param name="buffer">Source managed array.</param>
         public unsafe void Write(ushort[] buffer)
@@ -701,15 +585,11 @@ namespace Live2D.Cubism.Core.Unmanaged
             {
                 // Assert both length.
                 if (sourceLength > Length)
-                {
-                    throw new InvalidOperationException("Destination buffer length must be larger than source buffer length.");
-                }
+                    throw new InvalidOperationException(
+                        "Destination buffer length must be larger than source buffer length.");
 
                 // Assert instance is valid.
-                if (!IsValid)
-                {
-                    throw new InvalidOperationException("Array is empty, or not valid.");
-                }
+                if (!IsValid) throw new InvalidOperationException("Array is empty, or not valid.");
             }
 #endif
 
@@ -717,12 +597,34 @@ namespace Live2D.Cubism.Core.Unmanaged
             // Write data into unmanaged.
             fixed (ushort* sourceAddress = buffer)
             {
-                for (var i = 0; i < sourceLength; ++i)
-                {
-                    destinationAddress[i] = sourceAddress[i];
-                }
+                for (var i = 0; i < sourceLength; ++i) destinationAddress[i] = sourceAddress[i];
             }
         }
-    }
 
+        #region Ctors
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedUshortArrayView(ushort* address, int length)
+        {
+            UnmanagedFixedAddress = address;
+            Length = length;
+        }
+
+        /// <summary>
+        ///     Initializes instance.
+        /// </summary>
+        /// <param name="address">Unmanaged buffer address.</param>
+        /// <param name="length">Length of unmanaged buffer (in types).</param>
+        public unsafe CubismUnmanagedUshortArrayView(IntPtr address, int length)
+        {
+            UnmanagedFixedAddress = (ushort*)address.ToPointer();
+            Length = length;
+        }
+
+        #endregion
+    }
 }

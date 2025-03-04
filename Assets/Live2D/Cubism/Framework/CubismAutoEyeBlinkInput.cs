@@ -8,79 +8,76 @@
 
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    /// Automatic mouth movement.
+    ///     Automatic mouth movement.
     /// </summary>
     public sealed class CubismAutoEyeBlinkInput : MonoBehaviour
     {
         /// <summary>
-        /// Mean time between eye blinks in seconds.
+        ///     Mean time between eye blinks in seconds.
         /// </summary>
-        [SerializeField, Range(1f, 10f)]
-        public float Mean = 2.5f;
+        [SerializeField] [Range(1f, 10f)] public float Mean = 2.5f;
 
         /// <summary>
-        /// Maximum deviation from <see cref="Mean"/> in seconds.
+        ///     Maximum deviation from <see cref="Mean" /> in seconds.
         /// </summary>
-        [SerializeField, Range(0.5f, 5f)]
-        public float MaximumDeviation = 2f;
+        [SerializeField] [Range(0.5f, 5f)] public float MaximumDeviation = 2f;
 
         /// <summary>
-        /// Timescale.
+        ///     Timescale.
         /// </summary>
-        [SerializeField, Range(1f, 20f)]
-        public float Timescale = 10f;
+        [SerializeField] [Range(1f, 20f)] public float Timescale = 10f;
 
         /// <summary>
-        /// Target controller.
+        ///     Target controller.
         /// </summary>
         private CubismEyeBlinkController Controller { get; set; }
 
         /// <summary>
-        /// Control over whether output should be evaluated.
+        ///     Control over whether output should be evaluated.
         /// </summary>
         private Phase CurrentPhase { get; set; }
 
         /// <summary>
-        /// Used for switching from <see cref="Phase.ClosingEyes"/> to <see cref="Phase.OpeningEyes"/> and back to <see cref="Phase.Idling"/>.
+        ///     Used for switching from <see cref="Phase.ClosingEyes" /> to <see cref="Phase.OpeningEyes" /> and back to
+        ///     <see cref="Phase.Idling" />.
         /// </summary>
         private float LastValue { get; set; }
 
         /// <summary>
-        /// Totalized delta time [s].
+        ///     Totalized delta time [s].
         /// </summary>
         private float UserTimeSeconds { get; set; }
 
         /// <summary>
-        /// Time when the current state started [sec].
+        ///     Time when the current state started [sec].
         /// </summary>
         private float StateStartTimeSeconds { get; set; }
 
         /// <summary>
-        /// Duration of eyelid closing motion [sec]
+        ///     Duration of eyelid closing motion [sec]
         /// </summary>
         private float ClosingSeconds { get; set; }
 
         /// <summary>
-        /// Duration of eyelid closed state [sec]
+        ///     Duration of eyelid closed state [sec]
         /// </summary>
         private float ClosedSeconds { get; set; }
 
         /// <summary>
-        /// Duration of eyelid opening motion [sec]
+        ///     Duration of eyelid opening motion [sec]
         /// </summary>
         private float OpeningSeconds { get; set; }
 
         /// <summary>
-        /// Next blinking time.
+        ///     Next blinking time.
         /// </summary>
         private float NextBlinkingTime { get; set; }
 
         /// <summary>
-        /// Resets the input.
+        ///     Resets the input.
         /// </summary>
         public void Reset()
         {
@@ -89,7 +86,7 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        /// Calculate the value when the eyes are closed.
+        ///     Calculate the value when the eyes are closed.
         /// </summary>
         /// <returns>Eye closing value.</returns>
         private float UpdateEyeBlinkClosing()
@@ -108,7 +105,7 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        /// Calculate the value when the eyes are closed.
+        ///     Calculate the value when the eyes are closed.
         /// </summary>
         /// <returns>Eye closed value.</returns>
         private float UpdateEyeBlinkClosed()
@@ -127,7 +124,7 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        /// Calculate the value when the eyes are opening.
+        ///     Calculate the value when the eyes are opening.
         /// </summary>
         /// <returns>Eye opening value.</returns>
         private float UpdateEyeBlinkOpening()
@@ -147,7 +144,7 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        /// Calculate the value when the eyes are opened.
+        ///     Calculate the value when the eyes are opened.
         /// </summary>
         /// <returns>Eye opened value.</returns>
         private float UpdateEyeBlinkIdling()
@@ -166,13 +163,12 @@ namespace Live2D.Cubism.Framework
         }
 
 
-
         /// <summary>
-        /// Update eye blink.
+        ///     Update eye blink.
         /// </summary>
         private void UpdateEyeBlink()
         {
-            UserTimeSeconds += (Time.deltaTime * Timescale);
+            UserTimeSeconds += Time.deltaTime * Timescale;
             var value = 0.0f;
 
             switch (CurrentPhase)
@@ -203,7 +199,7 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        /// Set the details of the blinking motion.
+        ///     Set the details of the blinking motion.
         /// </summary>
         /// <param name="closing">Duration of eyelid closing motion [sec].</param>
         /// <param name="closed">Duration of eyelid closed state [sec].</param>
@@ -215,10 +211,36 @@ namespace Live2D.Cubism.Framework
             OpeningSeconds = opening;
         }
 
+        /// <summary>
+        ///     Internal states.
+        /// </summary>
+        private enum Phase
+        {
+            /// <summary>
+            ///     Idle state.
+            /// </summary>
+            Idling,
+
+            /// <summary>
+            ///     State when closing eyes.
+            /// </summary>
+            ClosingEyes,
+
+            /// <summary>
+            ///     State when closed eyes.
+            /// </summary>
+            ClosedEyes,
+
+            /// <summary>
+            ///     State when opening eyes.
+            /// </summary>
+            OpeningEyes
+        }
+
         #region Unity Event Handling
 
         /// <summary>
-        /// Called by Unity. Initializes input.
+        ///     Called by Unity. Initializes input.
         /// </summary>
         private void Start()
         {
@@ -230,48 +252,19 @@ namespace Live2D.Cubism.Framework
 
 
         /// <summary>
-        /// Called by Unity. Updates controller.
+        ///     Called by Unity. Updates controller.
         /// </summary>
         /// <remarks>
-        /// Make sure this method is called after any animations are evaluated.
+        ///     Make sure this method is called after any animations are evaluated.
         /// </remarks>
         private void LateUpdate()
         {
             // Fail silently.
-            if (Controller == null)
-            {
-                return;
-            }
+            if (Controller == null) return;
 
             UpdateEyeBlink();
         }
 
         #endregion
-
-        /// <summary>
-        /// Internal states.
-        /// </summary>
-        private enum Phase
-        {
-            /// <summary>
-            /// Idle state.
-            /// </summary>
-            Idling,
-
-            /// <summary>
-            /// State when closing eyes.
-            /// </summary>
-            ClosingEyes,
-
-            /// <summary>
-            /// State when closed eyes.
-            /// </summary>
-            ClosedEyes,
-
-            /// <summary>
-            /// State when opening eyes.
-            /// </summary>
-            OpeningEyes
-        }
     }
 }

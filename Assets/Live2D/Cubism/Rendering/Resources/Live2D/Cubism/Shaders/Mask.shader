@@ -23,14 +23,17 @@ Shader "Live2D Cubism/Mask"
         }
 
 
-        BindChannels{ Bind "Vertex", vertex Bind "texcoord", texcoord Bind "Color", color }
+        BindChannels
+        {
+            Bind "Vertex", vertex Bind "texcoord", texcoord Bind "Color", color
+        }
 
 
-        LOD      100
-        ZWrite   Off
+        LOD 100
+        ZWrite Off
         Lighting Off
-        Cull     [_Cull]
-        Blend    One One
+        Cull [_Cull]
+        Blend One One
 
 
         Pass
@@ -48,17 +51,16 @@ Shader "Live2D Cubism/Mask"
 
             struct appdata_t
             {
-                float4 vertex   : POSITION;
-                fixed4 color    : COLOR;
+                float4 vertex : POSITION;
+                fixed4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
-
             };
 
 
             struct v2f
             {
-                float4 vertex   : SV_POSITION;
-                fixed4 color    : COLOR;
+                float4 vertex : SV_POSITION;
+                fixed4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
             };
 
@@ -74,7 +76,7 @@ Shader "Live2D Cubism/Mask"
                 CUBISM_TO_MASK_CLIP_POS(IN, OUT);
 
 
-                OUT.color    = IN.color;
+                OUT.color = IN.color;
                 OUT.texcoord = IN.texcoord;
 
 
@@ -88,10 +90,7 @@ Shader "Live2D Cubism/Mask"
             fixed4 frag(v2f IN) : SV_Target
             {
                 return CUBISM_MASK_CHANNEL * tex2D(_MainTex, IN.texcoord).a;
-
             }
-
-
             ENDCG
         }
     }

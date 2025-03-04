@@ -9,23 +9,23 @@
 namespace Live2D.Cubism.Framework.Physics
 {
     /// <summary>
-    /// Component of source physical force.
+    ///     Component of source physical force.
     /// </summary>
     public enum CubismPhysicsSourceComponent
     {
         /// <summary>
-        /// Use X-axis position.
+        ///     Use X-axis position.
         /// </summary>
         X,
 
         /// <summary>
-        /// Use Y-axis position.
+        ///     Use Y-axis position.
         /// </summary>
         Y,
 
         /// <summary>
-        /// Use angle.
+        ///     Use angle.
         /// </summary>
-        Angle,
+        Angle
     }
 }

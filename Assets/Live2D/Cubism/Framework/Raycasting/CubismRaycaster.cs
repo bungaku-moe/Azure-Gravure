@@ -6,32 +6,44 @@
  */
 
 
+using System.Collections.Generic;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Rendering;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Framework.Raycasting
 {
     /// <summary>
-    /// Allows casting rays against <see cref="CubismRaycastable"/>s.
+    ///     Allows casting rays against <see cref="CubismRaycastable" />s.
     /// </summary>
     public sealed class CubismRaycaster : MonoBehaviour
     {
         /// <summary>
-        /// <see cref="CubismRenderer"/>s with <see cref="CubismRaycastable"/>s attached.
+        ///     <see cref="CubismRenderer" />s with <see cref="CubismRaycastable" />s attached.
         /// </summary>
         private CubismRenderer[] Raycastables { get; set; }
 
         /// <summary>
-        /// <see cref="CubismRaycastablePrecision"/>s with <see cref="CubismRaycastable"/>s attached.??????????????
+        ///     <see cref="CubismRaycastablePrecision" />s with <see cref="CubismRaycastable" />s attached.??????????????
         /// </summary>
         private CubismRaycastablePrecision[] RaycastablePrecisions { get; set; }
 
+        #region Unity Event Handling
 
         /// <summary>
-        /// Refreshes the controller. Call this method after adding and/or removing <see cref="CubismRaycastable"/>.
+        ///     Called by Unity. Makes sure cache is initialized.
+        /// </summary>
+        private void Start()
+        {
+            // Initialize cache.
+            Refresh();
+        }
+
+        #endregion
+
+
+        /// <summary>
+        ///     Refreshes the controller. Call this method after adding and/or removing <see cref="CubismRaycastable" />.
         /// </summary>
         private void Refresh()
         {
@@ -48,10 +60,7 @@ namespace Live2D.Cubism.Framework.Raycasting
             for (var i = 0; i < candidates.Length; i++)
             {
                 // Skip non-raycastables.
-                if (candidates[i].GetComponent<CubismRaycastable>() == null)
-                {
-                    continue;
-                }
+                if (candidates[i].GetComponent<CubismRaycastable>() == null) continue;
 
 
                 raycastables.Add(candidates[i].GetComponent<CubismRenderer>());
@@ -64,40 +73,28 @@ namespace Live2D.Cubism.Framework.Raycasting
             RaycastablePrecisions = raycastablePrecisions.ToArray();
         }
 
-        #region Unity Event Handling
-
         /// <summary>
-        /// Called by Unity. Makes sure cache is initialized.
-        /// </summary>
-        private void Start()
-        {
-            // Initialize cache.
-            Refresh();
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Casts a ray.
+        ///     Casts a ray.
         /// </summary>
         /// <param name="origin">The origin of the ray.</param>
         /// <param name="direction">The direction of the ray.</param>
         /// <param name="result">The result of the cast.</param>
         /// <param name="maximumDistance">[Optional] The maximum distance of the ray.</param>
-        /// <returns><see langword="true"/> in case of a hit; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> in case of a hit; <see langword="false" /> otherwise.</returns>
         /// <returns>The numbers of drawables had hit</returns>
-        public int Raycast(Vector3 origin, Vector3 direction, CubismRaycastHit[] result, float maximumDistance = Mathf.Infinity)
+        public int Raycast(Vector3 origin, Vector3 direction, CubismRaycastHit[] result,
+            float maximumDistance = Mathf.Infinity)
         {
             return Raycast(new Ray(origin, direction), result, maximumDistance);
         }
 
         /// <summary>
-        /// Casts a ray.
+        ///     Casts a ray.
         /// </summary>
         /// <param name="ray"></param>
         /// <param name="result">The result of the cast.</param>
         /// <param name="maximumDistance">[Optional] The maximum distance of the ray.</param>
-        /// <returns><see langword="true"/> in case of a hit; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> in case of a hit; <see langword="false" /> otherwise.</returns>
         /// <returns>The numbers of drawables had hit</returns>
         public int Raycast(Ray ray, CubismRaycastHit[] result, float maximumDistance = Mathf.Infinity)
         {
@@ -113,10 +110,7 @@ namespace Live2D.Cubism.Framework.Raycasting
 
 
             // Return non-hits.
-            if (distance > maximumDistance)
-            {
-                return 0;
-            }
+            if (distance > maximumDistance) return 0;
 
             // Cast against each raycastable.
             var hitCount = 0;
@@ -129,28 +123,18 @@ namespace Live2D.Cubism.Framework.Raycasting
 
 
                 // Skip inactive raycastables.
-                if (!raycastable.MeshRenderer.enabled)
-                {
-                    continue;
-                }
+                if (!raycastable.MeshRenderer.enabled) continue;
 
                 var bounds = raycastable.Mesh.bounds;
 
 
                 // Skip non hits (bounding box)
-                if (!bounds.Contains(intersectionInLocalSpace))
-                {
-                    continue;
-                }
+                if (!bounds.Contains(intersectionInLocalSpace)) continue;
 
                 // Do detailed hit-detection against mesh if requested.
                 if (raycastablePrecision == CubismRaycastablePrecision.Triangles)
-                {
                     if (!ContainsInTriangles(raycastable.Mesh, intersectionInLocalSpace))
-                    {
                         continue;
-                    }
-                }
 
 
                 result[hitCount].Drawable = raycastable.GetComponent<CubismDrawable>();
@@ -163,10 +147,7 @@ namespace Live2D.Cubism.Framework.Raycasting
 
 
                 // Exit if result buffer is full.
-                if (hitCount == result.Length)
-                {
-                    break;
-                }
+                if (hitCount == result.Length) break;
             }
 
 
@@ -175,14 +156,14 @@ namespace Live2D.Cubism.Framework.Raycasting
 
 
         /// <summary>
-        /// Check the point is inside polygons.
+        ///     Check the point is inside polygons.
         /// </summary>
         /// <param name="mesh"></param>
         /// <param name="inputPosition"></param>
         /// <returns></returns>
         private bool ContainsInTriangles(Mesh mesh, Vector3 inputPosition)
         {
-            for (var i = 0; i < mesh.triangles.Length; i+=3)
+            for (var i = 0; i < mesh.triangles.Length; i += 3)
             {
                 var vertexPositionA = mesh.vertices[mesh.triangles[i]];
                 var vertexPositionB = mesh.vertices[mesh.triangles[i + 1]];
@@ -200,9 +181,7 @@ namespace Live2D.Cubism.Framework.Raycasting
 
                 if ((crossProduct1 > 0 && crossProduct2 > 0 && crossProduct3 > 0) ||
                     (crossProduct1 < 0 && crossProduct2 < 0 && crossProduct3 < 0))
-                {
                     return true;
-                }
             }
 
 

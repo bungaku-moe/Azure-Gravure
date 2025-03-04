@@ -9,14 +9,14 @@
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// TOOD Document.
+    ///     TOOD Document.
     /// </summary>
     public static class CubismTaskQueue
     {
         #region Delegates
 
         /// <summary>
-        /// Handles <see cref="ICubismTask"/>s.
+        ///     Handles <see cref="ICubismTask" />s.
         /// </summary>
         /// <param name="task"></param>
         public delegate void CubismTaskHandler(ICubismTask task);
@@ -26,14 +26,14 @@ namespace Live2D.Cubism.Core
         #region Events
 
         /// <summary>
-        /// Event triggered on new <see cref="ICubismTask"/> enqueued.
+        ///     Event triggered on new <see cref="ICubismTask" /> enqueued.
         /// </summary>
         public static CubismTaskHandler OnTask;
 
         #endregion
 
         /// <summary>
-        /// Enqeues a <see cref="ICubismTask"/>.
+        ///     Enqeues a <see cref="ICubismTask" />.
         /// </summary>
         /// <param name="task"></param>
         internal static void Enqueue(ICubismTask task)

@@ -12,15 +12,16 @@ using UnityEditor;
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    /// Inspector for <see cref="CubismHarmonicMotionParameter"/>s.
+    ///     Inspector for <see cref="CubismHarmonicMotionParameter" />s.
     /// </summary>
-    [CustomEditor(typeof(CubismHitDrawable)), CanEditMultipleObjects]
+    [CustomEditor(typeof(CubismHitDrawable))]
+    [CanEditMultipleObjects]
     public class CubismHitDrawableInspector : UnityEditor.Editor
     {
         #region Editor
 
         /// <summary>
-        /// Draws inspector.
+        ///     Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
@@ -28,10 +29,7 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Fail silently.
-            if (hitDrawable == null)
-            {
-                return;
-            }
+            if (hitDrawable == null) return;
 
 
             // Display user data.
@@ -39,10 +37,7 @@ namespace Live2D.Cubism.Editor.Inspectors
             {
                 var name = EditorGUILayout.TextField("Precision", hitDrawable.Name);
 
-                if (!scope.changed)
-                {
-                    return;
-                }
+                if (!scope.changed) return;
 
 
                 // Apply to all selected HitDrawable.

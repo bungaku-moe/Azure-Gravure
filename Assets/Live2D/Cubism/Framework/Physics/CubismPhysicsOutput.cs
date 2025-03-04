@@ -6,21 +6,20 @@
  */
 
 
-using Live2D.Cubism.Core;
 using System;
+using Live2D.Cubism.Core;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Framework.Physics
 {
     /// <summary>
-    /// Output data of physics.
+    ///     Output data of physics.
     /// </summary>
     [Serializable]
     public struct CubismPhysicsOutput
     {
         /// <summary>
-        /// Delegation of function of getting output value.
+        ///     Delegation of function of getting output value.
         /// </summary>
         /// <param name="translation">Translation.</param>
         /// <param name="particles">Particles.</param>
@@ -35,13 +34,13 @@ namespace Live2D.Cubism.Framework.Physics
         );
 
         /// <summary>
-        /// Delegation of function of getting output scale.
+        ///     Delegation of function of getting output scale.
         /// </summary>
         /// <returns>Output scale.</returns>
         public delegate float ScaleGetter();
 
         /// <summary>
-        /// Gets output for translation X-axis.
+        ///     Gets output for translation X-axis.
         /// </summary>
         /// <param name="translation">Translation.</param>
         /// <param name="particles">Particles.</param>
@@ -57,16 +56,13 @@ namespace Live2D.Cubism.Framework.Physics
         {
             var outputValue = translation.x;
 
-            if (IsInverted)
-            {
-                outputValue *= -1.0f;
-            }
+            if (IsInverted) outputValue *= -1.0f;
 
             return outputValue;
         }
 
         /// <summary>
-        /// Gets output for translation Y-axis.
+        ///     Gets output for translation Y-axis.
         /// </summary>
         /// <param name="translation">Translation.</param>
         /// <param name="particles">Particles.</param>
@@ -82,16 +78,13 @@ namespace Live2D.Cubism.Framework.Physics
         {
             var outputValue = translation.y;
 
-            if (IsInverted)
-            {
-                outputValue *= -1.0f;
-            }
+            if (IsInverted) outputValue *= -1.0f;
 
             return outputValue;
         }
 
         /// <summary>
-        /// Gets output for angle.
+        ///     Gets output for angle.
         /// </summary>
         /// <param name="translation">Translation.</param>
         /// <param name="particles">Particles.</param>
@@ -118,7 +111,7 @@ namespace Live2D.Cubism.Framework.Physics
                 else
                 {
                     parentGravity = particles[particleIndex - 1].Position -
-                        particles[particleIndex - 2].Position;
+                                    particles[particleIndex - 2].Position;
                 }
             }
             else
@@ -131,16 +124,13 @@ namespace Live2D.Cubism.Framework.Physics
             var outputValue = CubismPhysicsMath.DirectionToRadian(parentGravity, translation);
 
 
-            if (IsInverted)
-            {
-                outputValue *= -1.0f;
-            }
+            if (IsInverted) outputValue *= -1.0f;
 
             return outputValue;
         }
 
         /// <summary>
-        /// Gets output scale for translation X-axis.
+        ///     Gets output scale for translation X-axis.
         /// </summary>
         /// <returns>Output scale.</returns>
         private float GetOutputScaleTranslationX()
@@ -149,7 +139,7 @@ namespace Live2D.Cubism.Framework.Physics
         }
 
         /// <summary>
-        /// Gets output scale for translation Y-axis.
+        ///     Gets output scale for translation Y-axis.
         /// </summary>
         /// <returns>Output scale.</returns>
         private float GetOutputScaleTranslationY()
@@ -158,7 +148,7 @@ namespace Live2D.Cubism.Framework.Physics
         }
 
         /// <summary>
-        /// Gets output scale for angle.
+        ///     Gets output scale for angle.
         /// </summary>
         /// <returns>Output scale.</returns>
         private float GetOutputScaleAngle()
@@ -171,111 +161,98 @@ namespace Live2D.Cubism.Framework.Physics
             switch (SourceComponent)
             {
                 case CubismPhysicsSourceComponent.X:
-                    {
-                        GetScale =
-                            GetOutputScaleTranslationX;
+                {
+                    GetScale =
+                        GetOutputScaleTranslationX;
 
-                        GetValue =
-                            GetOutputTranslationX;
-                    }
+                    GetValue =
+                        GetOutputTranslationX;
+                }
                     break;
                 case CubismPhysicsSourceComponent.Y:
-                    {
-                        GetScale =
-                            GetOutputScaleTranslationY;
+                {
+                    GetScale =
+                        GetOutputScaleTranslationY;
 
-                        GetValue =
-                            GetOutputTranslationY;
-                    }
+                    GetValue =
+                        GetOutputTranslationY;
+                }
                     break;
                 case CubismPhysicsSourceComponent.Angle:
-                    {
-                        GetScale =
-                            GetOutputScaleAngle;
+                {
+                    GetScale =
+                        GetOutputScaleAngle;
 
-                        GetValue =
-                            GetOutputAngle;
-                    }
+                    GetValue =
+                        GetOutputAngle;
+                }
                     break;
             }
         }
 
         /// <summary>
-        /// Parameter ID of destination.
+        ///     Parameter ID of destination.
         /// </summary>
-        [SerializeField]
-        public string DestinationId;
+        [SerializeField] public string DestinationId;
 
         /// <summary>
-        /// Index of particle.
+        ///     Index of particle.
         /// </summary>
-        [SerializeField]
-        public int ParticleIndex;
+        [SerializeField] public int ParticleIndex;
 
         /// <summary>
-        /// Scale of transition.
+        ///     Scale of transition.
         /// </summary>
-        [SerializeField]
-        public Vector2 TranslationScale;
+        [SerializeField] public Vector2 TranslationScale;
 
         /// <summary>
-        /// Scale of angle.
+        ///     Scale of angle.
         /// </summary>
-        [SerializeField]
-        public float AngleScale;
+        [SerializeField] public float AngleScale;
 
         /// <summary>
-        /// Weight.
+        ///     Weight.
         /// </summary>
-        [SerializeField]
-        public float Weight;
+        [SerializeField] public float Weight;
 
         /// <summary>
-        /// Component of source.
+        ///     Component of source.
         /// </summary>
-        [SerializeField]
-        public CubismPhysicsSourceComponent SourceComponent;
+        [SerializeField] public CubismPhysicsSourceComponent SourceComponent;
 
         /// <summary>
-        /// True if value is inverted; otherwise.
+        ///     True if value is inverted; otherwise.
         /// </summary>
-        [SerializeField]
-        public bool IsInverted;
+        [SerializeField] public bool IsInverted;
 
         /// <summary>
-        /// The value that below minimum.
+        ///     The value that below minimum.
         /// </summary>
-        [NonSerialized]
-        public float ValueBelowMinimum;
+        [NonSerialized] public float ValueBelowMinimum;
 
         /// <summary>
-        /// The value that exceeds maximum.
+        ///     The value that exceeds maximum.
         /// </summary>
-        [NonSerialized]
-        public float ValueExceededMaximum;
+        [NonSerialized] public float ValueExceededMaximum;
 
         /// <summary>
-        /// Destination data from parameter.
+        ///     Destination data from parameter.
         /// </summary>
-        [NonSerialized]
-        public CubismParameter Destination;
+        [NonSerialized] public CubismParameter Destination;
 
         /// <summary>
-        /// <see cref="Destination"/> index.
+        ///     <see cref="Destination" /> index.
         /// </summary>
-        [NonSerialized]
-        public int DestinationIndex;
+        [NonSerialized] public int DestinationIndex;
 
         /// <summary>
-        /// Function of getting output value.
+        ///     Function of getting output value.
         /// </summary>
-        [NonSerialized]
-        public ValueGetter GetValue;
+        [NonSerialized] public ValueGetter GetValue;
 
         /// <summary>
-        /// Function of getting output scale.
+        ///     Function of getting output scale.
         /// </summary>
-        [NonSerialized]
-        public ScaleGetter GetScale;
+        [NonSerialized] public ScaleGetter GetScale;
     }
 }

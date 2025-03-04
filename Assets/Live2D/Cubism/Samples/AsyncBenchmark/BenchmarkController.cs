@@ -12,65 +12,62 @@ using UnityEngine.UI;
 namespace Live2D.Cubism.Samples.AsyncBenchmark
 {
     /// <summary>
-    /// Automatically adjust the fps to the set value.
+    ///     Automatically adjust the fps to the set value.
     /// </summary>
     public sealed class BenchmarkController : MonoBehaviour
     {
         /// <summary>
-        /// Interval time before the model can spawn.
+        ///     Target frame rate value.
+        /// </summary>
+        [SerializeField] public int TargetFrameRate = 60;
+
+        /// <summary>
+        ///     UI for displaying <see cref="ElapsedTime" /> values.
+        /// </summary>
+        [SerializeField] public Text ReachedElapsedTimeUi;
+
+        /// <summary>
+        ///     UI to display the number of instances of the model when the target frame rate is finally reached.
+        /// </summary>
+        [SerializeField] public Text InstancesCountUi;
+
+        /// <summary>
+        ///     Interval time before the model can spawn.
         /// </summary>
         public readonly float SpawnIntervalTimeSecond = 1.0f;
 
         /// <summary>
-        /// Target frame rate value.
-        /// </summary>
-        [SerializeField]
-        public int TargetFrameRate = 60;
-
-        /// <summary>
-        /// UI for displaying <see cref="ElapsedTime"/> values.
-        /// </summary>
-        [SerializeField]
-        public Text ReachedElapsedTimeUi = null;
-
-        /// <summary>
-        /// UI to display the number of instances of the model when the target frame rate is finally reached.
-        /// </summary>
-        [SerializeField]
-        public Text InstancesCountUi = null;
-
-        /// <summary>
-        /// Save the maximum frame rate.
+        ///     Save the maximum frame rate.
         /// </summary>
         private float HighestRecordedFrameRate { get; set; }
 
         /// <summary>
-        /// Whether the model is spawnable or not.
+        ///     Whether the model is spawnable or not.
         /// </summary>
         private bool CanModelSpawn { get; set; }
 
         /// <summary>
-        /// Add delta time.
+        ///     Add delta time.
         /// </summary>
         private float SpawnTimeCount { get; set; }
 
         /// <summary>
-        /// Time elapsed since <see cref="CanModelSpawn"/> was set to false.
+        ///     Time elapsed since <see cref="CanModelSpawn" /> was set to false.
         /// </summary>
         private float ElapsedTime { get; set; }
 
         /// <summary>
-        /// <see cref="AsyncBenchmark.FpsCounter"/> Component.
+        ///     <see cref="AsyncBenchmark.FpsCounter" /> Component.
         /// </summary>
         private FpsCounter FpsCounter { get; set; }
 
         /// <summary>
-        /// <see cref="AsyncBenchmark.ModelSpawner"/> Conponent.
+        ///     <see cref="AsyncBenchmark.ModelSpawner" /> Conponent.
         /// </summary>
         private ModelSpawner ModelSpawner { get; set; }
 
         /// <summary>
-        /// Called by Unity. Setting vsync and target frame rate.
+        ///     Called by Unity. Setting vsync and target frame rate.
         /// </summary>
         private void Awake()
         {
@@ -84,7 +81,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        /// Called by Unity. Record the maximum frame rate and manage model spawning.
+        ///     Called by Unity. Record the maximum frame rate and manage model spawning.
         /// </summary>
         private void Update()
         {
@@ -93,7 +90,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        /// Records the maximum frame rate within a given time period.
+        ///     Records the maximum frame rate within a given time period.
         /// </summary>
         private void RecordFrameRate()
         {
@@ -113,7 +110,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
             }
 
             // If the model is not ready to spawn, add the elapsed time.
-            if (!CanModelSpawn && (ModelSpawner.InstancesCount != 0))
+            if (!CanModelSpawn && ModelSpawner.InstancesCount != 0)
             {
                 ElapsedTime += SpawnIntervalTimeSecond;
 
@@ -131,7 +128,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        /// Convert seconds to "hours:minutes:seconds".
+        ///     Convert seconds to "hours:minutes:seconds".
         /// </summary>
         /// <param name="second">Number of seconds it conversion source.</param>
         /// <returns>String type converted to "hours:minutes:seconds" notation.</returns>
@@ -144,14 +141,11 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        /// Managing model spawn.
+        ///     Managing model spawn.
         /// </summary>
         private void ManageSpawn()
         {
-            if (SpawnTimeCount < SpawnIntervalTimeSecond)
-            {
-                return;
-            }
+            if (SpawnTimeCount < SpawnIntervalTimeSecond) return;
 
             // When the model can spawn
             if (CanModelSpawn)

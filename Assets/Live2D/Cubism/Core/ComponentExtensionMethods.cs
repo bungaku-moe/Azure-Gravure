@@ -8,53 +8,41 @@
 
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// Extensions for <see cref="Component"/>s.
+    ///     Extensions for <see cref="Component" />s.
     /// </summary>
     public static class ComponentExtensionMethods
     {
         /// <summary>
-        /// Finds a <see cref="CubismModel"/> relative to a <see cref="Component"/>.
+        ///     Finds a <see cref="CubismModel" /> relative to a <see cref="Component" />.
         /// </summary>
         /// <param name="self">Component to base search on.</param>
         /// <param name="includeParents">Condition for including parents in search.</param>
-        /// <returns>The relative <see cref="CubismModel"/> if found; <see langword="null"/> otherwise.</returns>
+        /// <returns>The relative <see cref="CubismModel" /> if found; <see langword="null" /> otherwise.</returns>
         public static CubismModel FindCubismModel(this Component self, bool includeParents = false)
         {
             // Validate arguments.
-            if (self == null)
-            {
-                return null;
-            }
+            if (self == null) return null;
 
 
             var model = self.GetComponent<CubismModel>();
 
 
             // Return model if found.
-            if (model != null)
-            {
-                return model;
-            }
+            if (model != null) return model;
 
 
             // Recursively search in parents if requested.
             if (includeParents)
-            {
                 for (var parent = self.transform.parent; parent != null; parent = parent.parent)
                 {
                     model = parent.GetComponent<CubismModel>();
 
 
-                    if (model)
-                    {
-                        return model;
-                    }
+                    if (model) return model;
                 }
-            }
 
 
             // Signal not found.

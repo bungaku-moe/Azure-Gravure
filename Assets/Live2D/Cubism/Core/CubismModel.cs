@@ -6,12 +6,13 @@
  */
 
 
-using Live2D.Cubism.Framework;
 using System;
+using Live2D.Cubism.Framework;
 using UnityEngine;
 #if UNITY_2019_3_OR_NEWER
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+
 #elif UNITY_2018_1_OR_NEWER
 using UnityEngine.Experimental.LowLevel;
 using UnityEngine.Experimental.PlayerLoop;
@@ -21,15 +22,16 @@ using UnityEngine.Experimental.PlayerLoop;
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// Runtime Cubism model.
+    ///     Runtime Cubism model.
     /// </summary>
-    [ExecuteInEditMode, CubismDontMoveOnReimport]
+    [ExecuteInEditMode]
+    [CubismDontMoveOnReimport]
     public sealed class CubismModel : MonoBehaviour
     {
         #region Delegates
 
         /// <summary>
-        /// Handler for <see cref="CubismDynamicDrawableData"/>.
+        ///     Handler for <see cref="CubismDynamicDrawableData" />.
         /// </summary>
         /// <param name="sender">Model the dymanic data applies to.</param>
         /// <param name="data">New data.</param>
@@ -37,259 +39,135 @@ namespace Live2D.Cubism.Core
 
         #endregion
 
-        #region Events
-
         /// <summary>
-        /// Event triggered if new <see cref="CubismDynamicDrawableData"/> is available for instance.
+        ///     <see cref="Moc" /> backing field.
         /// </summary>
-        public event DynamicDrawableDataHandler OnDynamicDrawableData;
-
-        #endregion
-
-        #region Factory Methods
+        [SerializeField] [HideInInspector] private CubismMoc _moc;
 
         /// <summary>
-        /// Instantiates a <see cref="CubismMoc"/>.
+        ///     <see cref="CanvasInformation" /> backing field.
         /// </summary>
-        /// <param name="moc">Cubism moc to instantiate.</param>
-        /// <returns>Instance.</returns>
-        public static CubismModel InstantiateFrom(CubismMoc moc)
-        {
-            // Return if argument is invalid.
-            if (moc == null)
-            {
-                return null;
-            }
-
-
-            // Create model.
-            var model = new GameObject(moc.name)
-                .AddComponent<CubismModel>();
-
-
-            // Initialize it by resetting it.
-            model.Reset(moc);
-
-
-            return model;
-        }
-
-        #endregion
+        [NonSerialized] private CubismCanvasInformation _canvasInformation;
 
         /// <summary>
-        /// Resets a <see cref="CubismMoc"/> reference in <see cref="CubismModel"/>.
+        ///     <see cref="Drawables" /> backing field.
         /// </summary>
-        /// <param name="model">Target Cubism model.</param>
-        /// <param name="moc">Cubism moc to reset.</param>
-        public static void ResetMocReference(CubismModel model, CubismMoc moc)
-        {
-            model.Moc = moc;
-        }
+        [NonSerialized] private CubismDrawable[] _drawables;
+
 
         /// <summary>
-        /// <see cref="Moc"/> backing field.
+        ///     <see cref="Parameters" /> backing field.
         /// </summary>
-        [SerializeField, HideInInspector]
-        private CubismMoc _moc;
+        [NonSerialized] private CubismParameter[] _parameters;
 
         /// <summary>
-        /// Moc the instance was instantiated from.
+        ///     Parameter store cache.
+        /// </summary>
+        private CubismParameterStore _parameterStore;
+
+        /// <summary>
+        ///     <see cref="Parts" /> backing field.
+        /// </summary>
+        [NonSerialized] private CubismPart[] _parts;
+
+        /// <summary>
+        ///     Moc the instance was instantiated from.
         /// </summary>
         public CubismMoc Moc
         {
-            get { return _moc; }
-            private set { _moc = value; }
+            get => _moc;
+            private set => _moc = value;
         }
 
 
         /// <summary>
-        /// TaskableModel for unmanaged backend.
+        ///     TaskableModel for unmanaged backend.
         /// </summary>
         private CubismTaskableModel TaskableModel { get; set; }
 
-
         /// <summary>
-        /// <see cref="Parameters"/> backing field.
-        /// </summary>
-        [NonSerialized]
-        private CubismParameter[] _parameters;
-
-        /// <summary>
-        /// Drawables of model.
+        ///     Drawables of model.
         /// </summary>
         public CubismParameter[] Parameters
         {
             get
             {
-                if (_parameters == null)
-                {
-                    Revive();
-                }
+                if (_parameters == null) Revive();
 
 
                 return _parameters;
             }
-            private set { _parameters = value; }
+            private set => _parameters = value;
         }
 
         /// <summary>
-        /// <see cref="Parts"/> backing field.
-        /// </summary>
-        [NonSerialized]
-        private CubismPart[] _parts;
-
-        /// <summary>
-        /// Drawables of model.
+        ///     Drawables of model.
         /// </summary>
         public CubismPart[] Parts
         {
             get
             {
-                if (_parts == null)
-                {
-                    Revive();
-                }
+                if (_parts == null) Revive();
 
 
                 return _parts;
             }
-            private set { _parts = value; }
+            private set => _parts = value;
         }
 
         /// <summary>
-        /// <see cref="Drawables"/> backing field.
-        /// </summary>
-        [NonSerialized]
-        private CubismDrawable[] _drawables;
-
-        /// <summary>
-        /// Drawables of model.
+        ///     Drawables of model.
         /// </summary>
         public CubismDrawable[] Drawables
         {
             get
             {
-                if (_drawables == null)
-                {
-                    Revive();
-                }
+                if (_drawables == null) Revive();
 
 
                 return _drawables;
             }
-            private set { _drawables = value; }
+            private set => _drawables = value;
         }
 
         /// <summary>
-        /// <see cref="CanvasInformation"/> backing field.
-        /// </summary>
-        [NonSerialized]
-        private CubismCanvasInformation _canvasInformation;
-
-        /// <summary>
-        /// Canvas information of model.
+        ///     Canvas information of model.
         /// </summary>
         public CubismCanvasInformation CanvasInformation
         {
             get
             {
-                if (_canvasInformation == null)
-                {
-                    Revive();
-                }
+                if (_canvasInformation == null) Revive();
 
 
                 return _canvasInformation;
             }
-            private set { _canvasInformation = value; }
+            private set => _canvasInformation = value;
         }
 
         /// <summary>
-        /// Parameter store cache.
+        ///     True if instance is revived.
         /// </summary>
-        CubismParameterStore _parameterStore;
+        public bool IsRevived => TaskableModel != null;
 
         /// <summary>
-        /// True if instance is revived.
+        ///     True if instance can revive.
         /// </summary>
-        public bool IsRevived
-        {
-            get { return TaskableModel != null; }
-        }
-
-        /// <summary>
-        /// True if instance can revive.
-        /// </summary>
-        private bool CanRevive
-        {
-            get { return Moc != null; }
-        }
-
-#if UNITY_2018_1_OR_NEWER
-        /// <summary>
-        /// Model update functions for player loop.
-        /// </summary>
-        [NonSerialized]
-        private static Action _modelUpdateFunctions;
-
-        private bool WasAttachedModelUpdateFunction { get; set; }
-#endif
+        private bool CanRevive => Moc != null;
 
 
         /// <summary>
-        /// True on the frame the instance was enabled.
+        ///     True on the frame the instance was enabled.
         /// </summary>
         private bool WasJustEnabled { get; set; }
 
         /// <summary>
-        /// Frame number last update was done.
+        ///     Frame number last update was done.
         /// </summary>
         private int LastTick { get; set; }
 
-
         /// <summary>
-        /// Revives instance.
-        /// </summary>
-        private void Revive()
-        {
-            // Return if already revive.
-            if (IsRevived)
-            {
-                return;
-            }
-
-
-            // Return if revive isn't possible.
-            if (!CanRevive)
-            {
-                return;
-            }
-
-
-            // Revive unmanaged model.
-            TaskableModel = new CubismTaskableModel(Moc);
-
-            if (TaskableModel == null || TaskableModel.UnmanagedModel == null)
-            {
-                return;
-            }
-
-            // Revive proxies.
-            Parameters = GetComponentsInChildren<CubismParameter>();
-            Parts = GetComponentsInChildren<CubismPart>();
-            Drawables = GetComponentsInChildren<CubismDrawable>();
-
-            Parameters.Revive(TaskableModel.UnmanagedModel);
-            Parts.Revive(TaskableModel.UnmanagedModel);
-            Drawables.Revive(TaskableModel.UnmanagedModel);
-
-            CanvasInformation = new CubismCanvasInformation(TaskableModel.UnmanagedModel);
-
-            _parameterStore = GetComponent<CubismParameterStore>();
-        }
-
-        /// <summary>
-        /// Initializes instance for first use.
+        ///     Initializes instance for first use.
         /// </summary>
         /// <param name="moc">Moc to instantiate from.</param>
         private void Reset(CubismMoc moc)
@@ -298,10 +176,7 @@ namespace Live2D.Cubism.Core
             name = moc.name;
             TaskableModel = new CubismTaskableModel(moc);
 
-            if (TaskableModel == null || TaskableModel.UnmanagedModel == null)
-            {
-                return;
-            }
+            if (TaskableModel == null || TaskableModel.UnmanagedModel == null) return;
 
             // Create and initialize proxies.
             var parameters = CubismParameter.CreateParameters(TaskableModel.UnmanagedModel);
@@ -321,8 +196,87 @@ namespace Live2D.Cubism.Core
             CanvasInformation = new CubismCanvasInformation(TaskableModel.UnmanagedModel);
         }
 
+        #region Events
+
         /// <summary>
-        /// Forces update.
+        ///     Event triggered if new <see cref="CubismDynamicDrawableData" /> is available for instance.
+        /// </summary>
+        public event DynamicDrawableDataHandler OnDynamicDrawableData;
+
+        #endregion
+
+        #region Factory Methods
+
+        /// <summary>
+        ///     Instantiates a <see cref="CubismMoc" />.
+        /// </summary>
+        /// <param name="moc">Cubism moc to instantiate.</param>
+        /// <returns>Instance.</returns>
+        public static CubismModel InstantiateFrom(CubismMoc moc)
+        {
+            // Return if argument is invalid.
+            if (moc == null) return null;
+
+
+            // Create model.
+            var model = new GameObject(moc.name)
+                .AddComponent<CubismModel>();
+
+
+            // Initialize it by resetting it.
+            model.Reset(moc);
+
+
+            return model;
+        }
+
+        #endregion
+
+        /// <summary>
+        ///     Resets a <see cref="CubismMoc" /> reference in <see cref="CubismModel" />.
+        /// </summary>
+        /// <param name="model">Target Cubism model.</param>
+        /// <param name="moc">Cubism moc to reset.</param>
+        public static void ResetMocReference(CubismModel model, CubismMoc moc)
+        {
+            model.Moc = moc;
+        }
+
+
+        /// <summary>
+        ///     Revives instance.
+        /// </summary>
+        private void Revive()
+        {
+            // Return if already revive.
+            if (IsRevived) return;
+
+
+            // Return if revive isn't possible.
+            if (!CanRevive) return;
+
+
+            // Revive unmanaged model.
+            TaskableModel = new CubismTaskableModel(Moc);
+
+            if (TaskableModel == null || TaskableModel.UnmanagedModel == null) return;
+
+            // Revive proxies.
+            Parameters = GetComponentsInChildren<CubismParameter>();
+            Parts = GetComponentsInChildren<CubismPart>();
+            Drawables = GetComponentsInChildren<CubismDrawable>();
+
+            Parameters.Revive(TaskableModel.UnmanagedModel);
+            Parts.Revive(TaskableModel.UnmanagedModel);
+            Drawables.Revive(TaskableModel.UnmanagedModel);
+
+            CanvasInformation = new CubismCanvasInformation(TaskableModel.UnmanagedModel);
+
+            _parameterStore = GetComponent<CubismParameterStore>();
+        }
+
+        /// <summary>
+        ///     Forces update.
         /// </summary>
         public void ForceUpdateNow()
         {
@@ -339,31 +293,37 @@ namespace Live2D.Cubism.Core
 #endif
         }
 
+#if UNITY_2018_1_OR_NEWER
+        /// <summary>
+        ///     Model update functions for player loop.
+        /// </summary>
+        [NonSerialized] private static Action _modelUpdateFunctions;
+
+        private bool WasAttachedModelUpdateFunction { get; set; }
+#endif
+
 
 #if UNITY_2018_1_OR_NEWER
         /// <summary>
-        /// Calls model update functions for player loop.
+        ///     Calls model update functions for player loop.
         /// </summary>
         private static void OnModelsUpdate()
         {
-            if (_modelUpdateFunctions != null)
-            {
-                _modelUpdateFunctions.Invoke();
-            }
+            if (_modelUpdateFunctions != null) _modelUpdateFunctions.Invoke();
         }
 
 
         /// <summary>
-        /// Register the model update function into the player loop.
+        ///     Register the model update function into the player loop.
         /// </summary>
         [RuntimeInitializeOnLoadMethod]
         private static void RegisterCallbackFunction()
         {
             // Prepare the function for using player loop.
-            var myPlayerLoopSystem = new PlayerLoopSystem()
+            var myPlayerLoopSystem = new PlayerLoopSystem
             {
-                type = typeof(CubismModel),     // Identifier for Profiler Hierarchy view.
-                updateDelegate = OnModelsUpdate    // Register the function.
+                type = typeof(CubismModel), // Identifier for Profiler Hierarchy view.
+                updateDelegate = OnModelsUpdate // Register the function.
             };
 
 
@@ -378,10 +338,7 @@ namespace Live2D.Cubism.Core
             var playerLoopIndex = -1;
             for (var i = 0; i < playerLoopSystem.subSystemList.Length; i++)
             {
-                if (playerLoopSystem.subSystemList[i].type != typeof(PreLateUpdate))
-                {
-                    continue;
-                }
+                if (playerLoopSystem.subSystemList[i].type != typeof(PreLateUpdate)) continue;
 
                 playerLoopIndex = i;
                 break;
@@ -410,10 +367,10 @@ namespace Live2D.Cubism.Core
         }
 #endif
 
-#region Unity Event Handling
+        #region Unity Event Handling
 
         /// <summary>
-        /// Called by Unity. Triggers <see langword="this"/> to update.
+        ///     Called by Unity. Triggers <see langword="this" /> to update.
         /// </summary>
         private void Update()
         {
@@ -429,40 +386,25 @@ namespace Live2D.Cubism.Core
 
 
             // Return on first frame enabled.
-            if (WasJustEnabled)
-            {
-                return;
-            }
+            if (WasJustEnabled) return;
 
 
             // Return unless revived.
-            if (!IsRevived)
-            {
-                return;
-            }
+            if (!IsRevived) return;
 
 
             // Return if backend is ticking.
-            if (!TaskableModel.DidExecute)
-            {
-                return;
-            }
+            if (!TaskableModel.DidExecute) return;
 
 
             // Sync parameters back.
             TaskableModel.TryReadParameters(Parameters);
 
             // restore last frame parameters value and parts opacity.
-            if(_parameterStore != null)
-            {
-                _parameterStore.RestoreParameters();
-            }
+            if (_parameterStore != null) _parameterStore.RestoreParameters();
 
             // Trigger event.
-            if (OnDynamicDrawableData == null)
-            {
-                return;
-            }
+            if (OnDynamicDrawableData == null) return;
 
 
             OnDynamicDrawableData(this, TaskableModel.DynamicDrawableData);
@@ -470,7 +412,7 @@ namespace Live2D.Cubism.Core
 
 
         /// <summary>
-        /// Called by Unity. Blockingly updates <see langword="this"/> on first frame enabled; otherwise tries async update.
+        ///     Called by Unity. Blockingly updates <see langword="this" /> on first frame enabled; otherwise tries async update.
         /// </summary>
         private void OnRenderObject()
         {
@@ -480,22 +422,16 @@ namespace Live2D.Cubism.Core
         }
 
         /// <summary>
-        /// Update model states.
+        ///     Update model states.
         /// </summary>
         private void OnModelUpdate()
         {
             // Return unless revived.
-            if (!IsRevived)
-            {
-                return;
-            }
+            if (!IsRevived) return;
 
 
             // Return if already ticked this frame.
-            if (LastTick == Time.frameCount && Application.isPlaying)
-            {
-                return;
-            }
+            if (LastTick == Time.frameCount && Application.isPlaying) return;
 
 
             LastTick = Time.frameCount;
@@ -506,10 +442,7 @@ namespace Live2D.Cubism.Core
 
 
             // Return if task is executing.
-            if (TaskableModel.IsExecuting)
-            {
-                return;
-            }
+            if (TaskableModel.IsExecuting) return;
 
 
             // Force blocking update on first frame enabled.
@@ -536,7 +469,7 @@ namespace Live2D.Cubism.Core
         }
 
         /// <summary>
-        /// Called by Unity. Revives instance.
+        ///     Called by Unity. Revives instance.
         /// </summary>
         private void OnEnable()
         {
@@ -560,14 +493,11 @@ namespace Live2D.Cubism.Core
         }
 
         /// <summary>
-        /// Called by Unity. Releases unmanaged memory.
+        ///     Called by Unity. Releases unmanaged memory.
         /// </summary>
         private void OnDestroy()
         {
-            if (!IsRevived)
-            {
-                return;
-            }
+            if (!IsRevived) return;
 
 
             TaskableModel.ReleaseUnmanaged();
@@ -577,13 +507,13 @@ namespace Live2D.Cubism.Core
         }
 
         /// <summary>
-        /// Called by Unity. Triggers <see cref="OnEnable"/>.
+        ///     Called by Unity. Triggers <see cref="OnEnable" />.
         /// </summary>
         private void OnValidate()
         {
             OnEnable();
         }
 
-#endregion
+        #endregion
     }
 }

@@ -9,37 +9,36 @@
 using Live2D.Cubism.Core;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework.Physics
 {
     /// <summary>
-    /// Math utilities for physics.
+    ///     Math utilities for physics.
     /// </summary>
     internal static class CubismPhysicsMath
     {
         /// <summary>
-        /// Gets radian from degrees.
+        ///     Gets radian from degrees.
         /// </summary>
         /// <param name="degrees">Degrees.</param>
         /// <returns>Radian.</returns>
         public static float DegreesToRadian(float degrees)
         {
-            return (degrees / 180.0f) * Mathf.PI;
+            return degrees / 180.0f * Mathf.PI;
         }
 
         /// <summary>
-        /// Gets degrees from radian.
+        ///     Gets degrees from radian.
         /// </summary>
         /// <param name="radian">Radian.</param>
         /// <returns>Degrees.</returns>
         public static float RadianToDegrees(float radian)
         {
-            return (radian * 180.0f) / Mathf.PI;
+            return radian * 180.0f / Mathf.PI;
         }
 
 
         /// <summary>
-        /// Gets angle from both vector direction.
+        ///     Gets angle from both vector direction.
         /// </summary>
         /// <param name="from">From vector.</param>
         /// <param name="to">To vector.</param>
@@ -54,7 +53,7 @@ namespace Live2D.Cubism.Framework.Physics
 
 
         /// <summary>
-        /// Gets difference of angle.
+        ///     Gets difference of angle.
         /// </summary>
         /// <param name="q1"></param>
         /// <param name="q2"></param>
@@ -64,15 +63,9 @@ namespace Live2D.Cubism.Framework.Physics
             var ret = q1 - q2;
 
 
-            while (ret < -Mathf.PI)
-            {
-                ret += (Mathf.PI * 2.0f);
-            }
+            while (ret < -Mathf.PI) ret += Mathf.PI * 2.0f;
 
-            while (ret > Mathf.PI)
-            {
-                ret -= (Mathf.PI * 2.0f);
-            }
+            while (ret > Mathf.PI) ret -= Mathf.PI * 2.0f;
 
 
             return ret;
@@ -80,28 +73,25 @@ namespace Live2D.Cubism.Framework.Physics
 
 
         /// <summary>
-    /// Gets angle from both vector direction.
-    /// </summary>
-    /// <param name="from">From vector.</param>
-    /// <param name="to">To vector.</param>
-    /// <returns>Angle of degrees.</returns>
-    public static float DirectionToDegrees(Vector2 from, Vector2 to)
+        ///     Gets angle from both vector direction.
+        /// </summary>
+        /// <param name="from">From vector.</param>
+        /// <param name="to">To vector.</param>
+        /// <returns>Angle of degrees.</returns>
+        public static float DirectionToDegrees(Vector2 from, Vector2 to)
         {
             var radian = DirectionToRadian(from, to);
-            var degree = (float)RadianToDegrees(radian);
+            var degree = RadianToDegrees(radian);
 
 
-            if ((to.x - from.x) > 0.0f)
-            {
-                degree = -degree;
-            }
+            if (to.x - from.x > 0.0f) degree = -degree;
 
 
             return degree;
         }
 
         /// <summary>
-        /// Gets vector direction from angle.
+        ///     Gets vector direction from angle.
         /// </summary>
         /// <param name="totalAngle">Radian.</param>
         /// <returns>Direction of vector.</returns>
@@ -111,7 +101,7 @@ namespace Live2D.Cubism.Framework.Physics
 
 
             ret.x = Mathf.Sin(totalAngle);
-            ret.y = (float)Mathf.Cos(totalAngle);
+            ret.y = Mathf.Cos(totalAngle);
 
 
             return ret;
@@ -119,7 +109,7 @@ namespace Live2D.Cubism.Framework.Physics
 
 
         /// <summary>
-        /// Gets range of value.
+        ///     Gets range of value.
         /// </summary>
         /// <param name="min">Minimum value.</param>
         /// <param name="max">Maximum value.</param>
@@ -132,7 +122,7 @@ namespace Live2D.Cubism.Framework.Physics
         }
 
         /// <summary>
-        /// Gets middle value.
+        ///     Gets middle value.
         /// </summary>
         /// <param name="min">Minimum value.</param>
         /// <param name="max">Maximum value.</param>
@@ -140,11 +130,11 @@ namespace Live2D.Cubism.Framework.Physics
         private static float GetDefaultValue(float min, float max)
         {
             var minValue = Mathf.Min(min, max);
-            return minValue + (GetRangeValue(min, max) / 2.0f);
+            return minValue + GetRangeValue(min, max) / 2.0f;
         }
 
         /// <summary>
-        /// Normalize parameter value.
+        ///     Normalize parameter value.
         /// </summary>
         /// <param name="parameter">Target parameter.</param>
         /// <param name="parameterValue">Target parameter Value.</param>
@@ -164,16 +154,10 @@ namespace Live2D.Cubism.Framework.Physics
 
             var maxValue = Mathf.Max(parameter.MaximumValue, parameter.MinimumValue);
 
-            if (maxValue < parameterValue)
-            {
-                parameterValue = maxValue;
-            }
+            if (maxValue < parameterValue) parameterValue = maxValue;
 
             var minValue = Mathf.Min(parameter.MaximumValue, parameter.MinimumValue);
-            if (minValue > parameterValue)
-            {
-                parameterValue = minValue;
-            }
+            if (minValue > parameterValue) parameterValue = minValue;
 
             var minNormValue = Mathf.Min(normalizedMinimum, normalizedMaximum);
             var maxNormValue = Mathf.Max(normalizedMinimum, normalizedMaximum);
@@ -185,43 +169,41 @@ namespace Live2D.Cubism.Framework.Physics
             switch ((int)Mathf.Sign(paramValue))
             {
                 case 1:
+                {
+                    var nLength = maxNormValue - middleNormValue;
+                    var pLength = maxValue - middleValue;
+                    if (pLength != 0.0f)
                     {
-                        var nLength = maxNormValue - middleNormValue;
-                        var pLength = maxValue - middleValue;
-                        if (pLength != 0.0f)
-                        {
-                            result = paramValue * (nLength / pLength);
-                            result += middleNormValue;
-                        }
-
-
-                        break;
+                        result = paramValue * (nLength / pLength);
+                        result += middleNormValue;
                     }
+
+
+                    break;
+                }
                 case -1:
+                {
+                    var nLength = minNormValue - middleNormValue;
+                    var pLength = minValue - middleValue;
+                    if (pLength != 0.0f)
                     {
-                        var nLength = minNormValue - middleNormValue;
-                        var pLength = minValue - middleValue;
-                        if (pLength != 0.0f)
-                        {
-                            result = paramValue * (nLength / pLength);
-                            result += middleNormValue;
-                        }
-
-
-                        break;
+                        result = paramValue * (nLength / pLength);
+                        result += middleNormValue;
                     }
+
+
+                    break;
+                }
                 case 0:
-                    {
-                        result = middleNormValue;
+                {
+                    result = middleNormValue;
 
 
-                        break;
-                    }
+                    break;
+                }
             }
 
-            return (isInverted) ? result : (result * -1.0f);
+            return isInverted ? result : result * -1.0f;
         }
     }
 }
-
-

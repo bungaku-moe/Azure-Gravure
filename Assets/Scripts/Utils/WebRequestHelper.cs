@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -9,12 +8,12 @@ using UnityEngine.Networking;
 namespace Kiraio.Azure.Utils
 {
     /// <summary>
-    /// Some handy utility to perform Unity Web Request.
+    ///     Some handy utility to perform Unity Web Request.
     /// </summary>
     public static class WebRequestHelper
     {
         /// <summary>
-        /// Request a file and retrieve the data as text.
+        ///     Request a file and retrieve the data as text.
         /// </summary>
         /// <param name="url"></param>
         /// <returns>Text data.</returns>
@@ -22,19 +21,16 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
-                using UnityWebRequest uwr = UnityWebRequest.Get(url);
-                UnityWebRequestAsyncOperation asyncOperation = uwr.SendWebRequest();
+                using var uwr = UnityWebRequest.Get(url);
+                var asyncOperation = uwr.SendWebRequest();
                 // Wait for the request to complete (blocking the thread)
                 while (!asyncOperation.isDone)
                     Thread.Sleep(1);
 
                 if (uwr.result == UnityWebRequest.Result.Success)
                     return uwr.downloadHandler.text;
-                else
-                {
-                    Debug.LogError(uwr.error);
-                    return null;
-                }
+                Debug.LogError(uwr.error);
+                return null;
             }
             catch (Exception ex)
             {
@@ -44,7 +40,7 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Request a file and retrieve the data as text asynchronously.
+        ///     Request a file and retrieve the data as text asynchronously.
         /// </summary>
         /// <param name="url"></param>
         /// <returns>Text data.</returns>
@@ -52,7 +48,7 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
-                using UnityWebRequest uwr = UnityWebRequest.Get(url);
+                using var uwr = UnityWebRequest.Get(url);
                 UniTaskCompletionSource<string> tcs = new();
 
                 uwr.SendWebRequest().completed += _ =>
@@ -73,7 +69,7 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Request a file and retrieve the data as bytes.
+        ///     Request a file and retrieve the data as bytes.
         /// </summary>
         /// <param name="url"></param>
         /// <returns>Array of byte.</returns>
@@ -81,19 +77,16 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
-                using UnityWebRequest uwr = UnityWebRequest.Get(url);
-                UnityWebRequestAsyncOperation asyncOperation = uwr.SendWebRequest();
+                using var uwr = UnityWebRequest.Get(url);
+                var asyncOperation = uwr.SendWebRequest();
                 // Wait for the request to complete (blocking the thread)
                 while (!asyncOperation.isDone)
                     Thread.Sleep(1);
 
                 if (uwr.result == UnityWebRequest.Result.Success)
                     return uwr.downloadHandler.data;
-                else
-                {
-                    Debug.LogError(uwr.error);
-                    return null;
-                }
+                Debug.LogError(uwr.error);
+                return null;
             }
             catch (Exception ex)
             {
@@ -103,7 +96,7 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Request a file and retrieve the data as bytes asynchronously.
+        ///     Request a file and retrieve the data as bytes asynchronously.
         /// </summary>
         /// <param name="url"></param>
         /// <returns>Array of byte.</returns>
@@ -111,7 +104,7 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
-                using UnityWebRequest uwr = UnityWebRequest.Get(url);
+                using var uwr = UnityWebRequest.Get(url);
                 UniTaskCompletionSource<byte[]> tcs = new();
 
                 uwr.SendWebRequest().completed += _ =>
@@ -132,7 +125,7 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Request an audio clip.
+        ///     Request an audio clip.
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
@@ -140,7 +133,7 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
-                using UnityWebRequest uwr = UnityWebRequestMultimedia.GetAudioClip(
+                using var uwr = UnityWebRequestMultimedia.GetAudioClip(
                     url,
                     GetAudioType(url)
                 );
@@ -164,23 +157,23 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        /// Automatically assign AudioType for .mp3, .ogg, and .wav files.
+        ///     Automatically assign AudioType for .mp3, .ogg, and .wav files.
         /// </summary>
         /// <param name="url"></param>
         /// <returns>AudioType</returns>
-        static AudioType GetAudioType(string url)
+        private static AudioType GetAudioType(string url)
         {
             return Path.GetExtension(url) switch
             {
                 ".mp3" => AudioType.MPEG,
                 ".ogg" => AudioType.OGGVORBIS,
                 ".wav" => AudioType.WAV,
-                _ => AudioType.UNKNOWN,
+                _ => AudioType.UNKNOWN
             };
         }
 
         /// <summary>
-        /// Check if string is an HTTP protocol.
+        ///     Check if string is an HTTP protocol.
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
@@ -190,11 +183,11 @@ namespace Kiraio.Azure.Utils
                 return false;
 
             return url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-                || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+                   || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
-        /// Save asset from the internet locally.
+        ///     Save asset from the internet locally.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="savePath"></param>
@@ -204,7 +197,7 @@ namespace Kiraio.Azure.Utils
             if (File.Exists(savePath))
                 return savePath;
 
-            byte[] data = await GetBinaryDataAsync(uri);
+            var data = await GetBinaryDataAsync(uri);
             await using FileStream fs =
                 new(savePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await fs.WriteAsync(data);

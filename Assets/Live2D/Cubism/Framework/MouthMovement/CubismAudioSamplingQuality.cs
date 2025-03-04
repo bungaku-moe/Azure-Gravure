@@ -9,22 +9,22 @@
 namespace Live2D.Cubism.Framework.MouthMovement
 {
     /// <summary>
-    /// Audio sampling quality.
+    ///     Audio sampling quality.
     /// </summary>
     public enum CubismAudioSamplingQuality
     {
         /// <summary>
-        /// High quality.
+        ///     High quality.
         /// </summary>
         High,
 
         /// <summary>
-        /// Very high quality.
+        ///     Very high quality.
         /// </summary>
         VeryHigh,
 
         /// <summary>
-        /// Insane quality.
+        ///     Insane quality.
         /// </summary>
         Maximum
     }

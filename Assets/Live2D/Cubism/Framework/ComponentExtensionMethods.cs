@@ -9,26 +9,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    /// Extensions for <see cref="Component"/>s.
+    ///     Extensions for <see cref="Component" />s.
     /// </summary>
     public static class ComponentExtensionMethods
     {
         /// <summary>
-        /// Gets components for each item of a sequence and flattens the resulting sequences into one sequence.
+        ///     Gets components for each item of a sequence and flattens the resulting sequences into one sequence.
         /// </summary>
         /// <typeparam name="T">Component type to find.</typeparam>
         /// <param name="self">Array to query.</param>
         /// <returns>Matches.</returns>
         public static T[] GetComponentsMany<T>(this Component[] self) where T : Component
         {
-            if (self == null)
-            {
-                return null;
-            }
+            if (self == null) return null;
 
             var components = new List<T>();
 
@@ -39,10 +35,7 @@ namespace Live2D.Cubism.Framework
 
 
                 // Skip empty ranges.
-                if (range == null || range.Length == 0)
-                {
-                    continue;
-                }
+                if (range == null || range.Length == 0) continue;
 
 
                 components.AddRange(range);
@@ -54,25 +47,19 @@ namespace Live2D.Cubism.Framework
 
 
         /// <summary>
-        /// Adds a component to multiple objects.
+        ///     Adds a component to multiple objects.
         /// </summary>
         /// <typeparam name="T">Component type to add.</typeparam>
         /// <param name="self">Array of objects.</param>
         /// <returns>Added components.</returns>
         public static T[] AddComponentEach<T>(this Component[] self) where T : Component
         {
-            if (self == null)
-            {
-                return null;
-            }
+            if (self == null) return null;
 
             var components = new T[self.Length];
 
 
-            for (var i = 0; i < self.Length; ++i)
-            {
-                components[i] = self[i].gameObject.AddComponent<T>();
-            }
+            for (var i = 0; i < self.Length; ++i) components[i] = self[i].gameObject.AddComponent<T>();
 
 
             return components;

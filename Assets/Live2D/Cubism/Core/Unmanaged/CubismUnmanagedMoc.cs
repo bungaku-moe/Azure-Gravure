@@ -10,89 +10,17 @@
 
 using System;
 
-
 namespace Live2D.Cubism.Core.Unmanaged
 {
     /// <summary>
-    /// Unmanaged moc.
+    ///     Unmanaged moc.
     /// </summary>
     public sealed class CubismUnmanagedMoc
     {
-        #region Factory Methods
-
-        /// <summary>
-        /// Creates <see cref="CubismUnmanagedMoc"/> from bytes.
-        /// </summary>
-        /// <param name="bytes">Moc bytes.</param>
-        /// <returns>Instance on success; <see langword="null"/> otherwise.</returns>
-        public static CubismUnmanagedMoc FromBytes(byte[] bytes)
-        {
-            if (bytes == null)
-            {
-                return null;
-            }
-
-
-            var moc = new CubismUnmanagedMoc(bytes);
-
-
-            return (moc.Ptr != IntPtr.Zero)
-                ? moc
-                : null;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Native moc pointer.
-        /// </summary>
-        public IntPtr Ptr { get; private set; }
-
-        /// <summary>
-        /// .moc3 version.
-        /// </summary>
-        public uint MocVersion { get; private set; }
-
-        /// <summary>
-        /// Checks consistency of a moc.
-        /// </summary>
-        public static bool HasMocConsistency(byte[] bytes)
-        {
-            // Allocate and initialize memory (returning on fail).
-            var memory = CubismUnmanagedMemory.Allocate(bytes.Length, CubismCoreDll.AlignofMoc);
-
-            CubismUnmanagedMemory.Write(bytes, memory);
-
-            // '1' if Moc is valid; '0' otherwise.
-            var mocConsistencyNum = CubismCoreDll.HasMocConsistency(memory, (uint)bytes.Length);
-            var hasMocConsistency = (mocConsistencyNum == 1);
-
-            CubismUnmanagedMemory.Deallocate(memory);
-
-            return hasMocConsistency;
-        }
-
-        /// <summary>
-        /// Releases instance.
-        /// </summary>
-        public void Release()
-        {
-            if (Ptr == IntPtr.Zero)
-            {
-                return;
-            }
-
-
-            CubismUnmanagedMemory.Deallocate(Ptr);
-
-
-            Ptr = IntPtr.Zero;
-        }
-
         #region Ctors
 
         /// <summary>
-        /// Initializes instance.
+        ///     Initializes instance.
         /// </summary>
         /// <param name="bytes">Moc bytes.</param>
         private CubismUnmanagedMoc(byte[] bytes)
@@ -101,10 +29,7 @@ namespace Live2D.Cubism.Core.Unmanaged
             var memory = CubismUnmanagedMemory.Allocate(bytes.Length, CubismCoreDll.AlignofMoc);
 
 
-            if (memory == IntPtr.Zero)
-            {
-                return;
-            }
+            if (memory == IntPtr.Zero) return;
 
 
             CubismUnmanagedMemory.Write(bytes, memory);
@@ -125,5 +50,70 @@ namespace Live2D.Cubism.Core.Unmanaged
         }
 
         #endregion
+
+        /// <summary>
+        ///     Native moc pointer.
+        /// </summary>
+        public IntPtr Ptr { get; private set; }
+
+        /// <summary>
+        ///     .moc3 version.
+        /// </summary>
+        public uint MocVersion { get; private set; }
+
+        #region Factory Methods
+
+        /// <summary>
+        ///     Creates <see cref="CubismUnmanagedMoc" /> from bytes.
+        /// </summary>
+        /// <param name="bytes">Moc bytes.</param>
+        /// <returns>Instance on success; <see langword="null" /> otherwise.</returns>
+        public static CubismUnmanagedMoc FromBytes(byte[] bytes)
+        {
+            if (bytes == null) return null;
+
+
+            var moc = new CubismUnmanagedMoc(bytes);
+
+
+            return moc.Ptr != IntPtr.Zero
+                ? moc
+                : null;
+        }
+
+        #endregion
+
+        /// <summary>
+        ///     Checks consistency of a moc.
+        /// </summary>
+        public static bool HasMocConsistency(byte[] bytes)
+        {
+            // Allocate and initialize memory (returning on fail).
+            var memory = CubismUnmanagedMemory.Allocate(bytes.Length, CubismCoreDll.AlignofMoc);
+
+            CubismUnmanagedMemory.Write(bytes, memory);
+
+            // '1' if Moc is valid; '0' otherwise.
+            var mocConsistencyNum = CubismCoreDll.HasMocConsistency(memory, (uint)bytes.Length);
+            var hasMocConsistency = mocConsistencyNum == 1;
+
+            CubismUnmanagedMemory.Deallocate(memory);
+
+            return hasMocConsistency;
+        }
+
+        /// <summary>
+        ///     Releases instance.
+        /// </summary>
+        public void Release()
+        {
+            if (Ptr == IntPtr.Zero) return;
+
+
+            CubismUnmanagedMemory.Deallocate(Ptr);
+
+
+            Ptr = IntPtr.Zero;
+        }
     }
 }

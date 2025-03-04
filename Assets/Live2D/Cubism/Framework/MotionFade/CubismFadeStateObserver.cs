@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 
-
 namespace Live2D.Cubism.Framework.MotionFade
 {
     public class CubismFadeStateObserver : StateMachineBehaviour, ICubismFadeState
@@ -17,32 +16,32 @@ namespace Live2D.Cubism.Framework.MotionFade
         #region variable
 
         /// <summary>
-        /// Cubism fade motion list.
+        ///     Cubism fade motion list.
         /// </summary>
         private CubismFadeMotionList _cubismFadeMotionList;
 
         /// <summary>
-        /// Cubism playing motion list.
+        ///     Cubism playing motion list.
         /// </summary>
         private List<CubismFadePlayingMotion> _playingMotions;
 
         /// <summary>
-        /// State that attached this is default.
+        ///     State that attached this is default.
         /// </summary>
         private bool _isDefaulState;
 
         /// <summary>
-        /// Layer index that attached this.
+        ///     Layer index that attached this.
         /// </summary>
         private int _layerIndex;
 
         /// <summary>
-        /// Weight of layer that attached this.
+        ///     Weight of layer that attached this.
         /// </summary>
         private float _layerWeight;
 
         /// <summary>
-        /// State that attached this is transition finished.
+        ///     State that attached this is transition finished.
         /// </summary>
         private bool _isStateTransitionFinished;
 
@@ -52,7 +51,7 @@ namespace Live2D.Cubism.Framework.MotionFade
         #region Fade State Interface
 
         /// <summary>
-        /// Get cubism playing motion list.
+        ///     Get cubism playing motion list.
         /// </summary>
         /// <returns>Cubism playing motion list.</returns>
         public List<CubismFadePlayingMotion> GetPlayingMotions()
@@ -61,16 +60,16 @@ namespace Live2D.Cubism.Framework.MotionFade
         }
 
         /// <summary>
-        /// Is default state.
+        ///     Is default state.
         /// </summary>
-        /// <returns><see langword="true"/> State is default; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> State is default; <see langword="false" /> otherwise.</returns>
         public bool IsDefaultState()
         {
             return _isDefaulState;
         }
 
         /// <summary>
-        /// Get layer weight.
+        ///     Get layer weight.
         /// </summary>
         /// <returns>Layer weight.</returns>
         public float GetLayerWeight()
@@ -79,16 +78,16 @@ namespace Live2D.Cubism.Framework.MotionFade
         }
 
         /// <summary>
-        /// Get state transition finished.
+        ///     Get state transition finished.
         /// </summary>
-        /// <returns><see langword="true"/> State transition is finished; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> State transition is finished; <see langword="false" /> otherwise.</returns>
         public bool GetStateTransitionFinished()
         {
             return _isStateTransitionFinished;
         }
 
         /// <summary>
-        /// Set state transition finished.
+        ///     Set state transition finished.
         /// </summary>
         /// <param name="isFinished">State is finished.</param>
         public void SetStateTransitionFinished(bool isFinished)
@@ -97,7 +96,7 @@ namespace Live2D.Cubism.Framework.MotionFade
         }
 
         /// <summary>
-        /// Stop animation.
+        ///     Stop animation.
         /// </summary>
         /// <param name="index">Playing motion index.</param>
         public void StopAnimation(int index)
@@ -111,55 +110,48 @@ namespace Live2D.Cubism.Framework.MotionFade
         #region Unity Event Handling
 
         /// <summary>
-        /// Called by Unity.
+        ///     Called by Unity.
         /// </summary>
         private void OnEnable()
         {
             _isStateTransitionFinished = false;
 
-            if (_playingMotions == null)
-            {
-                _playingMotions = new List<CubismFadePlayingMotion>();
-            }
+            if (_playingMotions == null) _playingMotions = new List<CubismFadePlayingMotion>();
         }
 
         /// <summary>
-        /// Called by Unity.
+        ///     Called by Unity.
         /// </summary>
         /// <param name="animator">Animator.</param>
         /// <param name="stateInfo">Animator state info.</param>
         /// <param name="layerIndex">Index of the layer.</param>
         /// <param name="controller">Animation controller playable.</param>
-        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex, AnimatorControllerPlayable controller)
+        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex,
+            AnimatorControllerPlayable controller)
         {
             var fadeController = animator.gameObject.GetComponent<CubismFadeController>();
 
             // Fail silently...
-            if (fadeController == null)
-            {
-                return;
-            }
+            if (fadeController == null) return;
 
             _cubismFadeMotionList = fadeController.CubismFadeMotionList;
             _isStateTransitionFinished = false;
 
             _layerIndex = layerIndex;
-            _layerWeight = (_layerIndex == 0)
+            _layerWeight = _layerIndex == 0
                 ? 1.0f
                 : animator.GetLayerWeight(_layerIndex);
 
             var animatorClipInfo = controller.GetNextAnimatorClipInfo(layerIndex);
 
-            _isDefaulState = (animatorClipInfo.Length == 0);
+            _isDefaulState = animatorClipInfo.Length == 0;
 
             if (_isDefaulState)
-            {
                 // Get the motion of Default State only for the first time.
                 animatorClipInfo = controller.GetCurrentAnimatorClipInfo(layerIndex);
-            }
 
             // Set playing motions end time.
-            if ((_playingMotions.Count > 0) && (_playingMotions[_playingMotions.Count - 1].Motion != null))
+            if (_playingMotions.Count > 0 && _playingMotions[_playingMotions.Count - 1].Motion != null)
             {
                 var motion = _playingMotions[_playingMotions.Count - 1];
 
@@ -172,10 +164,7 @@ namespace Live2D.Cubism.Framework.MotionFade
 
                 while (motion.IsLooping)
                 {
-                    if ((motion.StartTime + motion.Motion.MotionLength) >= time)
-                    {
-                        break;
-                    }
+                    if (motion.StartTime + motion.Motion.MotionLength >= time) break;
 
                     motion.StartTime += motion.Motion.MotionLength;
                 }
@@ -191,12 +180,9 @@ namespace Live2D.Cubism.Framework.MotionFade
 
                 var instanceId = -1;
                 var events = animatorClipInfo[i].clip.events;
-                for(var k = 0; k < events.Length; ++k)
+                for (var k = 0; k < events.Length; ++k)
                 {
-                    if(events[k].functionName != "InstanceId")
-                    {
-                        continue;
-                    }
+                    if (events[k].functionName != "InstanceId") continue;
 
                     instanceId = events[k].intParameter;
                     break;
@@ -205,25 +191,22 @@ namespace Live2D.Cubism.Framework.MotionFade
                 var motionIndex = -1;
                 for (var j = 0; j < _cubismFadeMotionList.MotionInstanceIds.Length; ++j)
                 {
-                    if (_cubismFadeMotionList.MotionInstanceIds[j] != instanceId)
-                    {
-                        continue;
-                    }
+                    if (_cubismFadeMotionList.MotionInstanceIds[j] != instanceId) continue;
 
                     motionIndex = j;
                     break;
                 }
 
-                playingMotion.Motion = (motionIndex == -1)
+                playingMotion.Motion = motionIndex == -1
                     ? null
                     : _cubismFadeMotionList.CubismFadeMotionObjects[motionIndex];
 
                 playingMotion.Speed = 1.0f;
                 playingMotion.StartTime = Time.time;
                 playingMotion.FadeInStartTime = Time.time;
-                playingMotion.EndTime = (playingMotion.Motion.MotionLength <= 0)
-                                        ? -1
-                                        : playingMotion.StartTime + playingMotion.Motion.MotionLength;
+                playingMotion.EndTime = playingMotion.Motion.MotionLength <= 0
+                    ? -1
+                    : playingMotion.StartTime + playingMotion.Motion.MotionLength;
                 playingMotion.IsLooping = animatorClipInfo[i].clip.isLooping;
                 playingMotion.Weight = 0.0f;
 
@@ -232,7 +215,7 @@ namespace Live2D.Cubism.Framework.MotionFade
         }
 
         /// <summary>
-        /// Called by Unity.
+        ///     Called by Unity.
         /// </summary>
         /// <param name="animator">Animator.</param>
         /// <param name="stateInfo">Animator state info.</param>

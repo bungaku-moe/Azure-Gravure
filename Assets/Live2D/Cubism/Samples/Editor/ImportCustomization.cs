@@ -6,18 +6,16 @@
  */
 
 
-using Live2D.Cubism.Core;
-using Live2D.Cubism.Rendering;
-using Live2D.Cubism.Editor.Importers;
 using System.Linq;
+using Live2D.Cubism.Core;
+using Live2D.Cubism.Editor.Importers;
+using Live2D.Cubism.Rendering;
 using UnityEngine;
-using UnityEditor;
-
 
 namespace Live2D.Cubism.Samples.Editor
 {
     /// <summary>
-    /// Shows how Cubism model importing can be customized.
+    ///     Shows how Cubism model importing can be customized.
     /// </summary>
     internal static class ImportCustomization
     {
@@ -41,7 +39,7 @@ namespace Live2D.Cubism.Samples.Editor
         #region Cubism Import Event Handling
 
         /// <summary>
-        /// Customizes model importing.
+        ///     Customizes model importing.
         /// </summary>
         /// <param name="sender">Event source.</param>
         /// <param name="model">Imported model.</param>
@@ -49,9 +47,7 @@ namespace Live2D.Cubism.Samples.Editor
         {
             // Lets pretend we want to change the vertex colors of all drawables to green...
             foreach (var renderer in model.Drawables.Select(d => d.GetComponent<CubismRenderer>()))
-            {
-              renderer.Color = Color.green;
-            }
+                renderer.Color = Color.green;
         }
 
         #endregion

@@ -9,7 +9,7 @@
 namespace Live2D.Cubism.Framework.Motion
 {
     /// <summary>
-    /// The constants of Motion priorities.
+    ///     The constants of Motion priorities.
     /// </summary>
     public class CubismMotionPriority
     {

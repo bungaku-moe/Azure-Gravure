@@ -6,142 +6,224 @@
  */
 
 
+using System;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework;
-using System;
 using UnityEngine;
-
 using Object = UnityEngine.Object;
 
 
 namespace Live2D.Cubism.Rendering
 {
     /// <summary>
-    /// Controls rendering of a <see cref="CubismModel"/>.
+    ///     Controls rendering of a <see cref="CubismModel" />.
     /// </summary>
-    [ExecuteInEditMode, CubismDontMoveOnReimport]
+    [ExecuteInEditMode]
+    [CubismDontMoveOnReimport]
     public sealed class CubismRenderController : MonoBehaviour, ICubismUpdatable
     {
         /// <summary>
-        /// Model opacity.
+        ///     Model opacity.
         /// </summary>
         /// <remarks>
-        /// This is turned into a field to be available to <see cref="AnimationClip"/>s...
+        ///     This is turned into a field to be available to <see cref="AnimationClip" />s...
         /// </remarks>
-        [SerializeField, HideInInspector]
-        public float Opacity = 1f;
+        [SerializeField] [HideInInspector] public float Opacity = 1f;
 
         /// <summary>
-        /// <see cref="LastOpacity"/> backing field.
+        ///     <see cref="LastOpacity" /> backing field.
         /// </summary>
-        [SerializeField, HideInInspector]
-        private float _lastOpacity;
+        [SerializeField] [HideInInspector] private float _lastOpacity;
 
         /// <summary>
-        /// Last model opacity.
+        ///     <see cref="OverwriteFlagForModelMultiplyColors" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private bool _isOverwrittenModelMultiplyColors;
+
+        /// <summary>
+        ///     <see cref="OverwriteFlagForModelScreenColors" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private bool _isOverwrittenModelScreenColors;
+
+        /// <summary>
+        ///     <see cref="ModelMultiplyColor" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private Color _modelMultiplyColor;
+
+        /// <summary>
+        ///     <see cref="ModelScreenColor" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private Color _modelScreenColor;
+
+        /// <summary>
+        ///     <see cref="SortingLayerId" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private int _sortingLayerId;
+
+
+        /// <summary>
+        ///     <see cref="SortingMode" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private CubismSortingMode _sortingMode;
+
+
+        /// <summary>
+        ///     Order in sorting layer.
+        /// </summary>
+        [SerializeField] [HideInInspector] private int _sortingOrder;
+
+
+        /// <summary>
+        ///     [Optional] Camera to face.
+        /// </summary>
+        [SerializeField] public Camera CameraToFace;
+
+
+        /// <summary>
+        ///     <see cref="DrawOrderHandler" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private Object _drawOrderHandler;
+
+
+        /// <summary>
+        ///     <see cref="OpacityHandler" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private Object _opacityHandler;
+
+
+        /// <summary>
+        ///     <see cref="MultiplyColorHandler" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private Object _multiplyColorHandler;
+
+        /// <summary>
+        ///     <see cref="ScreenColorHandler" /> backing field.
+        /// </summary>
+        [SerializeField] [HideInInspector] private Object _screenColorHandler;
+
+        /// <summary>
+        ///     The value to offset the <see cref="CubismDrawable" />s by.
+        /// </summary>
+        /// <remarks>
+        ///     You only need to adjust this value when using perspective cameras.
+        /// </remarks>
+        [SerializeField] [HideInInspector] public float _depthOffset = 0.00001f;
+
+
+        /// <summary>
+        ///     <see cref="DrawablesRootTransform" /> backing field.
+        /// </summary>
+        private Transform _drawablesRootTransform;
+
+
+        /// <summary>
+        ///     <see cref="DrawOrderHandlerInterface" /> backing field.
+        /// </summary>
+        [NonSerialized] private ICubismDrawOrderHandler _drawOrderHandlerInterface;
+
+        /// <summary>
+        ///     <see cref="IsInitialized" />s backing field.
+        /// </summary>
+        private bool _isInitialized;
+
+
+        /// <summary>
+        ///     <see cref="MultiplyColorHandler" /> backing field.
+        /// </summary>
+        private ICubismBlendColorHandler _multiplyColorHandlerInterface;
+
+
+        /// <summary>
+        ///     multiply color buffer.
+        /// </summary>
+        private Color[] _newMultiplyColors;
+
+        /// <summary>
+        ///     screen color buffer.
+        /// </summary>
+        private Color[] _newScreenColors;
+
+
+        /// <summary>
+        ///     <see cref="OpacityHandler" /> backing field.
+        /// </summary>
+        private ICubismOpacityHandler _opacityHandlerInterface;
+
+
+        /// <summary>
+        ///     <see cref="Renderers" />s backing field.
+        /// </summary>
+        [NonSerialized] private CubismRenderer[] _renderers;
+
+
+        /// <summary>
+        ///     <see cref="MultiplyColorHandler" /> backing field.
+        /// </summary>
+        private ICubismBlendColorHandler _screenColorHandlerInterface;
+
+        /// <summary>
+        ///     Last model opacity.
         /// </summary>
         private float LastOpacity
         {
-            get { return _lastOpacity; }
-            set { _lastOpacity = value; }
+            get => _lastOpacity;
+            set => _lastOpacity = value;
         }
 
         /// <summary>
-        /// <see cref="OverwriteFlagForModelMultiplyColors"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private bool _isOverwrittenModelMultiplyColors;
-
-        /// <summary>
-        /// Whether to overwrite with multiply color from the model.
+        ///     Whether to overwrite with multiply color from the model.
         /// </summary>
         public bool OverwriteFlagForModelMultiplyColors
         {
-            get { return _isOverwrittenModelMultiplyColors; }
-            set { _isOverwrittenModelMultiplyColors = value; }
+            get => _isOverwrittenModelMultiplyColors;
+            set => _isOverwrittenModelMultiplyColors = value;
         }
 
         /// <summary>
-        /// <see cref="OverwriteFlagForModelScreenColors"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private bool _isOverwrittenModelScreenColors;
-
-        /// <summary>
-        /// Whether to overwrite with screen color from the model.
+        ///     Whether to overwrite with screen color from the model.
         /// </summary>
         public bool OverwriteFlagForModelScreenColors
         {
-            get { return _isOverwrittenModelScreenColors; }
-            set { _isOverwrittenModelScreenColors = value; }
+            get => _isOverwrittenModelScreenColors;
+            set => _isOverwrittenModelScreenColors = value;
         }
 
         /// <summary>
-        /// <see cref="ModelMultiplyColor"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private Color _modelMultiplyColor;
-
-        /// <summary>
-        /// Multiply colors used throughout the model.
+        ///     Multiply colors used throughout the model.
         /// </summary>
         public Color ModelMultiplyColor
         {
-            get { return _modelMultiplyColor; }
-            set { _modelMultiplyColor = value; }
+            get => _modelMultiplyColor;
+            set => _modelMultiplyColor = value;
         }
 
         /// <summary>
-        /// <see cref="ModelScreenColor"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private Color _modelScreenColor;
-
-        /// <summary>
-        /// Screen colors used throughout the model.
+        ///     Screen colors used throughout the model.
         /// </summary>
         public Color ModelScreenColor
         {
-            get { return _modelScreenColor; }
-            set { _modelScreenColor = value; }
+            get => _modelScreenColor;
+            set => _modelScreenColor = value;
         }
 
         /// <summary>
-        /// Sorting layer name.
+        ///     Sorting layer name.
         /// </summary>
         public string SortingLayer
         {
-            get
-            {
-                return UnityEngine.SortingLayer.IDToName(SortingLayerId);
-            }
-            set
-            {
-                SortingLayerId = UnityEngine.SortingLayer.NameToID(value);
-            }
+            get => UnityEngine.SortingLayer.IDToName(SortingLayerId);
+            set => SortingLayerId = UnityEngine.SortingLayer.NameToID(value);
         }
 
         /// <summary>
-        /// <see cref="SortingLayerId"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private int _sortingLayerId;
-
-        /// <summary>
-        /// Sorting layer Id.
+        ///     Sorting layer Id.
         /// </summary>
         public int SortingLayerId
         {
-            get
-            {
-                return _sortingLayerId;
-            }
+            get => _sortingLayerId;
             set
             {
-                if (value == _sortingLayerId)
-                {
-                    return;
-                }
+                if (value == _sortingLayerId) return;
 
 
                 _sortingLayerId = value;
@@ -152,35 +234,20 @@ namespace Live2D.Cubism.Rendering
 
 
                 for (var i = 0; i < renderers.Length; ++i)
-                {
                     renderers[i].OnControllerSortingLayerDidChange(_sortingLayerId);
-                }
             }
         }
 
-
         /// <summary>
-        /// <see cref="SortingMode"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private CubismSortingMode _sortingMode;
-
-        /// <summary>
-        /// <see cref="CubismDrawable"/> sorting.
+        ///     <see cref="CubismDrawable" /> sorting.
         /// </summary>
         public CubismSortingMode SortingMode
         {
-            get
-            {
-                return _sortingMode;
-            }
+            get => _sortingMode;
             set
             {
                 // Return early if same value given.
-                if (value == _sortingMode)
-                {
-                    return;
-                }
+                if (value == _sortingMode) return;
 
 
                 _sortingMode = value;
@@ -190,36 +257,20 @@ namespace Live2D.Cubism.Rendering
                 var renderers = Renderers;
 
 
-                for (var i = 0; i < renderers.Length; ++i)
-                {
-                    renderers[i].OnControllerSortingModeDidChange(_sortingMode);
-                }
+                for (var i = 0; i < renderers.Length; ++i) renderers[i].OnControllerSortingModeDidChange(_sortingMode);
             }
         }
 
-
         /// <summary>
-        /// Order in sorting layer.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private int _sortingOrder;
-
-        /// <summary>
-        /// Order in sorting layer.
+        ///     Order in sorting layer.
         /// </summary>
         public int SortingOrder
         {
-            get
-            {
-                return _sortingOrder;
-            }
+            get => _sortingOrder;
             set
             {
                 // Return early in case same value given.
-                if (value == _sortingOrder)
-                {
-                    return;
-                }
+                if (value == _sortingOrder) return;
 
 
                 _sortingOrder = value;
@@ -229,133 +280,76 @@ namespace Live2D.Cubism.Rendering
                 var renderers = Renderers;
 
 
-                for (var i = 0; i < renderers.Length; ++i)
-                {
-                    renderers[i].OnControllerSortingOrderDidChange(SortingOrder);
-                }
+                for (var i = 0; i < renderers.Length; ++i) renderers[i].OnControllerSortingOrderDidChange(SortingOrder);
             }
         }
 
-
         /// <summary>
-        /// [Optional] Camera to face.
-        /// </summary>
-        [SerializeField]
-        public Camera CameraToFace;
-
-
-
-        /// <summary>
-        /// <see cref="DrawOrderHandler"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private Object _drawOrderHandler;
-
-        /// <summary>
-        /// Draw order handler proxy object.
+        ///     Draw order handler proxy object.
         /// </summary>
         public Object DrawOrderHandler
         {
-            get { return _drawOrderHandler; }
-            set { _drawOrderHandler = value.ToNullUnlessImplementsInterface<ICubismDrawOrderHandler>(); }
+            get => _drawOrderHandler;
+            set => _drawOrderHandler = value.ToNullUnlessImplementsInterface<ICubismDrawOrderHandler>();
         }
 
-
         /// <summary>
-        /// <see cref="DrawOrderHandlerInterface"/> backing field.
-        /// </summary>
-        [NonSerialized]
-        private ICubismDrawOrderHandler _drawOrderHandlerInterface;
-
-        /// <summary>
-        /// Listener for draw order changes.
+        ///     Listener for draw order changes.
         /// </summary>
         private ICubismDrawOrderHandler DrawOrderHandlerInterface
         {
             get
             {
                 if (_drawOrderHandlerInterface == null)
-                {
                     _drawOrderHandlerInterface = DrawOrderHandler.GetInterface<ICubismDrawOrderHandler>();
-                }
 
 
                 return _drawOrderHandlerInterface;
             }
         }
 
-
         /// <summary>
-        /// <see cref="OpacityHandler"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private Object _opacityHandler;
-
-        /// <summary>
-        /// Opacity handler proxy object.
+        ///     Opacity handler proxy object.
         /// </summary>
         public Object OpacityHandler
         {
-            get { return _opacityHandler; }
-            set { _opacityHandler = value.ToNullUnlessImplementsInterface<ICubismOpacityHandler>(); }
+            get => _opacityHandler;
+            set => _opacityHandler = value.ToNullUnlessImplementsInterface<ICubismOpacityHandler>();
         }
 
-
         /// <summary>
-        /// <see cref="OpacityHandler"/> backing field.
-        /// </summary>
-        private ICubismOpacityHandler _opacityHandlerInterface;
-
-        /// <summary>
-        /// Listener for opacity changes.
+        ///     Listener for opacity changes.
         /// </summary>
         private ICubismOpacityHandler OpacityHandlerInterface
         {
             get
             {
                 if (_opacityHandlerInterface == null)
-                {
                     _opacityHandlerInterface = OpacityHandler.GetInterface<ICubismOpacityHandler>();
-                }
 
 
                 return _opacityHandlerInterface;
             }
         }
 
-
         /// <summary>
-        /// <see cref="MultiplyColorHandler"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private Object _multiplyColorHandler;
-
-        /// <summary>
-        /// Opacity handler proxy object.
+        ///     Opacity handler proxy object.
         /// </summary>
         public Object MultiplyColorHandler
         {
-            get { return _multiplyColorHandler; }
-            set { _multiplyColorHandler = value.ToNullUnlessImplementsInterface<ICubismBlendColorHandler>(); }
+            get => _multiplyColorHandler;
+            set => _multiplyColorHandler = value.ToNullUnlessImplementsInterface<ICubismBlendColorHandler>();
         }
 
-
         /// <summary>
-        /// <see cref="MultiplyColorHandler"/> backing field.
-        /// </summary>
-        private ICubismBlendColorHandler _multiplyColorHandlerInterface;
-
-        /// <summary>
-        /// Listener for blend color changes.
+        ///     Listener for blend color changes.
         /// </summary>
         private ICubismBlendColorHandler MultiplyColorHandlerInterface
         {
             get
             {
                 if (_multiplyColorHandlerInterface == null)
-                {
                     _multiplyColorHandlerInterface = MultiplyColorHandler?.GetInterface<ICubismBlendColorHandler>();
-                }
 
 
                 return _multiplyColorHandlerInterface;
@@ -363,37 +357,23 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        /// <see cref="ScreenColorHandler"/> backing field.
-        /// </summary>
-        [SerializeField, HideInInspector]
-        private Object _screenColorHandler;
-
-        /// <summary>
-        /// Opacity handler proxy object.
+        ///     Opacity handler proxy object.
         /// </summary>
         public Object ScreenColorHandler
         {
-            get { return _screenColorHandler; }
-            set { _screenColorHandler = value.ToNullUnlessImplementsInterface<ICubismBlendColorHandler>(); }
+            get => _screenColorHandler;
+            set => _screenColorHandler = value.ToNullUnlessImplementsInterface<ICubismBlendColorHandler>();
         }
 
-
         /// <summary>
-        /// <see cref="MultiplyColorHandler"/> backing field.
-        /// </summary>
-        private ICubismBlendColorHandler _screenColorHandlerInterface;
-
-        /// <summary>
-        /// Listener for blend color changes.
+        ///     Listener for blend color changes.
         /// </summary>
         private ICubismBlendColorHandler ScreenColorHandlerInterface
         {
             get
             {
                 if (_screenColorHandlerInterface == null)
-                {
                     _screenColorHandlerInterface = ScreenColorHandler?.GetInterface<ICubismBlendColorHandler>();
-                }
 
 
                 return _screenColorHandlerInterface;
@@ -401,27 +381,15 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        /// The value to offset the <see cref="CubismDrawable"/>s by.
-        /// </summary>
-        /// <remarks>
-        /// You only need to adjust this value when using perspective cameras.
-        /// </remarks>
-        [SerializeField, HideInInspector]
-        public float _depthOffset = 0.00001f;
-
-        /// <summary>
-        /// Depth offset used when sorting by depth.
+        ///     Depth offset used when sorting by depth.
         /// </summary>
         public float DepthOffset
         {
-            get { return _depthOffset; }
+            get => _depthOffset;
             set
             {
                 // Return if same value given.
-                if (Mathf.Abs(value - _depthOffset) < Mathf.Epsilon)
-                {
-                    return;
-                }
+                if (Mathf.Abs(value - _depthOffset) < Mathf.Epsilon) return;
 
 
                 // Store value.
@@ -432,110 +400,93 @@ namespace Live2D.Cubism.Rendering
                 var renderers = Renderers;
 
 
-                for (var i = 0; i < renderers.Length; ++i)
-                {
-                    renderers[i].OnControllerDepthOffsetDidChange(_depthOffset);
-                }
+                for (var i = 0; i < renderers.Length; ++i) renderers[i].OnControllerDepthOffsetDidChange(_depthOffset);
             }
         }
 
 
         /// <summary>
-        /// Model the controller belongs to.
+        ///     Model the controller belongs to.
         /// </summary>
-        private CubismModel Model
-        {
-            get { return this.FindCubismModel(); }
-        }
-
+        private CubismModel Model => this.FindCubismModel();
 
         /// <summary>
-        /// <see cref="DrawablesRootTransform"/> backing field.
-        /// </summary>
-        private Transform _drawablesRootTransform;
-
-        /// <summary>
-        /// Root transform of all <see cref="CubismDrawable"/>s of the model.
+        ///     Root transform of all <see cref="CubismDrawable" />s of the model.
         /// </summary>
         private Transform DrawablesRootTransform
         {
             get
             {
-                if (_drawablesRootTransform == null)
-                {
-                    _drawablesRootTransform = Model.Drawables[0].transform.parent;
-                }
+                if (_drawablesRootTransform == null) _drawablesRootTransform = Model.Drawables[0].transform.parent;
 
 
                 return _drawablesRootTransform;
             }
         }
 
-
         /// <summary>
-        /// <see cref="Renderers"/>s backing field.
-        /// </summary>
-        [NonSerialized]
-        private CubismRenderer[] _renderers;
-
-        /// <summary>
-        /// <see cref="CubismRenderer"/>s.
+        ///     <see cref="CubismRenderer" />s.
         /// </summary>
         public CubismRenderer[] Renderers
         {
             get
             {
-                if (_renderers == null)
-                {
-                    _renderers = Model.Drawables.GetComponentsMany<CubismRenderer>();
-                }
+                if (_renderers == null) _renderers = Model.Drawables.GetComponentsMany<CubismRenderer>();
 
                 return _renderers;
             }
-            private set { _renderers = value; }
+            private set => _renderers = value;
+        }
+
+        /// <summary>
+        ///     Is renderers initialized.
+        /// </summary>
+        public bool IsInitialized
+        {
+            get => _isInitialized;
+            private set => _isInitialized = value;
         }
 
 
         /// <summary>
-        /// multiply color buffer.
+        ///     Model has update controller component.
         /// </summary>
-        private Color[] _newMultiplyColors;
-
-        /// <summary>
-        /// screen color buffer.
-        /// </summary>
-        private Color[] _newScreenColors;
-
-
-        /// <summary>
-        /// Model has update controller component.
-        /// </summary>
-        [HideInInspector]
         public bool HasUpdateController { get; set; }
 
         /// <summary>
-        /// <see cref="IsInitialized"/>s backing field.
+        ///     Called by cubism update controller. Order to invoke OnLateUpdate.
         /// </summary>
-        private bool _isInitialized = false;
+        public int ExecutionOrder => CubismUpdateExecutionOrder.CubismRenderController;
 
         /// <summary>
-        /// Is renderers initialized.
+        ///     Called by cubism update controller. Needs to invoke OnLateUpdate on Editing.
         /// </summary>
-        [HideInInspector]
-        public bool IsInitialized
+        public bool NeedsUpdateOnEditing => true;
+
+        /// <summary>
+        ///     Called by cubism update controller. Applies billboarding.
+        /// </summary>
+        public void OnLateUpdate()
         {
-            get
-            {
-                return _isInitialized;
-            }
-            private set
-            {
-                _isInitialized = value;
-            }
+            // Fail silently...
+            if (!enabled) return;
+
+            // Update opacity if necessary.
+            UpdateOpacity();
+
+            // Updates Blend Colors if necessary.
+            UpdateBlendColors();
+
+            // Return early in case no camera is to be faced.
+            if (CameraToFace == null) return;
+
+
+            // Face camera.
+            DrawablesRootTransform.rotation = Quaternion.LookRotation(CameraToFace.transform.forward, Vector3.up);
         }
 
         /// <summary>
-        /// Makes sure all <see cref="CubismDrawable"/>s have <see cref="CubismRenderer"/>s attached to them.
+        ///     Makes sure all <see cref="CubismDrawable" />s have <see cref="CubismRenderer" />s attached to them.
         /// </summary>
         public void TryInitializeRenderers()
         {
@@ -547,8 +498,8 @@ namespace Live2D.Cubism.Rendering
             {
                 // Create renders and apply it to backing field...
                 var drawables = this
-                .FindCubismModel()
-                .Drawables;
+                    .FindCubismModel()
+                    .Drawables;
 
                 renderers = drawables.AddComponentEach<CubismRenderer>();
 
@@ -556,16 +507,10 @@ namespace Live2D.Cubism.Rendering
                 Renderers = renderers;
             }
 
-            if (renderers == null)
-            {
-                return;
-            }
+            if (renderers == null) return;
 
             // Make sure renderers are initialized.
-            for (var i = 0; i < renderers.Length; ++i)
-            {
-                renderers[i].TryInitialize(this);
-            }
+            for (var i = 0; i < renderers.Length; ++i) renderers[i].TryInitialize(this);
 
             // Initialize sorting layer.
             // We set the backing field here directly because we pull the sorting layer directly from the renderer.
@@ -578,15 +523,12 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        /// Updates opacity if necessary.
+        ///     Updates opacity if necessary.
         /// </summary>
         private void UpdateOpacity()
         {
             // Return if same value given.
-            if (Mathf.Abs(Opacity - LastOpacity) < Mathf.Epsilon)
-            {
-                return;
-            }
+            if (Mathf.Abs(Opacity - LastOpacity) < Mathf.Epsilon) return;
 
 
             // Store value.
@@ -595,7 +537,7 @@ namespace Live2D.Cubism.Rendering
 
 
             // Apply opacity.
-            var applyOpacityToRenderers = (OpacityHandlerInterface == null || Opacity > (1f - Mathf.Epsilon));
+            var applyOpacityToRenderers = OpacityHandlerInterface == null || Opacity > 1f - Mathf.Epsilon;
 
 
             if (applyOpacityToRenderers && Renderers != null)
@@ -603,29 +545,20 @@ namespace Live2D.Cubism.Rendering
                 var renderers = Renderers;
 
 
-                for (var i = 0; i < renderers.Length; ++i)
-                {
-                    renderers[i].OnModelOpacityDidChange(Opacity);
-                }
+                for (var i = 0; i < renderers.Length; ++i) renderers[i].OnModelOpacityDidChange(Opacity);
             }
 
 
             // Call handler.
-            if (OpacityHandlerInterface != null)
-            {
-                OpacityHandlerInterface.OnOpacityDidChange(this, Opacity);
-            }
+            if (OpacityHandlerInterface != null) OpacityHandlerInterface.OnOpacityDidChange(this, Opacity);
         }
 
         /// <summary>
-        /// Updates Blend Colors if necessary.
+        ///     Updates Blend Colors if necessary.
         /// </summary>
         private void UpdateBlendColors()
         {
-            if (Renderers == null)
-            {
-                return;
-            }
+            if (Renderers == null) return;
 
             var isMultiplyColorUpdated = false;
             var isScreenColorUpdated = false;
@@ -634,10 +567,10 @@ namespace Live2D.Cubism.Rendering
             var newMultiplyColors = _newMultiplyColors;
             var newScreenColors = _newScreenColors;
 
-            for (int i = 0; i < Renderers.Length; i++)
+            for (var i = 0; i < Renderers.Length; i++)
             {
-                var isUseUserMultiplyColor = (Renderers[i].OverwriteFlagForDrawableMultiplyColors ||
-                                        OverwriteFlagForModelMultiplyColors);
+                var isUseUserMultiplyColor = Renderers[i].OverwriteFlagForDrawableMultiplyColors ||
+                                             OverwriteFlagForModelMultiplyColors;
 
                 if (isUseUserMultiplyColor)
                 {
@@ -666,8 +599,8 @@ namespace Live2D.Cubism.Rendering
                 newMultiplyColors[i] = Renderers[i].MultiplyColor;
                 Renderers[i].LastIsUseUserMultiplyColor = isUseUserMultiplyColor;
 
-                var isUseUserScreenColor = (Renderers[i].OverwriteFlagForDrawableScreenColors ||
-                                             OverwriteFlagForModelScreenColors);
+                var isUseUserScreenColor = Renderers[i].OverwriteFlagForDrawableScreenColors ||
+                                           OverwriteFlagForModelScreenColors;
 
                 if (isUseUserScreenColor)
                 {
@@ -698,81 +631,30 @@ namespace Live2D.Cubism.Rendering
             }
 
             if (MultiplyColorHandler != null && isMultiplyColorUpdated)
-            {
                 MultiplyColorHandlerInterface.OnBlendColorDidChange(this, newMultiplyColors);
-            }
 
             if (ScreenColorHandler != null && isScreenColorUpdated)
-            {
                 ScreenColorHandlerInterface.OnBlendColorDidChange(this, newScreenColors);
-            }
-        }
-
-        /// <summary>
-        /// Called by cubism update controller. Order to invoke OnLateUpdate.
-        /// </summary>
-        public int ExecutionOrder
-        {
-            get { return CubismUpdateExecutionOrder.CubismRenderController; }
-        }
-
-        /// <summary>
-        /// Called by cubism update controller. Needs to invoke OnLateUpdate on Editing.
-        /// </summary>
-        public bool NeedsUpdateOnEditing
-        {
-            get { return true; }
-        }
-
-        /// <summary>
-        /// Called by cubism update controller. Applies billboarding.
-        /// </summary>
-        public void OnLateUpdate()
-        {
-            // Fail silently...
-            if (!enabled)
-            {
-                return;
-            }
-
-            // Update opacity if necessary.
-            UpdateOpacity();
-
-            // Updates Blend Colors if necessary.
-            UpdateBlendColors();
-
-            // Return early in case no camera is to be faced.
-            if (CameraToFace == null)
-            {
-                return;
-            }
-
-
-            // Face camera.
-            DrawablesRootTransform.rotation = (Quaternion.LookRotation(CameraToFace.transform.forward, Vector3.up));
         }
 
         #region Unity Event Handling
 
         /// <summary>
-        /// Called by Unity.
+        ///     Called by Unity.
         /// </summary>
         private void Start()
         {
             // Get cubism update controller.
-            HasUpdateController = (GetComponent<CubismUpdateController>() != null);
+            HasUpdateController = GetComponent<CubismUpdateController>() != null;
         }
 
         /// <summary>
-        /// Called by Unity. Enables listening to render data updates.
+        ///     Called by Unity. Enables listening to render data updates.
         /// </summary>
         private void OnEnable()
         {
             // Fail silently.
-            if (Model == null)
-            {
-                return;
-            }
+            if (Model == null) return;
 
 
             // Make sure renderers are available.
@@ -784,15 +666,12 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        /// Called by Unity. Disables listening to render data updates.
+        ///     Called by Unity. Disables listening to render data updates.
         /// </summary>
         private void OnDisable()
         {
             // Fail silently.
-            if (Model == null)
-            {
-                return;
-            }
+            if (Model == null) return;
 
 
             // Deregister listener.
@@ -804,18 +683,15 @@ namespace Live2D.Cubism.Rendering
         #region Cubism Event Handling
 
         /// <summary>
-        /// Called by Unity.
+        ///     Called by Unity.
         /// </summary>
         private void LateUpdate()
         {
-            if (!HasUpdateController)
-            {
-                OnLateUpdate();
-            }
+            if (!HasUpdateController) OnLateUpdate();
         }
 
         /// <summary>
-        /// Called whenever new render data is available.
+        ///     Called whenever new render data is available.
         /// </summary>
         /// <param name="sender">Model with new render data.</param>
         /// <param name="data">New render data.</param>
@@ -842,10 +718,7 @@ namespace Live2D.Cubism.Rendering
 
 
                 // Skip completely non-dirty data.
-                if (!data[i].IsAnyDirty)
-                {
-                    continue;
-                }
+                if (!data[i].IsAnyDirty) continue;
 
 
                 // Update visibility.
@@ -889,10 +762,7 @@ namespace Live2D.Cubism.Rendering
 
                 // Swap buffers if necessary.
                 // [INV] Swapping only half of the meshes might improve performance even. Would that be visually feasible?
-                if (swapMeshes)
-                {
-                    renderers[i].SwapMeshes();
-                }
+                if (swapMeshes) renderers[i].SwapMeshes();
             }
 
 
@@ -901,15 +771,9 @@ namespace Live2D.Cubism.Rendering
 
 
             if (drawOrderHandler != null)
-            {
                 for (var i = 0; i < data.Length; ++i)
-                {
                     if (data[i].IsDrawOrderDirty)
-                    {
                         drawOrderHandler.OnDrawOrderDidChange(this, drawables[i], data[i].DrawOrder);
-                    }
-                }
-            }
 
             var isMultiplyColorUpdated = false;
             var isScreenColorUpdated = false;
@@ -953,14 +817,10 @@ namespace Live2D.Cubism.Rendering
             var screenColorHandlerInterface = ScreenColorHandlerInterface;
 
             if (MultiplyColorHandler != null && isMultiplyColorUpdated)
-            {
                 multiplyColorHandlerInterface.OnBlendColorDidChange(this, newMultiplyColors);
-            }
 
             if (ScreenColorHandler != null && isScreenColorUpdated)
-            {
                 screenColorHandlerInterface.OnBlendColorDidChange(this, newScreenColors);
-            }
         }
 
         #endregion

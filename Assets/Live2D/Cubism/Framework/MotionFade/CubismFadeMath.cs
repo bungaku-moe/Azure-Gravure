@@ -8,13 +8,12 @@
 
 using System;
 
-
 namespace Live2D.Cubism.Framework.MotionFade
 {
     public static class CubismFadeMath
     {
         /// <summary>
-        /// Calculate the easing processed signaure.
+        ///     Calculate the easing processed signaure.
         /// </summary>
         /// <param name="value">Value to be subjected to easing.</param>
         /// <returns>Eased sign value.</returns>

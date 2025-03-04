@@ -12,38 +12,33 @@ using UnityEngine.UI;
 namespace Live2D.Cubism.Samples.AsyncBenchmark
 {
     /// <summary>
-    /// Record when the frame rate falls below the set target frame rate.
+    ///     Record when the frame rate falls below the set target frame rate.
     /// </summary>
     public class FrameRateUiHolder : MonoBehaviour
     {
         /// <summary>
-        /// Enable/disable observation.
+        ///     Enable/disable observation.
         /// </summary>
-        [SerializeField]
-        public bool HasShownFrameRate;
+        [SerializeField] public bool HasShownFrameRate;
 
         /// <summary>
-        /// Whether to enable total uptime.
+        ///     Whether to enable total uptime.
         /// </summary>
-        [SerializeField]
-        public bool HasShownElapsedTime;
+        [SerializeField] public bool HasShownElapsedTime;
 
         /// <summary>
-        /// Displays the frame rate and observation time when the maximum frame rate is observed.
+        ///     Displays the frame rate and observation time when the maximum frame rate is observed.
         /// </summary>
-        [SerializeField]
-        public Text HighestFrameRateUi = null;
+        [SerializeField] public Text HighestFrameRateUi;
 
         /// <summary>
-        /// Displays the frame rate and observation time when the minimum frame rate is observed.
+        ///     Displays the frame rate and observation time when the minimum frame rate is observed.
         /// </summary>
-        [SerializeField]
-        public Text LowestFrameRateUi = null;
+        [SerializeField] public Text LowestFrameRateUi;
 
         /// <summary>
-        /// UI to display total benchmark uptime.
+        ///     UI to display total benchmark uptime.
         /// </summary>
-        [SerializeField]
-        public Text ElapsedTimeUi = null;
+        [SerializeField] public Text ElapsedTimeUi;
     }
 }

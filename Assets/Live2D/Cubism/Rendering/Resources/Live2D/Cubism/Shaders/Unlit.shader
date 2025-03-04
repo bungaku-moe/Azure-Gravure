@@ -47,10 +47,10 @@ Shader "Live2D Cubism/Unlit"
             "CanUseSpriteAtlas" = "True"
         }
 
-        Cull     [_Cull]
+        Cull [_Cull]
         Lighting Off
-        ZWrite   Off
-        Blend    [_SrcColor][_DstColor], [_SrcAlpha][_DstAlpha]
+        ZWrite Off
+        Blend [_SrcColor][_DstColor], [_SrcAlpha][_DstAlpha]
 
         Pass
         {
@@ -67,8 +67,8 @@ Shader "Live2D Cubism/Unlit"
 
             struct appdata
             {
-                float4 vertex   : POSITION;
-                float4 color    : COLOR;
+                float4 vertex : POSITION;
+                float4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
@@ -76,8 +76,8 @@ Shader "Live2D Cubism/Unlit"
 
             struct v2f
             {
-                float4 vertex   : SV_POSITION;
-                fixed4 color    : COLOR;
+                float4 vertex : SV_POSITION;
+                fixed4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_OUTPUT_STEREO
 
@@ -95,7 +95,7 @@ Shader "Live2D Cubism/Unlit"
             CUBISM_SHADER_VARIABLES
 
 
-            v2f vert (appdata IN)
+            v2f vert(appdata IN)
             {
                 v2f OUT;
 
@@ -117,14 +117,15 @@ Shader "Live2D Cubism/Unlit"
             }
 
 
-            fixed4 frag (v2f IN) : SV_Target
+            fixed4 frag(v2f IN) : SV_Target
             {
                 fixed4 textureColor = tex2D(_MainTex, IN.texcoord);
 
                 // Multiply
                 textureColor.rgb *= cubism_MultiplyColor.rgb;
                 // Screen
-                textureColor.rgb = (textureColor.rgb + cubism_ScreenColor.rgb) - (textureColor.rgb * cubism_ScreenColor.rgb);
+                textureColor.rgb = (textureColor.rgb + cubism_ScreenColor.rgb) - (textureColor.rgb * cubism_ScreenColor.
+                    rgb);
 
                 fixed4 OUT = textureColor * IN.color;
 

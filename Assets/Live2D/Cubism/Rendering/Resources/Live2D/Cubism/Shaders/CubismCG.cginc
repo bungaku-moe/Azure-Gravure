@@ -39,7 +39,7 @@ inline float2 CubismToMaskCoordinates(float2 vertex, float4 tile, float4 transfo
     float2 result = vertex;
 
 
-    float  scale = tile.w * transform.z;
+    float scale = tile.w * transform.z;
     float2 offset = transform.xy;
     float2 origin = (tile.yz + float2(0.5, 0.5)) * tile.ww;
 

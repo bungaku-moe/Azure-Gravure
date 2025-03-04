@@ -13,117 +13,32 @@ using UnityEngine;
 namespace Live2D.Cubism.Framework.Expression
 {
     /// <summary>
-    /// The cubism expression data.
+    ///     The cubism expression data.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class CubismPlayingExpression
     {
-        #region variable
-
         /// <summary>
-        /// Expression type.
-        /// </summary>
-        [SerializeField]
-        public string Type;
-
-        /// <summary>
-        /// Expression fade in time.
-        /// </summary>
-        [SerializeField]
-        public float FadeInTime;
-
-        /// <summary>
-        /// Expression fade out time.
-        /// </summary>
-        [SerializeField]
-        public float FadeOutTime;
-
-        /// <summary>
-        /// Expression Weight.
-        /// </summary>
-        [SerializeField, Range(0.0f, 1.0f)]
-        public float Weight;
-
-        /// <summary>
-        /// Expression user time.
-        /// </summary>
-        [SerializeField]
-        public float ExpressionUserTime;
-
-        /// <summary>
-        /// Expression start time.
-        /// </summary>
-        [SerializeField]
-        public float ExpressionStartTime;
-
-        /// <summary>
-        /// Expression end time.
-        /// </summary>
-        [SerializeField]
-        public float ExpressionEndTime;
-
-        /// <summary>
-        /// Expression parameters cache.
-        /// </summary>
-        [SerializeField]
-        public CubismParameter[] Destinations;
-
-        /// <summary>
-        /// Expression parameter value.
-        /// </summary>
-        [SerializeField]
-        public float[] Value;
-
-        /// <summary>
-        /// Expression parameter blend mode.
-        /// </summary>
-        [SerializeField]
-        public CubismParameterBlendMode[] Blend;
-
-        /// <summary>
-        /// Expression fade weight.
-        /// </summary>
-        [NonSerialized, HideInInspector]
-        public float FadeWeight;
-
-        /// <summary>
-        /// Expression fade in weight.
-        /// </summary>
-        [NonSerialized, HideInInspector]
-        public float FadeInWeight;
-
-        /// <summary>
-        /// Expression fade out weight.
-        /// </summary>
-        [NonSerialized, HideInInspector]
-        public float FadeOutWeight;
-
-        #endregion
-
-        /// <summary>
-        /// Initialize expression data from <see cref="CubismExpressionData"/>.
+        ///     Initialize expression data from <see cref="CubismExpressionData" />.
         /// </summary>
         /// <param name="model">model.</param>
         /// <param name="expressionData">Source.</param>
         public static CubismPlayingExpression Create(CubismModel model, CubismExpressionData expressionData)
         {
             // Fail silently...
-            if(model == null || expressionData == null)
-            {
-                return null;
-            }
+            if (model == null || expressionData == null) return null;
 
             var ret = new CubismPlayingExpression();
 
             ret.Type = expressionData.Type;
 
-            ret.FadeInTime = (expressionData.FadeInTime < 0.0f)
-                                ? 1.0f
-                                : expressionData.FadeInTime;
+            ret.FadeInTime = expressionData.FadeInTime < 0.0f
+                ? 1.0f
+                : expressionData.FadeInTime;
 
-            ret.FadeOutTime = (expressionData.FadeOutTime < 0.0f)
-                                ? 1.0f
-                                : expressionData.FadeOutTime;
+            ret.FadeOutTime = expressionData.FadeOutTime < 0.0f
+                ? 1.0f
+                : expressionData.FadeOutTime;
 
             ret.Weight = 1.0f;
             ret.ExpressionUserTime = 0.0f;
@@ -135,7 +50,7 @@ namespace Live2D.Cubism.Framework.Expression
             ret.Value = new float[parameterCount];
             ret.Blend = new CubismParameterBlendMode[parameterCount];
 
-            for(var i = 0; i < parameterCount; ++i)
+            for (var i = 0; i < parameterCount; ++i)
             {
                 ret.Destinations[i] = model.Parameters.FindById(expressionData.Parameters[i].Id);
                 ret.Value[i] = expressionData.Parameters[i].Value;
@@ -144,5 +59,74 @@ namespace Live2D.Cubism.Framework.Expression
 
             return ret;
         }
+
+        #region variable
+
+        /// <summary>
+        ///     Expression type.
+        /// </summary>
+        [SerializeField] public string Type;
+
+        /// <summary>
+        ///     Expression fade in time.
+        /// </summary>
+        [SerializeField] public float FadeInTime;
+
+        /// <summary>
+        ///     Expression fade out time.
+        /// </summary>
+        [SerializeField] public float FadeOutTime;
+
+        /// <summary>
+        ///     Expression Weight.
+        /// </summary>
+        [SerializeField] [Range(0.0f, 1.0f)] public float Weight;
+
+        /// <summary>
+        ///     Expression user time.
+        /// </summary>
+        [SerializeField] public float ExpressionUserTime;
+
+        /// <summary>
+        ///     Expression start time.
+        /// </summary>
+        [SerializeField] public float ExpressionStartTime;
+
+        /// <summary>
+        ///     Expression end time.
+        /// </summary>
+        [SerializeField] public float ExpressionEndTime;
+
+        /// <summary>
+        ///     Expression parameters cache.
+        /// </summary>
+        [SerializeField] public CubismParameter[] Destinations;
+
+        /// <summary>
+        ///     Expression parameter value.
+        /// </summary>
+        [SerializeField] public float[] Value;
+
+        /// <summary>
+        ///     Expression parameter blend mode.
+        /// </summary>
+        [SerializeField] public CubismParameterBlendMode[] Blend;
+
+        /// <summary>
+        ///     Expression fade weight.
+        /// </summary>
+        [NonSerialized] public float FadeWeight;
+
+        /// <summary>
+        ///     Expression fade in weight.
+        /// </summary>
+        [NonSerialized] public float FadeInWeight;
+
+        /// <summary>
+        ///     Expression fade out weight.
+        /// </summary>
+        [NonSerialized] public float FadeOutWeight;
+
+        #endregion
     }
 }

@@ -9,81 +9,31 @@
 using System;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    /// Virtual pool allocator for <see cref="CubismMaskTile"/>s.
+    ///     Virtual pool allocator for <see cref="CubismMaskTile" />s.
     /// </summary>
     internal sealed class CubismMaskTilePool
     {
         private readonly int ClippingMaskMaxCountOnDefault = 36; // Maximum number of masks per normal frame buffer.
-        private readonly int ClippingMaskMaxCountOnMultiRenderTexture = 32; // Maximum number of masks per frame buffer when there are two or more frame buffers.
+
+        private readonly int
+            ClippingMaskMaxCountOnMultiRenderTexture =
+                32; // Maximum number of masks per frame buffer when there are two or more frame buffers.
 
         /// <summary>
-        /// Level of subdivisions.
-        /// </summary>
-        private int Subdivisions { get; set; }
-
-        /// <summary>
-        /// Pool slots.
-        /// </summary>
-        /// <remarks>
-        /// <see langword="true"/> slots are in use, <see langword="false"/> are available slots.
-        /// </remarks>
-        private bool[] Slots { get; set; }
-
-        /// <summary>
-        /// Number of <see cref="RenderTexture"/>.
-        /// </summary>
-        private int RenderTextureCount { get; set; }
-
-        /// <summary>
-        /// High precision mask flags.
-        /// </summary>
-        private bool IsUsingHighPrecisionMask { get; set; }
-
-        /// <summary>
-        /// Limit on number of clipping masks.
-        /// </summary>
-        private int UseClippingMaskMaxCount { get; set; }
-
-        /// <summary>
-        /// Channel count.
-        /// </summary>
-        private int ColorChannelCount { get; set; }
-
-        /// <summary>
-        /// Number of masks used.
-        /// </summary>
-        public int UsedMaskCount { get; set; }
-
-        /// <summary>
-        /// Array of structures holding information for each mask tile.
-        /// </summary>
-        private LayoutContext[] LayoutContexts { get; set; }
-
-        /// <summary>
-        /// <see cref="HeadOfChannels"/> backing field.
+        ///     <see cref="HeadOfChannels" /> backing field.
         /// </summary>
         private LayoutContext[] _headOfChannels;
-
-        /// <summary>
-        /// Top of channel.
-        /// </summary>
-        private LayoutContext[] HeadOfChannels
-        {
-            get { return _headOfChannels; }
-            set { _headOfChannels = value; }
-        }
 
         #region Ctors
 
         /// <summary>
-        /// Initializes instance.
+        ///     Initializes instance.
         /// </summary>
-        /// <param name="subdivisions">Number of <see cref="CubismMaskTexture"/> subdivisions.</param>
-        /// <param name="channels">Number of <see cref="CubismMaskTexture"/> color channels.</param>
+        /// <param name="subdivisions">Number of <see cref="CubismMaskTexture" /> subdivisions.</param>
+        /// <param name="channels">Number of <see cref="CubismMaskTexture" /> color channels.</param>
         public CubismMaskTilePool(int subdivisions, int channels, int renderTextureCount = -1)
         {
             RenderTextureCount = renderTextureCount;
@@ -117,16 +67,14 @@ namespace Live2D.Cubism.Rendering.Masking
                 UsedMaskCount = 0;
 
                 LayoutContexts = new LayoutContext[UseClippingMaskMaxCount * ColorChannelCount];
-                for (int layoutContextIndex = 0; layoutContextIndex < LayoutContexts.Length; layoutContextIndex++)
-                {
+                for (var layoutContextIndex = 0; layoutContextIndex < LayoutContexts.Length; layoutContextIndex++)
                     LayoutContexts[layoutContextIndex] = new LayoutContext
                     {
                         RenderTextureIndex = 0,
                         Channel = 0,
                         LayoutCount = 0,
-                        LayoutContextIndex = 0,
+                        LayoutContextIndex = 0
                     };
-                }
 
                 HeadOfChannels = new LayoutContext[0];
             }
@@ -135,10 +83,62 @@ namespace Live2D.Cubism.Rendering.Masking
         #endregion
 
         /// <summary>
-        /// Acquires tiles.
+        ///     Level of subdivisions.
+        /// </summary>
+        private int Subdivisions { get; }
+
+        /// <summary>
+        ///     Pool slots.
+        /// </summary>
+        /// <remarks>
+        ///     <see langword="true" /> slots are in use, <see langword="false" /> are available slots.
+        /// </remarks>
+        private bool[] Slots { get; }
+
+        /// <summary>
+        ///     Number of <see cref="RenderTexture" />.
+        /// </summary>
+        private int RenderTextureCount { get; }
+
+        /// <summary>
+        ///     High precision mask flags.
+        /// </summary>
+        private bool IsUsingHighPrecisionMask { get; set; }
+
+        /// <summary>
+        ///     Limit on number of clipping masks.
+        /// </summary>
+        private int UseClippingMaskMaxCount { get; }
+
+        /// <summary>
+        ///     Channel count.
+        /// </summary>
+        private int ColorChannelCount { get; }
+
+        /// <summary>
+        ///     Number of masks used.
+        /// </summary>
+        public int UsedMaskCount { get; set; }
+
+        /// <summary>
+        ///     Array of structures holding information for each mask tile.
+        /// </summary>
+        private LayoutContext[] LayoutContexts { get; set; }
+
+        /// <summary>
+        ///     Top of channel.
+        /// </summary>
+        private LayoutContext[] HeadOfChannels
+        {
+            get => _headOfChannels;
+            set => _headOfChannels = value;
+        }
+
+        /// <summary>
+        ///     Acquires tiles.
         /// </summary>
         /// <param name="count">Number of tiles to acquire.</param>
-        /// <returns>Acquired tiles on success; <see langword="null"/> otherwise.</returns>
+        /// <returns>Acquired tiles on success; <see langword="null" /> otherwise.</returns>
         public CubismMaskTile[] AcquireTiles(int count)
         {
             var result = new CubismMaskTile[count];
@@ -153,10 +153,7 @@ namespace Live2D.Cubism.Rendering.Masking
                 for (var j = 0; j < Slots.Length; ++j)
                 {
                     // Skip occupied slots.
-                    if (Slots[j])
-                    {
-                        continue;
-                    }
+                    if (Slots[j]) continue;
 
 
                     // Generate tile.
@@ -178,7 +175,8 @@ namespace Live2D.Cubism.Rendering.Masking
                 // Return as soon as one allocation fails.
                 if (!allocationSuccessful)
                 {
-                    Debug.LogError("The currently specified mask texture exceeds the number of masks that can be drawn.");
+                    Debug.LogError(
+                        "The currently specified mask texture exceeds the number of masks that can be drawn.");
                     return null;
                 }
             }
@@ -189,36 +187,30 @@ namespace Live2D.Cubism.Rendering.Masking
         }
 
         /// <summary>
-        /// Releases tiles.
+        ///     Releases tiles.
         /// </summary>
         /// <param name="tiles">Tiles to release.</param>
         [Obsolete("ReturnTiles() is not used.", false)]
         public void ReturnTiles(CubismMaskTile[] tiles)
         {
             // Flag slots as available.
-            for (var i = 0; i < tiles.Length; ++i)
-            {
-                Slots[ToIndex(tiles[i])] = false;
-            }
+            for (var i = 0; i < tiles.Length; ++i) Slots[ToIndex(tiles[i])] = false;
         }
 
 
         /// <summary>
-        /// Reset HeadOfChannels.
+        ///     Reset HeadOfChannels.
         /// </summary>
         public void ResetTiles()
         {
             HeadOfChannels = new LayoutContext[0];
             LayoutContexts = new LayoutContext[UseClippingMaskMaxCount * ColorChannelCount];
-            for (var i = 0; i < Slots.Length; i++)
-            {
-                Slots[i] = false;
-            }
+            for (var i = 0; i < Slots.Length; i++) Slots[i] = false;
         }
 
 
         /// <summary>
-        /// Converts from index to <see cref="CubismMaskTile"/>.
+        ///     Converts from index to <see cref="CubismMaskTile" />.
         /// </summary>
         /// <param name="index">Index to convert.</param>
         /// <returns>Mask tile matching index.</returns>
@@ -229,7 +221,8 @@ namespace Live2D.Cubism.Rendering.Masking
                 if (UsedMaskCount > UseClippingMaskMaxCount)
                 {
                     var overCount = UsedMaskCount - UseClippingMaskMaxCount;
-                    Debug.LogError($"Not supported mask count : {overCount}\n[Details] render texture count : {RenderTextureCount}, mask count : {UsedMaskCount}");
+                    Debug.LogError(
+                        $"Not supported mask count : {overCount}\n[Details] render texture count : {RenderTextureCount}, mask count : {UsedMaskCount}");
                     return new CubismMaskTile
                     {
                         Channel = 0,
@@ -255,14 +248,16 @@ namespace Live2D.Cubism.Rendering.Masking
 
                 // Use RGBA in sequence.
                 var divCount = countPerSheetDiv / ColorChannelCount; // Number of masks to be placed in one channel.
-                var modCount = countPerSheetDiv % ColorChannelCount; // Excess. Allocate one by one to this numbered channel.
+                var modCount =
+                    countPerSheetDiv % ColorChannelCount; // Excess. Allocate one by one to this numbered channel.
 
                 // Start the calculation as the first index of that channel.
                 if (LayoutContexts[index].LayoutCount < 1)
                 {
-                    var headOfChannelsIndex = (HeadOfChannels.Length == 0)
+                    var headOfChannelsIndex = HeadOfChannels.Length == 0
                         ? 0
-                        : HeadOfChannels.Length - 1; ;
+                        : HeadOfChannels.Length - 1;
+                    ;
                     if (HeadOfChannels.Length < 1)
                     {
                         LayoutContexts[index].Channel = 0;
@@ -273,12 +268,14 @@ namespace Live2D.Cubism.Rendering.Masking
                         var previousUseChannel = HeadOfChannels[HeadOfChannels.Length - 1].Channel;
 
                         // Channel
-                        LayoutContexts[index].Channel = previousUseChannel < (ColorChannelCount - 1)
-                            ? (previousUseChannel + 1) : 0;
+                        LayoutContexts[index].Channel = previousUseChannel < ColorChannelCount - 1
+                            ? previousUseChannel + 1
+                            : 0;
 
                         // RenderTextureIndex
-                        LayoutContexts[index].RenderTextureIndex = previousUseChannel < (ColorChannelCount - 1)
-                            ? HeadOfChannels[headOfChannelsIndex].RenderTextureIndex : HeadOfChannels[headOfChannelsIndex].RenderTextureIndex + 1;
+                        LayoutContexts[index].RenderTextureIndex = previousUseChannel < ColorChannelCount - 1
+                            ? HeadOfChannels[headOfChannelsIndex].RenderTextureIndex
+                            : HeadOfChannels[headOfChannelsIndex].RenderTextureIndex + 1;
                     }
 
                     // Number of layouts in this channel.
@@ -293,12 +290,11 @@ namespace Live2D.Cubism.Rendering.Masking
 
                     // If this is the target channel and there is a render texture that reduces the number of layouts by one.
                     if (LayoutContexts[index].Channel == checkChannelIndex && reduceLayoutTextureCount > 0)
-                    {
                         // If the current render texture is the target render texture, reduce the number of layouts by one.
-                        LayoutContexts[index].LayoutCount -= !(LayoutContexts[index].RenderTextureIndex < reduceLayoutTextureCount)
-                            ? 1
-                            : 0;
-                    }
+                        LayoutContexts[index].LayoutCount -=
+                            !(LayoutContexts[index].RenderTextureIndex < reduceLayoutTextureCount)
+                                ? 1
+                                : 0;
 
                     LayoutContexts[index].LayoutContextIndex = 0;
 
@@ -319,7 +315,6 @@ namespace Live2D.Cubism.Rendering.Masking
 
                 // Set tile layout.
                 if (layoutCount <= 1)
-                {
                     return new CubismMaskTile
                     {
                         Channel = LayoutContexts[index].Channel,
@@ -329,12 +324,12 @@ namespace Live2D.Cubism.Rendering.Masking
                         RenderTextureIndex = LayoutContexts[index].RenderTextureIndex,
                         Index = index
                     };
-                }
-                else if (layoutCount <= 4)
+
+                if (layoutCount <= 4)
                 {
                     var tilesPerRow = 2; // Rows per tile
                     var currentTilePosition = LayoutContexts[index].LayoutContextIndex;
-                    var tileSize = 1f / (float)tilesPerRow;
+                    var tileSize = 1f / tilesPerRow;
                     var column = currentTilePosition / tilesPerRow;
                     var rowId = currentTilePosition % tilesPerRow;
 
@@ -348,11 +343,12 @@ namespace Live2D.Cubism.Rendering.Masking
                         Index = index
                     };
                 }
-                else if (layoutCount <= layoutCountMaxValue)
+
+                if (layoutCount <= layoutCountMaxValue)
                 {
                     var tilesPerRow = 3; // Rows per tile
                     var currentTilePosition = LayoutContexts[index].LayoutContextIndex;
-                    var tileSize = 1f / (float)tilesPerRow;
+                    var tileSize = 1f / tilesPerRow;
                     var column = currentTilePosition / tilesPerRow;
                     var rowId = currentTilePosition % tilesPerRow;
 
@@ -366,10 +362,11 @@ namespace Live2D.Cubism.Rendering.Masking
                         Index = index
                     };
                 }
-                else
+
                 {
                     var overCount = UsedMaskCount - UseClippingMaskMaxCount;
-                    Debug.LogError($"Not supported mask count : {overCount}\n[Details] render texture count : {RenderTextureCount}, mask count : {UsedMaskCount}");
+                    Debug.LogError(
+                        $"Not supported mask count : {overCount}\n[Details] render texture count : {RenderTextureCount}, mask count : {UsedMaskCount}");
                     return new CubismMaskTile
                     {
                         Channel = 0,
@@ -382,13 +379,13 @@ namespace Live2D.Cubism.Rendering.Masking
                     };
                 }
             }
-            else
+
             {
                 var tileCounts = (int)Mathf.Pow(4, Subdivisions - 1);
                 var tilesPerRow = (int)Mathf.Pow(2, Subdivisions - 1);
-                var tileSize = 1f / (float)tilesPerRow;
+                var tileSize = 1f / tilesPerRow;
                 var channel = index / tileCounts;
-                var currentTilePosition = index - (channel * tileCounts);
+                var currentTilePosition = index - channel * tileCounts;
                 var column = currentTilePosition / tilesPerRow;
                 var rowId = currentTilePosition % tilesPerRow;
 
@@ -406,7 +403,7 @@ namespace Live2D.Cubism.Rendering.Masking
         }
 
         /// <summary>
-        /// Converts from <see cref="CubismMaskTile"/> to index.
+        ///     Converts from <see cref="CubismMaskTile" /> to index.
         /// </summary>
         /// <param name="tile">Tile to convert.</param>
         /// <returns>Tile index.</returns>
@@ -428,56 +425,45 @@ namespace Live2D.Cubism.Rendering.Masking
                 tileCounts = div + (tile.Channel < mod ? 1 : 0);
 
                 var checkChannelNo = mod + 1 >= ColorChannelCount ? 0 : mod + 1;
-                if (tile.Channel == checkChannelNo)
-                {
-                    tileCounts += tile.RenderTextureIndex < countPerSheetMod ? 1 : 0;
-                }
+                if (tile.Channel == checkChannelNo) tileCounts += tile.RenderTextureIndex < countPerSheetMod ? 1 : 0;
 
                 if (tileCounts <= 1)
-                {
                     tilesPerRow = 0;
-                }
                 else if (tileCounts <= 4)
-                {
                     tilesPerRow = 2;
-                }
-                else if (tileCounts <= 9)
-                {
-                    tilesPerRow = 3;
-                }
+                else if (tileCounts <= 9) tilesPerRow = 3;
 
-                return (int)((tile.Channel * tileCounts) + (tile.Column * tilesPerRow) + tile.Channel * (UseClippingMaskMaxCount / ColorChannelCount));
+                return (int)(tile.Channel * tileCounts + tile.Column * tilesPerRow +
+                             tile.Channel * (UseClippingMaskMaxCount / ColorChannelCount));
             }
-            else
-            {
-                tileCounts = (int)Mathf.Pow(4, Subdivisions - 1);
-                tilesPerRow = (int)Mathf.Pow(2, Subdivisions - 1);
-                return (int)((tile.Channel * tileCounts) + (tile.Column * tilesPerRow) + tile.Row);
-            }
+
+            tileCounts = (int)Mathf.Pow(4, Subdivisions - 1);
+            tilesPerRow = (int)Mathf.Pow(2, Subdivisions - 1);
+            return (int)(tile.Channel * tileCounts + tile.Column * tilesPerRow + tile.Row);
         }
 
         /// <summary>
-        /// The structure that holds the information for each mask tile.
+        ///     The structure that holds the information for each mask tile.
         /// </summary>
         private struct LayoutContext
         {
             /// <summary>
-            /// Index of the <see cref="RenderTexture"/> to which this mask is assigned.
+            ///     Index of the <see cref="RenderTexture" /> to which this mask is assigned.
             /// </summary>
             public int RenderTextureIndex;
 
             /// <summary>
-            /// Index of the <see cref="ColorChannelCount"/> to which this mask is assigned.
+            ///     Index of the <see cref="ColorChannelCount" /> to which this mask is assigned.
             /// </summary>
             public int Channel;
 
             /// <summary>
-            /// Number of channel divisions to which this mask is assigned.
+            ///     Number of channel divisions to which this mask is assigned.
             /// </summary>
             public int LayoutCount;
 
             /// <summary>
-            /// Index within a division.
+            ///     Index within a division.
             /// </summary>
             public int LayoutContextIndex;
         }

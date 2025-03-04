@@ -6,58 +6,48 @@ namespace Live2D.Cubism.Editor.Importers
 {
     public class CubismCreatedAssetList
     {
+        private static CubismCreatedAssetList _instance;
+
+        private List<string> _assetPaths;
         private List<Object> _assets;
+
+        private List<bool> _isImporterDirties;
+        public volatile bool onPostImporting;
+
         public List<Object> Assets
         {
             get
             {
-                if (_assets == null)
-                {
-                    _assets = new List<Object>();
-                }
+                if (_assets == null) _assets = new List<Object>();
 
                 return _assets;
             }
         }
 
-        private List<string> _assetPaths;
         public List<string> AssetPaths
         {
             get
             {
-                if(_assetPaths == null)
-                {
-                    _assetPaths = new List<string>();
-                }
+                if (_assetPaths == null) _assetPaths = new List<string>();
 
                 return _assetPaths;
             }
         }
 
-        private List<bool> _isImporterDirties;
         public List<bool> IsImporterDirties
         {
             get
             {
-                if (_isImporterDirties == null)
-                {
-                    _isImporterDirties = new List<bool>();
-                }
+                if (_isImporterDirties == null) _isImporterDirties = new List<bool>();
 
                 return _isImporterDirties;
             }
         }
 
-        private static CubismCreatedAssetList _instance;
-        public volatile bool onPostImporting = false;
-
 
         public static CubismCreatedAssetList GetInstance()
         {
-            if (_instance == null)
-            {
-                _instance = new CubismCreatedAssetList();
-            }
+            if (_instance == null) _instance = new CubismCreatedAssetList();
 
             return _instance;
         }
@@ -65,10 +55,7 @@ namespace Live2D.Cubism.Editor.Importers
 
         public void OnPostImport()
         {
-            if (_instance.Assets.Count <= 0)
-            {
-                return;
-            }
+            if (_instance.Assets.Count <= 0) return;
 
             onPostImporting = true;
 
@@ -76,15 +63,9 @@ namespace Live2D.Cubism.Editor.Importers
             {
                 var asset = _instance.Assets[i];
 
-                if (!IsImporterDirties[i])
-                {
-                    continue;
-                }
+                if (!IsImporterDirties[i]) continue;
 
-                if (asset != null)
-                {
-                    EditorUtility.SetDirty(asset);
-                }
+                if (asset != null) EditorUtility.SetDirty(asset);
 
                 Remove(i);
             }
@@ -98,10 +79,7 @@ namespace Live2D.Cubism.Editor.Importers
 
         public void Remove(int index)
         {
-            if (_instance == null || index < 0)
-            {
-                return;
-            }
+            if (_instance == null || index < 0) return;
             _instance.Assets.RemoveAt(index);
             _instance._assetPaths.RemoveAt(index);
             _instance._isImporterDirties.RemoveAt(index);

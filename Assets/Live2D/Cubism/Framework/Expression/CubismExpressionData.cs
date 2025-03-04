@@ -6,8 +6,8 @@
  */
 
 
-using Live2D.Cubism.Framework.Json;
 using System;
+using Live2D.Cubism.Framework.Json;
 using UnityEngine;
 
 namespace Live2D.Cubism.Framework.Expression
@@ -15,53 +15,24 @@ namespace Live2D.Cubism.Framework.Expression
     public class CubismExpressionData : ScriptableObject
     {
         /// <summary>
-        /// Expression type.
+        ///     Expression type.
         /// </summary>
-        [SerializeField]
-        public string Type;
+        [SerializeField] public string Type;
 
         /// <summary>
-        /// Expression fade in time.
+        ///     Expression fade in time.
         /// </summary>
-        [SerializeField]
-        public float FadeInTime;
+        [SerializeField] public float FadeInTime;
 
         /// <summary>
-        /// Expression fade out time.
+        ///     Expression fade out time.
         /// </summary>
-        [SerializeField]
-        public float FadeOutTime;
+        [SerializeField] public float FadeOutTime;
 
         /// <summary>
-        /// Expression Parameters
+        ///     Expression Parameters
         /// </summary>
-        [SerializeField]
-        public SerializableExpressionParameter[] Parameters;
-
-        /// <summary>
-        /// ExpressionParameter
-        /// </summary>
-        [Serializable]
-        public struct SerializableExpressionParameter
-        {
-            /// <summary>
-            /// Expression Parameter Id
-            /// </summary>
-            [SerializeField]
-            public string Id;
-
-            /// <summary>
-            /// Expression Parameter Value
-            /// </summary>
-            [SerializeField]
-            public float Value;
-
-            /// <summary>
-            /// Expression Parameter Blend Mode
-            /// </summary>
-            [SerializeField]
-            public CubismParameterBlendMode Blend;
-        }
+        [SerializeField] public SerializableExpressionParameter[] Parameters;
 
         public static CubismExpressionData CreateInstance(CubismExp3Json json)
         {
@@ -76,12 +47,12 @@ namespace Live2D.Cubism.Framework.Expression
             expressionData.FadeOutTime = json.FadeOutTime;
             expressionData.Parameters = new SerializableExpressionParameter[json.Parameters.Length];
 
-            for(var i = 0; i < json.Parameters.Length; ++i)
+            for (var i = 0; i < json.Parameters.Length; ++i)
             {
                 expressionData.Parameters[i].Id = json.Parameters[i].Id;
                 expressionData.Parameters[i].Value = json.Parameters[i].Value;
 
-                switch(json.Parameters[i].Blend)
+                switch (json.Parameters[i].Blend)
                 {
                     case "Add":
                         expressionData.Parameters[i].Blend = CubismParameterBlendMode.Additive;
@@ -95,13 +66,32 @@ namespace Live2D.Cubism.Framework.Expression
                     default:
                         expressionData.Parameters[i].Blend = CubismParameterBlendMode.Additive;
                         break;
-
                 }
             }
 
             return expressionData;
         }
 
-    }
+        /// <summary>
+        ///     ExpressionParameter
+        /// </summary>
+        [Serializable]
+        public struct SerializableExpressionParameter
+        {
+            /// <summary>
+            ///     Expression Parameter Id
+            /// </summary>
+            [SerializeField] public string Id;
 
+            /// <summary>
+            ///     Expression Parameter Value
+            /// </summary>
+            [SerializeField] public float Value;
+
+            /// <summary>
+            ///     Expression Parameter Blend Mode
+            /// </summary>
+            [SerializeField] public CubismParameterBlendMode Blend;
+        }
+    }
 }

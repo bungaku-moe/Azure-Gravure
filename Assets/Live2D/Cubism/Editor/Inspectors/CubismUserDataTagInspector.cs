@@ -10,19 +10,19 @@ using Live2D.Cubism.Framework.UserData;
 using UnityEditor;
 using UnityEngine;
 
-
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    /// Inspector for <see cref="CubismUserDataTag"/>s.
+    ///     Inspector for <see cref="CubismUserDataTag" />s.
     /// </summary>
-    [CustomEditor(typeof(CubismUserDataTag)), CanEditMultipleObjects]
+    [CustomEditor(typeof(CubismUserDataTag))]
+    [CanEditMultipleObjects]
     internal sealed class CubismUserDataTagInspector : UnityEditor.Editor
     {
         #region Editor
 
         /// <summary>
-        /// Draws inspector.
+        ///     Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
@@ -30,10 +30,7 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Fail silently.
-            if (tag == null)
-            {
-                return;
-            }
+            if (tag == null) return;
 
 
             using (var scope = new EditorGUI.ChangeCheckScope())
@@ -49,10 +46,7 @@ namespace Live2D.Cubism.Editor.Inspectors
                 EditorGUILayout.EndHorizontal();
 
 
-                if (!scope.changed)
-                {
-                    return;
-                }
+                if (!scope.changed) return;
 
                 // Apply to all selected UserData.
                 foreach (CubismUserDataTag userDataTag in targets)

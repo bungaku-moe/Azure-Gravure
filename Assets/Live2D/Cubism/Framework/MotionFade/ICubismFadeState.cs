@@ -10,42 +10,42 @@ using System.Collections.Generic;
 namespace Live2D.Cubism.Framework.MotionFade
 {
     /// <summary>
-    /// Cubism fade state interface.
+    ///     Cubism fade state interface.
     /// </summary>
     public interface ICubismFadeState
     {
         /// <summary>
-        /// Get cubism playing motion list.
+        ///     Get cubism playing motion list.
         /// </summary>
         /// <returns>Cubism playing motion list.</returns>
         List<CubismFadePlayingMotion> GetPlayingMotions();
 
         /// <summary>
-        /// Is default state.
+        ///     Is default state.
         /// </summary>
-        /// <returns><see langword="true"/> State is default; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> State is default; <see langword="false" /> otherwise.</returns>
         bool IsDefaultState();
 
         /// <summary>
-        /// Get layer weight.
+        ///     Get layer weight.
         /// </summary>
         /// <returns>Layer weight.</returns>
         float GetLayerWeight();
 
         /// <summary>
-        /// Get state transition finished.
+        ///     Get state transition finished.
         /// </summary>
-        /// <returns><see langword="true"/> State transition is finished; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> State transition is finished; <see langword="false" /> otherwise.</returns>
         bool GetStateTransitionFinished();
 
         /// <summary>
-        /// Set state transition finished.
+        ///     Set state transition finished.
         /// </summary>
         /// <param name="isFinished">State is finished.</param>
         void SetStateTransitionFinished(bool isFinished);
 
         /// <summary>
-        /// Stop animation.
+        ///     Stop animation.
         /// </summary>
         /// <param name="index">Playing motion index.</param>
         void StopAnimation(int index);

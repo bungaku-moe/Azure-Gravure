@@ -6,14 +6,15 @@
  */
 
 
+using System;
+using System.Collections.Generic;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework;
 using Live2D.Cubism.Framework.Expression;
 using Live2D.Cubism.Framework.Motion;
 using Live2D.Cubism.Framework.Raycasting;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
 {
@@ -22,75 +23,48 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
     public class CubismSampleController : MonoBehaviour
     {
         /// <summary>
-        /// MotionController to be operated.
+        ///     Operation animation clip from the inspector.
         /// </summary>
-        private CubismMotionController _motionController;
+        [SerializeField] private AnimationClip _bodyAnimation;
 
         /// <summary>
-        /// ExpressionController to be operated.
+        ///     Array of motion set in tapbody.
+        /// </summary>
+        [SerializeField] private AnimationClip[] _tapBodyMotions;
+
+        /// <summary>
+        ///     ExpressionController to be operated.
         /// </summary>
         private CubismExpressionController _expressionController;
 
         /// <summary>
-        /// Operation animation clip from the inspector.
-        /// </summary>
-        [SerializeField]
-        private AnimationClip _bodyAnimation;
-
-        /// <summary>
-        /// Array of motion set in tapbody.
-        /// </summary>
-        [SerializeField]
-        private AnimationClip[] _tapBodyMotions;
-
-        /// <summary>
-        /// Motion set in loop motion.
-        /// </summary>
-        private AnimationClip _loopMotion;
-
-        /// <summary>
-        /// List of Drawables info.
+        ///     List of Drawables info.
         /// </summary>
         private List<HitDrawableInfomation> _hasHitDrawables;
 
         /// <summary>
-        /// Component that performs ray judgment on Drawables of model.
+        ///     Motion set in loop motion.
+        /// </summary>
+        private AnimationClip _loopMotion;
+
+        /// <summary>
+        ///     MotionController to be operated.
+        /// </summary>
+        private CubismMotionController _motionController;
+
+        /// <summary>
+        ///     Component that performs ray judgment on Drawables of model.
         /// </summary>
         private CubismRaycaster _raycaster;
 
         /// <summary>
-        /// Raycast Hit Results.
+        ///     Raycast Hit Results.
         /// </summary>
         private CubismRaycastHit[] _raycastResults;
 
-        /// <summary>
-        /// Enumeration type for hit area discrimination.
-        /// </summary>
-        private enum HitArea
-        {
-            Head,
-            Body
-        }
 
         /// <summary>
-        /// Structure that stores Drawable information for which hit area is specified.
-        /// </summary>
-        private struct HitDrawableInfomation
-        {
-            /// <summary>
-            /// Drawable with component set.
-            /// </summary>
-            public CubismDrawable drawable;
-
-            /// <summary>
-            /// HitArea.
-            /// </summary>
-            public HitArea hitArea;
-        }
-
-
-        /// <summary>
-        /// Load model.
+        ///     Load model.
         /// </summary>
         private void Start()
         {
@@ -119,31 +93,27 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
 
 
                 for (var i = 0; i < hitAreas.Length; i++)
+                for (var j = 0; j < drawables.Length; j++)
                 {
-                    for (var j = 0; j < drawables.Length; j++)
-                    {
-                        var cubismHitDrawable = drawables[j].GetComponent<CubismHitDrawable>();
+                    var cubismHitDrawable = drawables[j].GetComponent<CubismHitDrawable>();
 
-                        if (cubismHitDrawable)
+                    if (cubismHitDrawable)
+                        if (cubismHitDrawable.Name == hitAreas.GetValue(i).ToString())
                         {
-                            if (cubismHitDrawable.Name == hitAreas.GetValue(i).ToString())
-                            {
-                                var hitDrawable = new HitDrawableInfomation();
-                                hitDrawable.drawable = drawables[j];
-                                hitDrawable.hitArea = (HitArea)i;
+                            var hitDrawable = new HitDrawableInfomation();
+                            hitDrawable.drawable = drawables[j];
+                            hitDrawable.hitArea = (HitArea)i;
 
-                                _hasHitDrawables.Add(hitDrawable);
-                                break;
-                            }
+                            _hasHitDrawables.Add(hitDrawable);
+                            break;
                         }
-                    }
                 }
             }
         }
 
 
         /// <summary>
-        /// Update.
+        ///     Update.
         /// </summary>
         private void Update()
         {
@@ -151,10 +121,7 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
             SpecifiedAnimationCheck();
 
 
-            if(!Input.GetMouseButtonDown(0))
-            {
-                return;
-            }
+            if (!Input.GetMouseButtonDown(0)) return;
 
 
             // Cast ray from pointer position.
@@ -168,7 +135,6 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
                 var hitDrawable = _raycastResults[i].Drawable;
 
                 for (var j = 0; j < _hasHitDrawables.Count; j++)
-                {
                     if (hitDrawable == _hasHitDrawables[j].drawable)
                     {
                         var hitArea = _hasHitDrawables[j].hitArea;
@@ -178,57 +144,83 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Demo
                         if (hitArea == HitArea.Body)
                         {
                             // Decide motion to play at random.
-                            var motionIndex = UnityEngine.Random.Range(0, _tapBodyMotions.Length);
+                            var motionIndex = Random.Range(0, _tapBodyMotions.Length);
 
                             Debug.Log("Tap body : Play : " + _tapBodyMotions[motionIndex].name);
 
-                            _motionController.PlayAnimation(_tapBodyMotions[motionIndex], isLoop: false, priority:CubismMotionPriority.PriorityNormal);
+                            _motionController.PlayAnimation(_tapBodyMotions[motionIndex], isLoop: false,
+                                priority: CubismMotionPriority.PriorityNormal);
                         }
                         // Tap head.
                         else if (hitArea == HitArea.Head)
                         {
                             // Decide expression motion to play at random.
                             var expressionNum = _expressionController.ExpressionsList.CubismExpressionObjects.Length;
-                            var expressionIndex = UnityEngine.Random.Range(0, expressionNum);
+                            var expressionIndex = Random.Range(0, expressionNum);
 
                             _expressionController.CurrentExpressionIndex = expressionIndex;
 
-                            Debug.Log("Tap head : Play : " + _expressionController.ExpressionsList.CubismExpressionObjects[expressionIndex].name);
+                            Debug.Log("Tap head : Play : " + _expressionController.ExpressionsList
+                                .CubismExpressionObjects[expressionIndex].name);
                         }
 
                         break;
                     }
-                }
             }
         }
 
 
         /// <summary>
-        /// Check the specified animation and play it.
+        ///     Check the specified animation and play it.
         /// </summary>
         private void SpecifiedAnimationCheck()
         {
-            if(_bodyAnimation != _loopMotion)
+            if (_bodyAnimation != _loopMotion)
             {
                 _loopMotion = _bodyAnimation;
 
                 Debug.Log("Body animation : Play : " + _loopMotion.name);
 
-                _motionController.PlayAnimation(_loopMotion, priority:CubismMotionPriority.PriorityIdle);
+                _motionController.PlayAnimation(_loopMotion, priority: CubismMotionPriority.PriorityIdle);
             }
         }
 
 
         /// <summary>
-        /// Called at the end of the animation.
+        ///     Called at the end of the animation.
         /// </summary>
         /// <param name="instanceId"></param>
         private void AnimationEnded(float instanceId)
         {
             // Play loop motion.
-            _motionController.PlayAnimation(_loopMotion, priority:CubismMotionPriority.PriorityIdle);
+            _motionController.PlayAnimation(_loopMotion, priority: CubismMotionPriority.PriorityIdle);
 
             Debug.Log("Body animation : Play : " + _loopMotion.name);
+        }
+
+        /// <summary>
+        ///     Enumeration type for hit area discrimination.
+        /// </summary>
+        private enum HitArea
+        {
+            Head,
+            Body
+        }
+
+        /// <summary>
+        ///     Structure that stores Drawable information for which hit area is specified.
+        /// </summary>
+        private struct HitDrawableInfomation
+        {
+            /// <summary>
+            ///     Drawable with component set.
+            /// </summary>
+            public CubismDrawable drawable;
+
+            /// <summary>
+            ///     HitArea.
+            /// </summary>
+            public HitArea hitArea;
         }
     }
 }

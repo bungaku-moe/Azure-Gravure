@@ -6,32 +6,21 @@
  */
 
 
-using AOT;
-using Live2D.Cubism.Core.Unmanaged;
 using System;
 using System.Runtime.InteropServices;
+using AOT;
+using Live2D.Cubism.Core.Unmanaged;
 using UnityEngine;
-
 
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    /// Wrapper for core logs.
+    ///     Wrapper for core logs.
     /// </summary>
     internal static class CubismLogging
     {
-        #region Delegates
-
         /// <summary>
-        /// Delegate compatible with unmanaged log function.
-        /// </summary>
-        /// <param name="message">Message to log.</param>
-        private unsafe delegate void UnmanagedLogDelegate(char* message);
-
-        #endregion
-
-        /// <summary>
-        /// Delegate to pass to native Api.
+        ///     Delegate to pass to native Api.
         /// </summary>
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private static UnmanagedLogDelegate LogDelegate { get; set; }
@@ -39,7 +28,7 @@ namespace Live2D.Cubism.Core
         #region Initialization
 
         /// <summary>
-        /// Registers delegates.
+        ///     Registers delegates.
         /// </summary>
         [RuntimeInitializeOnLoadMethod]
         // ReSharper disable once UnusedMember.Local
@@ -57,7 +46,7 @@ namespace Live2D.Cubism.Core
         #endregion
 
         /// <summary>
-        /// Prints an unmanaged, null-terminated message.
+        ///     Prints an unmanaged, null-terminated message.
         /// </summary>
         /// <param name="message">Message to log.</param>
         [MonoPInvokeCallback(typeof(UnmanagedLogDelegate))]
@@ -74,6 +63,16 @@ namespace Live2D.Cubism.Core
 
         [DllImport(CubismCoreDll.DllName)]
         private static extern void csmSetLogFunction(IntPtr logFunction);
+
+        #endregion
+
+        #region Delegates
+
+        /// <summary>
+        ///     Delegate compatible with unmanaged log function.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        private unsafe delegate void UnmanagedLogDelegate(char* message);
 
         #endregion
     }
