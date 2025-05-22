@@ -11,25 +11,95 @@ using System.Collections.Generic;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.MouthMovement;
 using Live2D.Cubism.Rendering;
-using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine;
 
 
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    ///     Contains Cubism motion3.json data.
+    /// Contains Cubism motion3.json data.
     /// </summary>
     [Serializable]
     // ReSharper disable once ClassCannotBeInstantiated
     public sealed class CubismMotion3Json
     {
+        #region Load Methods
+
+        /// <summary>
+        /// Loads a motion3.json asset.
+        /// </summary>
+        /// <param name="motion3Json">motion3.json to deserialize.</param>
+        /// <returns>Deserialized motion3.json on success; <see langword="null"/> otherwise.</returns>
+        public static CubismMotion3Json LoadFrom(string motion3Json)
+        {
+            if (string.IsNullOrEmpty(motion3Json))
+            {
+                return null;
+            }
+
+            var cubismMotion3Json = JsonUtility.FromJson<CubismMotion3Json>(motion3Json);
+
+            cubismMotion3Json.Meta.FadeInTime = -1.0f;
+            cubismMotion3Json.Meta.FadeOutTime = -1.0f;
+            for (var i = 0; i < cubismMotion3Json.Curves.Length; ++i)
+            {
+                cubismMotion3Json.Curves[i].FadeInTime = -1.0f;
+                cubismMotion3Json.Curves[i].FadeOutTime = -1.0f;
+            }
+            JsonUtility.FromJsonOverwrite(motion3Json, cubismMotion3Json);
+
+            return cubismMotion3Json;
+        }
+
+        /// <summary>
+        /// Loads a motion3.json asset.
+        /// </summary>
+        /// <param name="motion3JsonAsset">motion3.json to deserialize.</param>
+        /// <returns>Deserialized motion3.json on success; <see langword="null"/> otherwise.</returns>
+        public static CubismMotion3Json LoadFrom(TextAsset motion3JsonAsset)
+        {
+            return (motion3JsonAsset == null)
+                ? null
+                : LoadFrom(motion3JsonAsset.text);
+        }
+
+        #endregion
+
+        #region Json Data
+
+        /// <summary>
+        /// The model3.json format version.
+        /// </summary>
+        [SerializeField]
+        public int Version;
+
+        /// <summary>
+        /// Motion meta info.
+        /// </summary>
+        [SerializeField]
+        public SerializableMeta Meta;
+
+        /// <summary>
+        /// Curves.
+        /// </summary>
+        [SerializeField]
+        public SerializableCurve[] Curves;
+
+        /// <summary>
+        /// User data.
+        /// </summary>
+        [SerializeField]
+        public SerializableUserData[] UserData;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
-        ///     Makes construction only possible through factories.
+        /// Makes construction only possible through factories.
         /// </summary>
         private CubismMotion3Json()
         {
@@ -38,21 +108,27 @@ namespace Live2D.Cubism.Framework.Json
         #endregion
 
         /// <summary>
-        ///     Converts motion curve segments into <see cref="Keyframe" />s.
+        /// Converts motion curve segments into <see cref="Keyframe"/>s.
         /// </summary>
         /// <param name="segments">Data to convert.</param>
         /// <returns>Keyframes.</returns>
         public static Keyframe[] ConvertCurveSegmentsToKeyframes(float[] segments)
         {
             // Return early on invalid input.
-            if (segments.Length < 1) return new Keyframe[0];
+            if (segments.Length < 1)
+            {
+                return new Keyframe[0];
+            }
 
             // Initialize container for keyframes.
-            var keyframes = new List<Keyframe> { new(segments[0], segments[1]) };
+            var keyframes = new List<Keyframe> { new Keyframe(segments[0], segments[1]) };
 
 
             // Parse segments.
-            for (var i = 2; i < segments.Length;) Parsers[segments[i]](segments, keyframes, ref i);
+            for (var i = 2; i < segments.Length;)
+            {
+                Parsers[segments[i]](segments, keyframes, ref i);
+            }
 
 
             // Return result.
@@ -60,27 +136,27 @@ namespace Live2D.Cubism.Framework.Json
         }
 
         /// <summary>
-        ///     Converts stepped curves to liner curves.
+        /// Converts stepped curves to liner curves.
         /// </summary>
         /// <param name="curve">Data to convert.</param>
         /// <returns>Animation curve.</returns>
-        public static AnimationCurve ConvertSteppedCurveToLinerCurver(SerializableCurve curve, float poseFadeInTime)
+        public static AnimationCurve ConvertSteppedCurveToLinerCurver(CubismMotion3Json.SerializableCurve curve, float poseFadeInTime)
         {
-            poseFadeInTime = poseFadeInTime < 0 ? 0.5f : poseFadeInTime;
+            poseFadeInTime = (poseFadeInTime < 0) ? 0.5f : poseFadeInTime;
 
             var segments = curve.Segments;
             var segmentsCount = 2;
 
-            for (var index = 2; index < curve.Segments.Length; index += 3)
+            for(var index = 2; index < curve.Segments.Length; index += 3)
             {
                 // if current segment type is stepped and
                 // next segment type is stepped or next segment is last segment
                 // then convert segment type to liner.
-                var currentSegmentTypeIsStepped = curve.Segments[index] == 2;
-                var currentSegmentIsLast = index == curve.Segments.Length - 3;
-                var nextSegmentTypeIsStepped = currentSegmentIsLast ? false : curve.Segments[index + 3] == 2;
-                var nextSegmentIsLast = currentSegmentIsLast ? false : index + 3 == curve.Segments.Length - 3;
-                if (currentSegmentTypeIsStepped && (nextSegmentTypeIsStepped || nextSegmentIsLast))
+                var currentSegmentTypeIsStepped = (curve.Segments[index] == 2);
+                var currentSegmentIsLast = (index == (curve.Segments.Length - 3));
+                var nextSegmentTypeIsStepped = (currentSegmentIsLast) ? false : (curve.Segments[index + 3] == 2);
+                var nextSegmentIsLast = (currentSegmentIsLast) ? false : ((index + 3) == (curve.Segments.Length - 3));
+                if ( currentSegmentTypeIsStepped && (nextSegmentTypeIsStepped || nextSegmentIsLast) )
                 {
                     Array.Resize(ref segments, segments.Length + 3);
                     segments[segmentsCount + 0] = 0;
@@ -91,7 +167,7 @@ namespace Live2D.Cubism.Framework.Json
                     segments[segmentsCount + 5] = curve.Segments[index + 2];
                     segmentsCount += 6;
                 }
-                else if (curve.Segments[index] == 1)
+                else if(curve.Segments[index] == 1)
                 {
                     segments[segmentsCount + 0] = curve.Segments[index + 0];
                     segments[segmentsCount + 1] = curve.Segments[index + 1];
@@ -117,24 +193,24 @@ namespace Live2D.Cubism.Framework.Json
 
 
         /// <summary>
-        ///     Instantiates an <see cref="AnimationClip" />.
+        /// Instantiates an <see cref="AnimationClip"/>.
         /// </summary>
         /// <param name="shouldImportAsOriginalWorkflow">Should import as original workflow.</param>
         /// <param name="shouldClearAnimationCurves">Should clear animation clip curves.</param>
-        /// <param name="isCallFormModelJson">Is function call form <see cref="CubismModel3Json" />.</param>
+        /// <param name="isCallFormModelJson">Is function call form <see cref="CubismModel3Json"/>.</param>
         /// <param name="poseJson">pose3.json asset.</param>
-        /// <returns>The instantiated clip on success; <see langword="null" /> otherwise.</returns>
+        /// <returns>The instantiated clip on success; <see langword="null"/> otherwise.</returns>
         /// <remarks>
-        ///     Note this method generates <see cref="AnimationClip.legacy" /> clips when called at runtime.
+        /// Note this method generates <see cref="AnimationClip.legacy"/> clips when called at runtime.
         /// </remarks>
-        public AnimationClip ToAnimationClip(bool shouldImportAsOriginalWorkflow = false,
-            bool shouldClearAnimationCurves = false,
-            bool isCallFormModelJson = false, CubismPose3Json poseJson = null)
+        public AnimationClip ToAnimationClip(bool shouldImportAsOriginalWorkflow = false, bool shouldClearAnimationCurves = false,
+                                             bool isCallFormModelJson = false, CubismPose3Json poseJson = null)
         {
             // Check béziers restriction flag.
             if (!Meta.AreBeziersRestricted)
-                Debug.LogWarning(
-                    "Béziers are not restricted and curves might be off. Please export motions from Cubism in restricted mode for perfect match.");
+            {
+                Debug.LogWarning("Béziers are not restricted and curves might be off. Please export motions from Cubism in restricted mode for perfect match.");
+            }
 
 
             // Create animation clip.
@@ -151,30 +227,29 @@ namespace Live2D.Cubism.Framework.Json
 #endif
             };
 
-            return ToAnimationClip(animationClip, shouldImportAsOriginalWorkflow, shouldClearAnimationCurves,
-                isCallFormModelJson, poseJson);
+            return ToAnimationClip(animationClip, shouldImportAsOriginalWorkflow, shouldClearAnimationCurves, isCallFormModelJson, poseJson);
         }
 
         /// <summary>
-        ///     Instantiates an <see cref="AnimationClip" />.
+        /// Instantiates an <see cref="AnimationClip"/>.
         /// </summary>
         /// <param name="animationClip">Previous animation clip.</param>
         /// <param name="shouldImportAsOriginalWorkflow">Should import as original workflow.</param>
         /// <param name="shouldClearAnimationCurves">Should clear animation clip curves.</param>
-        /// <param name="isCallFormModelJson">Is function call form <see cref="CubismModel3Json" />.</param>
+        /// <param name="isCallFormModelJson">Is function call form <see cref="CubismModel3Json"/>.</param>
         /// <param name="poseJson">pose3.json asset.</param>
-        /// <returns>The instantiated clip on success; <see langword="null" /> otherwise.</returns>
+        /// <returns>The instantiated clip on success; <see langword="null"/> otherwise.</returns>
         /// <remarks>
-        ///     Note this method generates <see cref="AnimationClip.legacy" /> clips when called at runtime.
+        /// Note this method generates <see cref="AnimationClip.legacy"/> clips when called at runtime.
         /// </remarks>
-        public AnimationClip ToAnimationClip(AnimationClip animationClip, bool shouldImportAsOriginalWorkflow = false,
-            bool shouldClearAnimationCurves = false
-            , bool isCallFormModelJson = false, CubismPose3Json poseJson = null)
+        public AnimationClip ToAnimationClip(AnimationClip animationClip, bool shouldImportAsOriginalWorkflow = false, bool shouldClearAnimationCurves = false
+                                                                        , bool isCallFormModelJson = false, CubismPose3Json poseJson = null)
         {
             // Clear curves.
-            if (!shouldImportAsOriginalWorkflow ||
-                (isCallFormModelJson && shouldImportAsOriginalWorkflow && shouldClearAnimationCurves))
+            if (!shouldImportAsOriginalWorkflow || (isCallFormModelJson && shouldImportAsOriginalWorkflow && shouldClearAnimationCurves))
+            {
                 animationClip.ClearCurves();
+            }
 
             // Convert curves.
             for (var i = 0; i < Curves.Length; ++i)
@@ -182,7 +257,10 @@ namespace Live2D.Cubism.Framework.Json
                 var curve = Curves[i];
 
                 // If should import as original workflow mode, skip add part opacity curve when call not from model3.json.
-                if (curve.Target == "PartOpacity" && shouldImportAsOriginalWorkflow && !isCallFormModelJson) continue;
+                if (curve.Target == "PartOpacity" && shouldImportAsOriginalWorkflow && !isCallFormModelJson)
+                {
+                    continue;
+                }
 
                 var relativePath = string.Empty;
                 var type = default(Type);
@@ -235,7 +313,9 @@ namespace Live2D.Cubism.Framework.Json
 
                     // original workflow.
                     if (shouldImportAsOriginalWorkflow && poseJson != null && poseJson.FadeInTime != 0.0f)
+                    {
                         animationCurve = ConvertSteppedCurveToLinerCurver(curve, poseJson.FadeInTime);
+                    }
                 }
 
 
@@ -280,7 +360,7 @@ namespace Live2D.Cubism.Framework.Json
                     var animationEvent = new AnimationEvent
                     {
                         time = UserData[i].Time,
-                        stringParameter = UserData[i].Value
+                        stringParameter = UserData[i].Value,
                     };
 
 
@@ -289,86 +369,24 @@ namespace Live2D.Cubism.Framework.Json
 
 
                 if (animationEvents.Count > 0)
+                {
                     AnimationUtility.SetAnimationEvents(animationClip, animationEvents.ToArray());
+                }
             }
 #endif
 
             return animationClip;
         }
 
-        #region Load Methods
-
-        /// <summary>
-        ///     Loads a motion3.json asset.
-        /// </summary>
-        /// <param name="motion3Json">motion3.json to deserialize.</param>
-        /// <returns>Deserialized motion3.json on success; <see langword="null" /> otherwise.</returns>
-        public static CubismMotion3Json LoadFrom(string motion3Json)
-        {
-            if (string.IsNullOrEmpty(motion3Json)) return null;
-
-            var cubismMotion3Json = JsonUtility.FromJson<CubismMotion3Json>(motion3Json);
-
-            cubismMotion3Json.Meta.FadeInTime = -1.0f;
-            cubismMotion3Json.Meta.FadeOutTime = -1.0f;
-            for (var i = 0; i < cubismMotion3Json.Curves.Length; ++i)
-            {
-                cubismMotion3Json.Curves[i].FadeInTime = -1.0f;
-                cubismMotion3Json.Curves[i].FadeOutTime = -1.0f;
-            }
-
-            JsonUtility.FromJsonOverwrite(motion3Json, cubismMotion3Json);
-
-            return cubismMotion3Json;
-        }
-
-        /// <summary>
-        ///     Loads a motion3.json asset.
-        /// </summary>
-        /// <param name="motion3JsonAsset">motion3.json to deserialize.</param>
-        /// <returns>Deserialized motion3.json on success; <see langword="null" /> otherwise.</returns>
-        public static CubismMotion3Json LoadFrom(TextAsset motion3JsonAsset)
-        {
-            return motion3JsonAsset == null
-                ? null
-                : LoadFrom(motion3JsonAsset.text);
-        }
-
-        #endregion
-
-        #region Json Data
-
-        /// <summary>
-        ///     The model3.json format version.
-        /// </summary>
-        [SerializeField] public int Version;
-
-        /// <summary>
-        ///     Motion meta info.
-        /// </summary>
-        [SerializeField] public SerializableMeta Meta;
-
-        /// <summary>
-        ///     Curves.
-        /// </summary>
-        [SerializeField] public SerializableCurve[] Curves;
-
-        /// <summary>
-        ///     User data.
-        /// </summary>
-        [SerializeField] public SerializableUserData[] UserData;
-
-        #endregion
-
         #region Segment Parsing
 
         /// <summary>
-        ///     Offset to use for setting of keyframes.
+        /// Offset to use for setting of keyframes.
         /// </summary>
         private const float OffsetGranularity = 0.01f;
 
         /// <summary>
-        ///     Handles parsing of a single segment.
+        /// Handles parsing of a single segment.
         /// </summary>
         /// <param name="segments">Curve segments.</param>
         /// <param name="result">Buffer to append result to.</param>
@@ -377,20 +395,20 @@ namespace Live2D.Cubism.Framework.Json
 
 
         /// <summary>
-        ///     Available segment parsers.
+        /// Available segment parsers.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        private static Dictionary<float, SegmentParser> Parsers = new()
+        private static Dictionary<float, SegmentParser> Parsers = new Dictionary<float, SegmentParser>
         {
-            { 0f, ParseLinearSegment },
-            { 1f, ParseBezierSegment },
-            { 2f, ParseSteppedSegment },
-            { 3f, ParseInverseSteppedSegment }
+            {0f, ParseLinearSegment},
+            {1f, ParseBezierSegment},
+            {2f, ParseSteppedSegment},
+            {3f, ParseInverseSteppedSegment}
         };
 
 
         /// <summary>
-        ///     Parses a linear segment.
+        /// Parses a linear segment.
         /// </summary>
         /// <param name="segments">Curve segments.</param>
         /// <param name="result">Buffer to append result to.</param>
@@ -398,7 +416,7 @@ namespace Live2D.Cubism.Framework.Json
         private static void ParseLinearSegment(float[] segments, List<Keyframe> result, ref int position)
         {
             // Compute slope.
-            var length = segments[position + 1] - result[result.Count - 1].time;
+            var length = (segments[position + 1] - result[result.Count - 1].time);
             var slope = (segments[position + 2] - result[result.Count - 1].value) / length;
 
 
@@ -431,7 +449,7 @@ namespace Live2D.Cubism.Framework.Json
         }
 
         /// <summary>
-        ///     Parses a bezier segment.
+        /// Parses a bezier segment.
         /// </summary>
         /// <param name="segments">Curve segments.</param>
         /// <param name="result">Buffer to append result to.</param>
@@ -470,7 +488,7 @@ namespace Live2D.Cubism.Framework.Json
         }
 
         /// <summary>
-        ///     Parses a stepped segment.
+        /// Parses a stepped segment.
         /// </summary>
         /// <param name="segments">Curve segments.</param>
         /// <param name="result">Buffer to append result to.</param>
@@ -490,7 +508,7 @@ namespace Live2D.Cubism.Framework.Json
         }
 
         /// <summary>
-        ///     Parses a inverse-stepped segment.
+        /// Parses a inverse-stepped segment.
         /// </summary>
         /// <param name="segments">Curve segments.</param>
         /// <param name="result">Buffer to append result to.</param>
@@ -501,8 +519,8 @@ namespace Live2D.Cubism.Framework.Json
             var keyframe = result[result.Count - 1];
 
             var tangent = (float)Math.Atan2(
-                segments[position + 2] - keyframe.value,
-                segments[position + 1] - keyframe.time);
+                (segments[position + 2] - keyframe.value),
+                (segments[position + 1] - keyframe.time));
 
 
             keyframe.outTangent = tangent;
@@ -532,114 +550,132 @@ namespace Live2D.Cubism.Framework.Json
         #region Json Object Types
 
         /// <summary>
-        ///     Motion meta info.
+        /// Motion meta info.
         /// </summary>
         [Serializable]
         public struct SerializableMeta
         {
             /// <summary>
-            ///     Duration in seconds.
+            /// Duration in seconds.
             /// </summary>
-            [SerializeField] public float Duration;
+            [SerializeField]
+            public float Duration;
 
             /// <summary>
-            ///     Framerate in seconds.
+            /// Framerate in seconds.
             /// </summary>
-            [SerializeField] public float Fps;
+            [SerializeField]
+            public float Fps;
 
             /// <summary>
-            ///     True if motion is looping.
+            /// True if motion is looping.
             /// </summary>
-            [SerializeField] public bool Loop;
+            [SerializeField]
+            public bool Loop;
 
             /// <summary>
-            ///     Number of curves.
+            /// Number of curves.
             /// </summary>
-            [SerializeField] public int CurveCount;
+            [SerializeField]
+            public int CurveCount;
 
             /// <summary>
-            ///     Total number of curve segments.
+            /// Total number of curve segments.
             /// </summary>
-            [SerializeField] public int TotalSegmentCount;
+            [SerializeField]
+            public int TotalSegmentCount;
 
             /// <summary>
-            ///     Total number of curve points.
+            /// Total number of curve points.
             /// </summary>
-            [SerializeField] public int TotalPointCount;
+            [SerializeField]
+            public int TotalPointCount;
 
             /// <summary>
-            ///     True if beziers are restricted.
+            /// True if beziers are restricted.
             /// </summary>
-            [SerializeField] public bool AreBeziersRestricted;
+            [SerializeField]
+            public bool AreBeziersRestricted;
 
             /// <summary>
-            ///     Total number of UserData.
+            /// Total number of UserData.
             /// </summary>
-            [SerializeField] public int UserDataCount;
+            [SerializeField]
+            public int UserDataCount;
 
             /// <summary>
-            ///     Total size of UserData in bytes.
+            /// Total size of UserData in bytes.
             /// </summary>
-            [SerializeField] public int TotalUserDataSize;
+            [SerializeField]
+            public int TotalUserDataSize;
 
             /// <summary>
-            ///     [Optional] Time of the Fade-In for easing in seconds.
+            /// [Optional] Time of the Fade-In for easing in seconds.
             /// </summary>
-            [SerializeField] public float FadeInTime;
+            [SerializeField]
+            public float FadeInTime;
 
             /// <summary>
-            ///     [Optional] Time of the Fade-Out for easing in seconds.
+            /// [Optional] Time of the Fade-Out for easing in seconds.
             /// </summary>
-            [SerializeField] public float FadeOutTime;
-        }
+            [SerializeField]
+            public float FadeOutTime;
+        };
 
         /// <summary>
-        ///     Single motion curve.
+        /// Single motion curve.
         /// </summary>
         [Serializable]
         public struct SerializableCurve
         {
             /// <summary>
-            ///     Target type.
+            /// Target type.
             /// </summary>
-            [SerializeField] public string Target;
+            [SerializeField]
+            public string Target;
 
             /// <summary>
-            ///     Id within target.
+            /// Id within target.
             /// </summary>
-            [SerializeField] public string Id;
+            [SerializeField]
+            public string Id;
 
             /// <summary>
-            ///     Flattened curve segments.
+            /// Flattened curve segments.
             /// </summary>
-            [SerializeField] public float[] Segments;
+            [SerializeField]
+            public float[] Segments;
 
             /// <summary>
-            ///     [Optional] Time of the overall Fade-In for easing in seconds.
+            /// [Optional] Time of the overall Fade-In for easing in seconds.
             /// </summary>
-            [SerializeField] public float FadeInTime;
+            [SerializeField]
+            public float FadeInTime;
 
             /// <summary>
-            ///     [Optional] Time of the overall Fade-Out for easing in seconds.
+            /// [Optional] Time of the overall Fade-Out for easing in seconds.
             /// </summary>
-            [SerializeField] public float FadeOutTime;
-        }
+            [SerializeField]
+            public float FadeOutTime;
+        };
 
         /// <summary>
-        ///     User data.
+        /// User data.
         /// </summary>
         [Serializable]
         public struct SerializableUserData
         {
             /// <summary>
-            ///     Time in seconds.
+            /// Time in seconds.
             /// </summary>
-            [SerializeField] public float Time;
+            [SerializeField]
+            public float Time;
 
             /// <summary>
-            ///     Content of user data.
+            /// Content of user data.
             /// </summary>
-            [SerializeField] public string Value;
+            [SerializeField]
+            public string Value;
         }
 
         #endregion

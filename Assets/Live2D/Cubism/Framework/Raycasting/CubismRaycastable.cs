@@ -8,15 +8,16 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.Raycasting
 {
     /// <summary>
-    ///     Allows raycasting against <see cref="Core.CubismDrawable" />s.
+    /// Allows raycasting against <see cref="Core.CubismDrawable"/>s.
     /// </summary>
     public sealed class CubismRaycastable : MonoBehaviour
     {
         /// <summary>
-        ///     The precision.
+        /// The precision.
         /// </summary>
         public CubismRaycastablePrecision Precision;
     }

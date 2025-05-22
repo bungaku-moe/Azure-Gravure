@@ -9,32 +9,34 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace Live2D.Cubism.Samples.AsyncBenchmark
 {
     /// <summary>
-    ///     Measures Fps for on-screen display.
+    /// Measures Fps for on-screen display.
     /// </summary>
     public sealed class FpsCounter : MonoBehaviour
     {
         /// <summary>
-        ///     UI component representing current model count.
+        /// UI component representing current model count.
         /// </summary>
-        [SerializeField] public Text FpsUi;
+        [SerializeField]
+        public Text FpsUi;
 
         /// <summary>
-        ///     Frame rate propertie to get from external sources.
+        /// Frame rate propertie to get from external sources.
         /// </summary>
         public float Fps { get; private set; }
 
         /// <summary>
-        ///     Time for FPS calculation.
+        /// Time for FPS calculation.
         /// </summary>
         private float DeltaTime { get; set; }
 
         #region Unity Event Handling
 
         /// <summary>
-        ///     Called by Unity. Initializes fields.
+        /// Called by Unity. Initializes fields.
         /// </summary>
         private void Update()
         {

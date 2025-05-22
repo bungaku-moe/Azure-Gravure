@@ -9,44 +9,50 @@
 using System;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.Physics
 {
     /// <summary>
-    ///     Normalization tuplet.
+    /// Normalization tuplet.
     /// </summary>
     [Serializable]
     public struct CubismPhysicsNormalizationTuplet
     {
         /// <summary>
-        ///     Normalized maximum value.
+        /// Normalized maximum value.
         /// </summary>
-        [SerializeField] public float Maximum;
+        [SerializeField]
+        public float Maximum;
 
         /// <summary>
-        ///     Normalized minimum value.
+        /// Normalized minimum value.
         /// </summary>
-        [SerializeField] public float Minimum;
+        [SerializeField]
+        public float Minimum;
 
         /// <summary>
-        ///     Normalized default value.
+        /// Normalized default value.
         /// </summary>
-        [SerializeField] public float Default;
+        [SerializeField]
+        public float Default;
     }
 
     /// <summary>
-    ///     Normalization parameters of physics.
+    /// Normalization parameters of physics.
     /// </summary>
     [Serializable]
     public struct CubismPhysicsNormalization
     {
         /// <summary>
-        ///     Normalized position.
+        /// Normalized position.
         /// </summary>
-        [SerializeField] public CubismPhysicsNormalizationTuplet Position;
+        [SerializeField]
+        public CubismPhysicsNormalizationTuplet Position;
 
         /// <summary>
-        ///     Normalized angle.
+        /// Normalized angle.
         /// </summary>
-        [SerializeField] public CubismPhysicsNormalizationTuplet Angle;
+        [SerializeField]
+        public CubismPhysicsNormalizationTuplet Angle;
     }
 }

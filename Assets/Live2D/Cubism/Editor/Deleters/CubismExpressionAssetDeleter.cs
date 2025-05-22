@@ -6,24 +6,26 @@
  */
 
 
+using Live2D.Cubism.Framework.Expression;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Live2D.Cubism.Framework.Expression;
 using UnityEditor;
+
 
 namespace Live2D.Cubism.Editor.Deleters
 {
     /// <summary>
-    ///     Handles importing of Cubism models.
+    /// Handles importing of Cubism models.
     /// </summary>
     [Serializable]
     public sealed class CubismExpressionAssetDeleter : CubismDeleterBase
     {
+
         #region Unity Event Handling
 
         /// <summary>
-        ///     Registers deleter.
+        /// Registers deleter.
         /// </summary>
         [InitializeOnLoadMethod]
         // ReSharper disable once UnusedMember.Local
@@ -37,17 +39,20 @@ namespace Live2D.Cubism.Editor.Deleters
         #region CubismDeleterBase
 
         /// <summary>
-        ///     Deleters the corresponding asset.
+        /// Deleters the corresponding asset.
         /// </summary>
         public override void Delete()
         {
-            var directoryName = Path.GetDirectoryName(AssetPath);
-            var modelDir = Path.GetDirectoryName(directoryName);
-            var modelName = Path.GetFileName(modelDir);
-            var expressionListPath = Path.GetDirectoryName(directoryName) + "/" + modelName + ".expressionList.asset";
+            var directoryName = Path.GetDirectoryName(AssetPath).ToString();
+            var modelDir = Path.GetDirectoryName(directoryName).ToString();
+            var modelName = Path.GetFileName(modelDir).ToString();
+            var expressionListPath = Path.GetDirectoryName(directoryName).ToString() + "/" + modelName + ".expressionList.asset";
             var expressionList = AssetDatabase.LoadAssetAtPath<CubismExpressionList>(expressionListPath);
 
-            if (expressionList == null) return;
+            if (expressionList == null)
+            {
+                return;
+            }
 
             var deleteAssetName = Path.GetFileName(AssetPath).Replace(".asset", "");
             var expressionObjects = new List<CubismExpressionData>();
@@ -56,7 +61,10 @@ namespace Live2D.Cubism.Editor.Deleters
             {
                 var expression = expressionList.CubismExpressionObjects[i];
 
-                if (expression == null || expression.name == deleteAssetName) continue;
+                if (expression == null || expression.name == deleteAssetName)
+                {
+                    continue;
+                }
 
                 expressionObjects.Add(expression);
             }
@@ -65,5 +73,6 @@ namespace Live2D.Cubism.Editor.Deleters
         }
 
         #endregion
+
     }
 }

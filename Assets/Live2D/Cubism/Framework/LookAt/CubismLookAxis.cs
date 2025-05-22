@@ -9,22 +9,22 @@
 namespace Live2D.Cubism.Framework.LookAt
 {
     /// <summary>
-    ///     Look axis.
+    /// Look axis.
     /// </summary>
     public enum CubismLookAxis
     {
         /// <summary>
-        ///     X axis.
+        /// X axis.
         /// </summary>
         X,
 
         /// <summary>
-        ///     Y axis.
+        /// Y axis.
         /// </summary>
         Y,
 
         /// <summary>
-        ///     Z axis.
+        /// Z axis.
         /// </summary>
         Z
     }

@@ -6,43 +6,45 @@
  */
 
 
+using UnityEngine;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.Raycasting;
-using UnityEngine;
-using UnityEngine.UI;
+
 
 namespace Live2D.Cubism.Samples.Raycasting
 {
     /// <summary>
-    ///     Casts rays against a <see cref="Model" /> and displays results.
+    /// Casts rays against a <see cref="Model"/> and displays results.
     /// </summary>
     public sealed class RaycastHitDisplay : MonoBehaviour
     {
         /// <summary>
-        ///     <see cref="CubismModel" /> to cast rays against.
+        /// <see cref="CubismModel"/> to cast rays against.
         /// </summary>
-        [SerializeField] public CubismModel Model;
+        [SerializeField]
+        public CubismModel Model;
 
 
         /// <summary>
-        ///     UI element to display results in.
+        /// UI element to display results in.
         /// </summary>
-        [SerializeField] public Text ResultsText;
+        [SerializeField]
+        public UnityEngine.UI.Text ResultsText;
 
 
         /// <summary>
-        ///     <see cref="CubismRaycaster" /> attached to <see cref="Model" />.
+        /// <see cref="CubismRaycaster"/> attached to <see cref="Model"/>.
         /// </summary>
         private CubismRaycaster Raycaster { get; set; }
 
         /// <summary>
-        ///     Buffer for raycast results.
+        /// Buffer for raycast results.
         /// </summary>
         private CubismRaycastHit[] Results { get; set; }
 
 
         /// <summary>
-        ///     Hit test.
+        /// Hit test.
         /// </summary>
         private void DoRaycast()
         {
@@ -65,13 +67,16 @@ namespace Live2D.Cubism.Samples.Raycasting
             ResultsText.text = hitCount + "\n";
 
 
-            for (var i = 0; i < hitCount; i++) ResultsText.text += Results[i].Drawable.name + "\n";
+            for (var i = 0; i < hitCount; i++)
+            {
+                ResultsText.text += Results[i].Drawable.name + "\n";
+            }
         }
 
         #region Unity Event Handling
 
         /// <summary>
-        ///     Called by Unity. Initializes instance.
+        /// Called by Unity. Initializes instance.
         /// </summary>
         private void Start()
         {
@@ -80,12 +85,15 @@ namespace Live2D.Cubism.Samples.Raycasting
         }
 
         /// <summary>
-        ///     Called by Unity. Triggers raycasting.
+        /// Called by Unity. Triggers raycasting.
         /// </summary>
         private void Update()
         {
             // Return early in case of no user interaction.
-            if (!Input.GetMouseButtonDown(0)) return;
+            if (!Input.GetMouseButtonDown(0))
+            {
+                return;
+            }
 
 
             DoRaycast();

@@ -13,8 +13,9 @@ namespace Live2D.Cubism.Framework.Expression
     public class CubismExpressionList : ScriptableObject
     {
         /// <summary>
-        ///     Cubism expression objects.
+        /// Cubism expression objects.
         /// </summary>
-        [SerializeField] public CubismExpressionData[] CubismExpressionObjects;
+        [SerializeField]
+        public CubismExpressionData[] CubismExpressionObjects;
     }
 }

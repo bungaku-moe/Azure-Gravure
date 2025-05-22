@@ -12,21 +12,22 @@ using UnityEditor;
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    ///     Inspector for <see cref="CubismLookParameter" />s.
+    /// Inspector for <see cref="CubismLookParameter"/>s.
     /// </summary>
-    [CustomEditor(typeof(CubismLookParameter))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(CubismLookParameter)), CanEditMultipleObjects]
     public class CubismLookParameterInspector : UnityEditor.Editor
     {
         #region Editor
-
         /// <summary>
-        ///     Draws inspector.
+        /// Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
             // Fail silently.
-            if (serializedObject == null) return;
+            if (serializedObject == null)
+            {
+                return;
+            }
 
 
             serializedObject.Update();
@@ -45,9 +46,11 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Save any changes.
-            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            if (EditorGUI.EndChangeCheck())
+            {
+                serializedObject.ApplyModifiedProperties();
+            }
         }
-
         #endregion
     }
 }

@@ -11,12 +11,12 @@ namespace Live2D.Cubism.Framework.MotionFade
     public enum CubismFadeCurveType
     {
         /// <summary>
-        ///     Parameter.
+        /// Parameter.
         /// </summary>
         Parameter,
 
         /// <summary>
-        ///     Part opacity.
+        /// Part opacity.
         /// </summary>
         Part
     }

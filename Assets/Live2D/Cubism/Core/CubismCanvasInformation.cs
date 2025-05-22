@@ -8,17 +8,19 @@
 
 using Live2D.Cubism.Core.Unmanaged;
 using Live2D.Cubism.Framework;
+using UnityEngine;
+
 
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    ///     Single <see cref="CubismModel" /> canvas information.
+    /// Single <see cref="CubismModel"/> canvas information.
     /// </summary>
     [CubismDontMoveOnReimport]
     public sealed class CubismCanvasInformation
     {
         /// <summary>
-        ///     Initializes instance.
+        /// Initializes instance.
         /// </summary>
         /// <param name="unmanagedModel">Handle to unmanaged model.</param>
         public CubismCanvasInformation(CubismUnmanagedModel unmanagedModel)
@@ -28,53 +30,78 @@ namespace Live2D.Cubism.Core
 
 
         /// <summary>
-        ///     Unmanaged canvas information from unmanaged model.
+        /// Unmanaged canvas information from unmanaged model.
         /// </summary>
         private CubismUnmanagedCanvasInformation UnmanagedCanvasInformation { get; set; }
 
 
         /// <summary>
-        ///     Width of native model canvas.
+        /// Width of native model canvas.
         /// </summary>
-        public float CanvasWidth =>
-            // Pull data.
-            UnmanagedCanvasInformation.CanvasWidth;
+        public float CanvasWidth
+        {
+            get
+            {
+                // Pull data.
+                return UnmanagedCanvasInformation.CanvasWidth;
+            }
+        }
 
 
         /// <summary>
-        ///     Height of native model canvas.
+        /// Height of native model canvas.
         /// </summary>
-        public float CanvasHeight =>
-            // Pull data.
-            UnmanagedCanvasInformation.CanvasHeight;
+        public float CanvasHeight
+        {
+            get
+            {
+                // Pull data.
+                return UnmanagedCanvasInformation.CanvasHeight;
+            }
+        }
 
 
         /// <summary>
-        ///     Coordinate origin of X axis.
+        /// Coordinate origin of X axis.
         /// </summary>
-        public float CanvasOriginX =>
-            // Pull data.
-            UnmanagedCanvasInformation.CanvasOriginX;
+        public float CanvasOriginX
+        {
+            get
+            {
+                // Pull data.
+                return UnmanagedCanvasInformation.CanvasOriginX;
+            }
+        }
 
 
         /// <summary>
-        ///     Coordinate origin of Y axis.
+        /// Coordinate origin of Y axis.
         /// </summary>
-        public float CanvasOriginY =>
-            // Pull data.
-            UnmanagedCanvasInformation.CanvasOriginY;
+        public float CanvasOriginY
+        {
+            get
+            {
+                // Pull data.
+                return UnmanagedCanvasInformation.CanvasOriginY;
+            }
+        }
 
 
         /// <summary>
-        ///     Pixels per unit of native model.
+        /// Pixels per unit of native model.
         /// </summary>
-        public float PixelsPerUnit =>
-            // Pull data.
-            UnmanagedCanvasInformation.PixelsPerUnit;
+        public float PixelsPerUnit
+        {
+            get
+            {
+                // Pull data.
+                return UnmanagedCanvasInformation.PixelsPerUnit;
+            }
+        }
 
 
         /// <summary>
-        ///     Revives the instance.
+        /// Revives the instance.
         /// </summary>
         /// <param name="unmanagedModel">Handle to unmanaged model.</param>
         internal void Revive(CubismUnmanagedModel unmanagedModel)
@@ -83,7 +110,7 @@ namespace Live2D.Cubism.Core
         }
 
         /// <summary>
-        ///     Restores instance to initial state.
+        /// Restores instance to initial state.
         /// </summary>
         /// <param name="unmanagedModel">Handle to unmanaged model.</param>
         private void Reset(CubismUnmanagedModel unmanagedModel)

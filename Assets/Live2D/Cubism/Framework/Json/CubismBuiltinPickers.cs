@@ -10,15 +10,16 @@ using Live2D.Cubism.Core;
 using Live2D.Cubism.Rendering;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    ///     Default pickers.
+    /// Default pickers.
     /// </summary>
     public static class CubismBuiltinPickers
     {
         /// <summary>
-        ///     Builtin <see cref="Material" /> picker.
+        /// Builtin <see cref="Material"/> picker.
         /// </summary>
         /// <param name="sender">Event source.</param>
         /// <param name="drawable">Drawable to map to.</param>
@@ -28,54 +29,56 @@ namespace Live2D.Cubism.Framework.Json
             if (drawable.IsDoubleSided)
             {
                 if (drawable.BlendAdditive)
-                    return drawable.IsMasked
-                        ? drawable.IsInverted
-                            ? CubismBuiltinMaterials.UnlitAdditiveMaskedInverted
-                            : CubismBuiltinMaterials.UnlitAdditiveMasked
+                {
+                    return (drawable.IsMasked)
+                        ? (drawable.IsInverted) ? CubismBuiltinMaterials.UnlitAdditiveMaskedInverted :
+                        CubismBuiltinMaterials.UnlitAdditiveMasked
                         : CubismBuiltinMaterials.UnlitAdditive;
+                }
 
 
                 if (drawable.MultiplyBlend)
-                    return drawable.IsMasked
-                        ? drawable.IsInverted
-                            ? CubismBuiltinMaterials.UnlitMultiplyMaskedInverted
-                            : CubismBuiltinMaterials.UnlitMultiplyMasked
+                {
+                    return (drawable.IsMasked)
+                        ? (drawable.IsInverted) ? CubismBuiltinMaterials.UnlitMultiplyMaskedInverted :
+                        CubismBuiltinMaterials.UnlitMultiplyMasked
                         : CubismBuiltinMaterials.UnlitMultiply;
+                }
 
 
-                return drawable.IsMasked
-                    ? drawable.IsInverted
-                        ? CubismBuiltinMaterials.UnlitMaskedInverted
-                        : CubismBuiltinMaterials.UnlitMasked
+                return (drawable.IsMasked)
+                    ? (drawable.IsInverted) ? CubismBuiltinMaterials.UnlitMaskedInverted :
+                    CubismBuiltinMaterials.UnlitMasked
                     : CubismBuiltinMaterials.Unlit;
             }
 
             if (drawable.BlendAdditive)
-                return drawable.IsMasked
-                    ? drawable.IsInverted
-                        ? CubismBuiltinMaterials.UnlitAdditiveMaskedInvertedCulling
-                        : CubismBuiltinMaterials.UnlitAdditiveMaskedCulling
+            {
+                return (drawable.IsMasked)
+                    ? (drawable.IsInverted) ? CubismBuiltinMaterials.UnlitAdditiveMaskedInvertedCulling :
+                    CubismBuiltinMaterials.UnlitAdditiveMaskedCulling
                     : CubismBuiltinMaterials.UnlitAdditiveCulling;
+            }
 
 
             if (drawable.MultiplyBlend)
-                return drawable.IsMasked
-                    ? drawable.IsInverted
-                        ? CubismBuiltinMaterials.UnlitMultiplyMaskedInvertedCulling
-                        : CubismBuiltinMaterials.UnlitMultiplyMaskedCulling
+            {
+                return (drawable.IsMasked)
+                    ? (drawable.IsInverted) ? CubismBuiltinMaterials.UnlitMultiplyMaskedInvertedCulling :
+                    CubismBuiltinMaterials.UnlitMultiplyMaskedCulling
                     : CubismBuiltinMaterials.UnlitMultiplyCulling;
+            }
 
 
-            return drawable.IsMasked
-                ? drawable.IsInverted
-                    ? CubismBuiltinMaterials.UnlitMaskedInvertedCulling
-                    : CubismBuiltinMaterials.UnlitMaskedCulling
+            return (drawable.IsMasked)
+                ? (drawable.IsInverted) ? CubismBuiltinMaterials.UnlitMaskedInvertedCulling :
+                CubismBuiltinMaterials.UnlitMaskedCulling
                 : CubismBuiltinMaterials.UnlitCulling;
         }
 
 
         /// <summary>
-        ///     Builtin <see cref="Texture2D" /> picker.
+        /// Builtin <see cref="Texture2D"/> picker.
         /// </summary>
         /// <param name="sender">Event source.</param>
         /// <param name="drawable">Drawable to map to.</param>

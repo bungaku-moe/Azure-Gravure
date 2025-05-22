@@ -9,22 +9,22 @@
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Holds mask properties.
+    /// Holds mask properties.
     /// </summary>
     public sealed class CubismMaskProperties
     {
         /// <summary>
-        ///     RenderTexture to draw masks
+        /// RenderTexture to draw masks
         /// </summary>
         public CubismMaskTexture Texture;
 
         /// <summary>
-        ///     Tile where masks are drawn on Texture
+        /// Tile where masks are drawn on Texture
         /// </summary>
         public CubismMaskTile Tile;
 
         /// <summary>
-        ///     Transform info to draw masks on Texture
+        /// Transform info to draw masks on Texture
         /// </summary>
         public CubismMaskTransform Transform;
     }

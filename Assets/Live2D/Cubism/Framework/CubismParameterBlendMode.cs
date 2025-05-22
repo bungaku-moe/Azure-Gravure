@@ -8,25 +8,26 @@
 
 using Live2D.Cubism.Core;
 
+
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    ///     Enumeration of <see cref="CubismParameter" /> blend modes.
+    /// Enumeration of <see cref="CubismParameter"/> blend modes.
     /// </summary>
     public enum CubismParameterBlendMode
     {
         /// <summary>
-        ///     Override blending.
+        /// Override blending.
         /// </summary>
         Override,
 
         /// <summary>
-        ///     Additive blending.
+        /// Additive blending.
         /// </summary>
         Additive,
 
         /// <summary>
-        ///     Multiply blending.
+        /// Multiply blending.
         /// </summary>
         Multiply
     }

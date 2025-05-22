@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: sample_01.fade
   m_EditorClassIdentifier: 
   MotionName: Assets/Live2D/Cubism/Samples/Models/Mao/motions/sample_01.motion3.json
+  ModelFadeInTime: -1
+  ModelFadeOutTime: -1
   FadeInTime: 0
   FadeOutTime: 0
   ParameterIds:

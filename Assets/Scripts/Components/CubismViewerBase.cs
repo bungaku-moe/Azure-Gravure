@@ -11,29 +11,43 @@ using Live2D.Cubism.Framework.MotionFade;
 using Live2D.Cubism.Framework.Pose;
 using Live2D.Cubism.Framework.Raycasting;
 using Live2D.Cubism.Rendering;
+using Live2D.Cubism.Rendering.Masking;
 using UnityEngine;
 
 namespace Kiraio.Azure.Components
 {
     public class CubismViewerBase : MonoBehaviour
     {
+        public string ModelJsonFile { get; set; }
+        public string VoicesDirectory { get; set; }
+
         protected CubismModel3Json ModelJson { get; set; }
+        protected CubismPose3Json PoseJson { get; set; }
         protected CubismModel Model { get; set; }
-        public CubismMotionController MotionController { get; set; }
-        public CubismFadeController FadeController { get; set; }
         public CubismRaycaster Raycaster { get; set; }
 
+        public CubismMotionController MotionController { get; set; }
+        public CubismMaskController MaskController { get; set; }
+        public CubismFadeController FadeController { get; set; }
         protected CubismUpdateController UpdateController { get; set; }
         protected CubismPoseController PoseController { get; set; }
-        protected CubismRenderController RenderController { get; set;  }
+        protected CubismRenderController RenderController { get; set; }
 
         public Animator Animator { get; set; }
+
+        public AudioSource VoiceSource { get; set; }
+
+        // public SerializableDictionary<string, AudioClip> AnimationsVoices { get; set; } = new();
+        public SerializableDictionary<string, AudioClip> Voices { get; set; } = new();
+        public SerializableDictionary<string, AnimationClip> Animations { get; set; } = new();
+
+        public MainControl MainControl { get; set; }
         public InputManager InputManager { get; set; }
         public bool AllowInteraction { get; set; }
-        protected SerializableDictionary<string, AnimationClip> Animations { get; } = new();
 
-        public virtual void Awake()
+        protected virtual void Awake()
         {
+            MainControl = FindObjectsByType<MainControl>(FindObjectsSortMode.None)[0];
             InputManager = FindObjectsByType<InputManager>(FindObjectsSortMode.None)[0];
         }
 
@@ -63,33 +77,15 @@ namespace Kiraio.Azure.Components
         /// <param name="isLoop">Loop the animation?</param>
         /// <param name="layerIndex">Which layer to play the animation?</param>
         /// <param name="priority">How important is the animation? Scale from 0 ~ 3.</param>
-        // public void PlayMotion(string motionName, bool isLoop = false, byte layerIndex = 0, byte priority = 1)
-        // {
-        //     if (!Animations.TryGetValue(motionName, out var animationClip))
-        //     {
-        //         Debug.LogWarning($"Motion {motionName} not found.");
-        //         return;
-        //     }
-        //
-        //     // MotionController.LayerCount =
-        //     //     MotionController.LayerCount <= layerIndex ? layerIndex + 1 : MotionController.LayerCount;
-        //
-        //     MotionController.PlayAnimation(
-        //         animationClip,
-        //         layerIndex,
-        //         priority,
-        //         isLoop
-        //     );
-        // }
         public void PlayMotion(
             string motionName,
             bool isLoop = false,
             int layerIndex = 0,
             int priority = CubismMotionPriority.PriorityIdle,
-            Action<float> onComplete = null
+            Action<int> onComplete = null
         )
         {
-            if (!Animations.ContainsKey(motionName))
+            if (!Animations.TryGetValue(motionName, out var animationClip))
             {
                 Debug.LogWarning($"Motion {motionName} not found.");
                 return;
@@ -103,7 +99,7 @@ namespace Kiraio.Azure.Components
 
             // Play the motion with the specified priority
             MotionController.PlayAnimation(
-                Animations[motionName],
+                animationClip,
                 layerIndex,
                 priority,
                 isLoop
@@ -111,6 +107,19 @@ namespace Kiraio.Azure.Components
 
             // Register completion handler
             if (onComplete != null) MotionController.AnimationEndHandler += onComplete;
+        }
+
+        public void PlayVoice(string voiceName)
+        {
+            if (!string.IsNullOrEmpty(voiceName))
+            {
+                VoiceSource.clip = Voices[voiceName];
+                VoiceSource.Play();
+            }
+            else
+            {
+                Debug.LogWarning("No voice clip with the name provided.");
+            }
         }
 
         /// <summary>
@@ -151,8 +160,6 @@ namespace Kiraio.Azure.Components
 
             // Update the _motionPriorities field
             motionPrioritiesField.SetValue(motionController, motionPriorities);
-
-            Debug.Log("Motion priorities reset successfully.");
         }
     }
 }

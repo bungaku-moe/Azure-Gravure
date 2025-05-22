@@ -8,45 +8,48 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Holds info used for masking.
+    /// Holds info used for masking.
     /// </summary>
     public struct CubismMaskTransform
     {
         #region Conversion
 
         /// <summary>
-        ///     <see cref="UniqueId" /> backing field.
+        /// <see cref="UniqueId"/> backing field.
         /// </summary>
         private static int _uniqueId;
 
         /// <summary>
-        ///     HACK Prevents dynamic batching of <see cref="CubismRenderer" />s that are masked.
+        /// HACK Prevents dynamic batching of <see cref="CubismRenderer"/>s that are masked.
         /// </summary>
         /// <remarks>
-        ///     As Unity transforms vertex positions into world space on dynamic batching, and masking relies on vertex positions
-        ///     to be in local space,
-        ///     masking isn't compatible with dynamic batching.
-        ///     Unity exposes a shader tag for disabling dynamic batching ("DynamicBatching"), but this would make it necessary for
-        ///     creating separate shaders...
+        /// As Unity transforms vertex positions into world space on dynamic batching, and masking relies on vertex positions to be in local space,
+        /// masking isn't compatible with dynamic batching.
+        ///
+        /// Unity exposes a shader tag for disabling dynamic batching ("DynamicBatching"), but this would make it necessary for creating separate shaders...
         /// </remarks>
         private static int UniqueId
         {
             get
             {
                 // We just have to make sure consecutive drawables with the same mask aren't batched; having more than 1024 cases in a row seems pretty rare, so...
-                if (_uniqueId > 1024) _uniqueId = 0;
+                if (_uniqueId > 1024)
+                {
+                    _uniqueId = 0;
+                }
 
 
-                return ++_uniqueId;
+                return (++_uniqueId);
             }
         }
 
 
         /// <summary>
-        ///     Converts a <see cref="CubismMaskTile" /> to a <see cref="Vector4" />.
+        /// Converts a <see cref="CubismMaskTile"/> to a <see cref="Vector4"/>.
         /// </summary>
         /// <param name="value">Value to convert.</param>
         public static implicit operator Vector4(CubismMaskTransform value)
@@ -63,12 +66,12 @@ namespace Live2D.Cubism.Rendering.Masking
         #endregion
 
         /// <summary>
-        ///     Offset in model space.
+        /// Offset in model space.
         /// </summary>
         public Vector2 Offset;
 
         /// <summary>
-        ///     Scale in model space.
+        /// Scale in model space.
         /// </summary>
         public float Scale;
     }

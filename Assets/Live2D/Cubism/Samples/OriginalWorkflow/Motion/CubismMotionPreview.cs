@@ -16,16 +16,17 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Motion
     public class CubismMotionPreview : MonoBehaviour
     {
         /// <summary>
+        ///
         /// </summary>
         public AnimationClip Animation;
 
         /// <summary>
-        ///     MotionController to be operated.
+        /// MotionController to be operated.
         /// </summary>
-        private CubismMotionController _motionController;
+        CubismMotionController _motionController;
 
         /// <summary>
-        ///     Get motion controller.
+        /// Get motion controller.
         /// </summary>
         private void Start()
         {
@@ -35,20 +36,25 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Motion
 
             _motionController.AnimationEndHandler += PlayIdleAnimation;
 
-            if (Animation == null) return;
+            if (Animation == null)
+            {
+                return;
+            }
 
             PlayIdleAnimation();
         }
 
 
-        private void PlayIdleAnimation(float index = 0.0f)
+
+        private void PlayIdleAnimation(int index = 0)
         {
             _motionController.PlayAnimation(Animation, isLoop: false, priority: CubismMotionPriority.PriorityIdle);
         }
 
 
+
         /// <summary>
-        ///     Play specified animation.
+        /// Play specified animation.
         /// </summary>
         /// <param name="animation">Animation clip to play.</param>
         public void PlayAnimation(AnimationClip animation)

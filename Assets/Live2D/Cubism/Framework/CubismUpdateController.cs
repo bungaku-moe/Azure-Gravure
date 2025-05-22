@@ -5,10 +5,10 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-using System;
-using System.Collections.Generic;
 using Live2D.Cubism.Core;
+using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace Live2D.Cubism.Framework
 {
@@ -16,19 +16,22 @@ namespace Live2D.Cubism.Framework
     public class CubismUpdateController : MonoBehaviour
     {
         /// <summary>
-        ///     The action of cubism component late update.
+        /// The action of cubism component late update.
         /// </summary>
-        private Action _onLateUpdate;
+        private System.Action _onLateUpdate;
 
         /// <summary>
-        ///     Refresh delegate manager.
+        /// Refresh delegate manager.
         /// </summary>
         public void Refresh()
         {
             var model = this.FindCubismModel();
 
             // Fail silently...
-            if (model == null) return;
+            if (model == null)
+            {
+                return;
+            }
 
             // Set the null value when refreshed UpdateController to avoid duplicated registering.
             _onLateUpdate = null;
@@ -38,10 +41,13 @@ namespace Live2D.Cubism.Framework
             var sortedComponents = new List<ICubismUpdatable>(components);
             CubismUpdateExecutionOrder.SortByExecutionOrder(sortedComponents);
 
-            foreach (var component in sortedComponents)
+            foreach(var component in sortedComponents)
             {
 #if UNITY_EDITOR
-                if (!Application.isPlaying && !component.NeedsUpdateOnEditing) continue;
+                if (!Application.isPlaying && !component.NeedsUpdateOnEditing)
+                {
+                    continue;
+                }
 #endif
 
                 _onLateUpdate += component.OnLateUpdate;
@@ -51,7 +57,7 @@ namespace Live2D.Cubism.Framework
         #region Unity Event Handling
 
         /// <summary>
-        ///     Called by Unity.
+        /// Called by Unity.
         /// </summary>
         private void Start()
         {
@@ -59,12 +65,15 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        ///     Called by Unity.
+        /// Called by Unity.
         /// </summary>
         private void LateUpdate()
         {
             // Cubism late update.
-            if (_onLateUpdate != null) _onLateUpdate();
+            if(_onLateUpdate != null)
+            {
+                _onLateUpdate();
+            }
         }
 
         #endregion

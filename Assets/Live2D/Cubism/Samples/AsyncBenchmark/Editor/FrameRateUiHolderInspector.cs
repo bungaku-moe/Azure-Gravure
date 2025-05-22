@@ -11,7 +11,7 @@ using UnityEditor;
 namespace Live2D.Cubism.Samples.AsyncBenchmark.Editor
 {
     /// <summary>
-    ///     Dynamically switch the display on <see cref="FrameRateUiHolder" />  inspector.
+    /// Dynamically switch the display on <see cref="FrameRateUiHolder"/>  inspector.
     /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(FrameRateUiHolder))]
@@ -21,7 +21,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark.Editor
         private FrameRateUiHolder Target { get; set; }
 
         /// <summary>
-        ///     Called by Unity. Getting target component and Initializing.
+        /// Called by Unity. Getting target component and Initializing.
         /// </summary>
         private void Awake()
         {
@@ -59,8 +59,10 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark.Editor
             Target.ElapsedTimeUi.gameObject.SetActive(Target.HasShownElapsedTime);
 
             if (EditorGUI.EndChangeCheck())
+            {
                 // Apply changes and set dirty flag.
                 EditorUtility.SetDirty(Target);
+            }
         }
     }
 }

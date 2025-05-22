@@ -8,17 +8,21 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.Pose
 {
     /// <summary>
-    ///     Tagging component for pose part.
+    /// Tagging component for pose part.
     /// </summary>
     public sealed class CubismPosePart : MonoBehaviour
     {
-        [SerializeField] public int GroupIndex;
+        [SerializeField]
+        public int GroupIndex;
 
-        [SerializeField] public int PartIndex;
+        [SerializeField]
+        public int PartIndex;
 
-        [SerializeField] public string[] Link;
+        [SerializeField]
+        public string[] Link;
     }
 }

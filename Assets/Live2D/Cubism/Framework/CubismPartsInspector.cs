@@ -9,10 +9,11 @@
 using Live2D.Cubism.Core;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    ///     Allows inspecting <see cref="CubismPart" />s.
+    /// Allows inspecting <see cref="CubismPart"/>s.
     /// </summary>
     public sealed class CubismPartsInspector : MonoBehaviour
     {

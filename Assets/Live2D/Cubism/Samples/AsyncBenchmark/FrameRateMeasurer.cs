@@ -13,92 +13,93 @@ using UnityEngine.UI;
 namespace Live2D.Cubism.Samples.AsyncBenchmark
 {
     /// <summary>
-    ///     Measure the frame rate.
+    /// Measure the frame rate.
     /// </summary>
     public class FrameRateMeasurer : MonoBehaviour
     {
         /// <summary>
-        ///     Target frame rate value.
+        /// Target frame rate value.
         /// </summary>
-        [SerializeField] public int TargetFrameRate = 60;
+        [SerializeField]
+        public int TargetFrameRate = 60;
 
         /// <summary>
-        ///     Whether the model is spawnable or not.
+        /// Whether the model is spawnable or not.
         /// </summary>
         private bool LessThanTargetFrameRate { get; set; }
 
         /// <summary>
-        ///     The highest frame rate on running the application.
+        /// The highest frame rate on running the application.
         /// </summary>
         private float HighestFrameRate { get; set; }
 
         /// <summary>
-        ///     Save the maximum frame rate.
+        /// Save the maximum frame rate.
         /// </summary>
         private int CurrentHighestFrameRate { get; set; }
 
         /// <summary>
-        ///     Save Previous Frame <see cref="CurrentHighestFrameRate" />.
+        /// Save Previous Frame <see cref="CurrentHighestFrameRate"/>.
         /// </summary>
         private int PreviousHighestFrameRate { get; set; }
 
         /// <summary>
-        ///     The lowest frame rate on running the application.
+        /// The lowest frame rate on running the application.
         /// </summary>
         private float LowestFrameRate { get; set; }
 
         /// <summary>
-        ///     Save the minimum frame rate.
+        /// Save the minimum frame rate.
         /// </summary>
         private int CurrentLowestFrameRate { get; set; }
 
         /// <summary>
-        ///     Save Previous Frame <see cref="CurrentLowestFrameRate" />.
+        /// Save Previous Frame <see cref="CurrentLowestFrameRate"/>.
         /// </summary>
         private int PreviousLowestFrameRate { get; set; }
 
         /// <summary>
-        ///     Get Model Instances Count.
+        /// Get Model Instances Count.
         /// </summary>
         private int InstancesCount { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.FpsCounter" /> Component.
+        /// <see cref="AsyncBenchmark.FpsCounter"/> Component.
         /// </summary>
         private FpsCounter FpsCounter { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.BenchmarkController" /> Component.
+        /// <see cref="AsyncBenchmark.BenchmarkController"/> Component.
         /// </summary>
         private BenchmarkController BenchmarkController { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.ModelSpawner" /> Conponent.
+        /// <see cref="AsyncBenchmark.ModelSpawner"/> Conponent.
         /// </summary>
         private ModelSpawner ModelSpawner { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.TotalElapsedTime" /> Component.
+        /// <see cref="AsyncBenchmark.TotalElapsedTime"/> Component.
         /// </summary>
         private TotalElapsedTime TotalElapsedTime { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.FrameRateUiHolder" /> Component.
+        /// <see cref="AsyncBenchmark.FrameRateUiHolder"/> Component.
         /// </summary>
         private FrameRateUiHolder FrameRateUiHolder { get; set; }
 
         /// <summary>
-        ///     Displays the frame rate and observation time when the maximum frame rate is observed.
+        /// Displays the frame rate and observation time when the maximum frame rate is observed.
         /// </summary>
         private Text HighestFrameRateUi { get; set; }
 
         /// <summary>
-        ///     Displays the frame rate and observation time when the minimum frame rate is observed.
+        /// Displays the frame rate and observation time when the minimum frame rate is observed.
         /// </summary>
         private Text LowestFrameRateUi { get; set; }
 
         /// <summary>
-        ///     Called by Unity. Getting target component and Initializing.
+        /// Called by Unity. Getting target component and Initializing.
         /// </summary>
         private void Start()
         {
@@ -151,10 +152,8 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
                     : LowestFrameRate;
 
                 // Has the values been changed?
-                var isMaximumFrameRateChange = HighestFrameRate == CurrentHighestFrameRate &&
-                                               PreviousHighestFrameRate != CurrentHighestFrameRate;
-                var isMinimumFrameRateChange = LowestFrameRate == CurrentLowestFrameRate &&
-                                               PreviousLowestFrameRate != CurrentLowestFrameRate;
+                var isMaximumFrameRateChange = (HighestFrameRate == CurrentHighestFrameRate) && (PreviousHighestFrameRate != CurrentHighestFrameRate);
+                var isMinimumFrameRateChange = (LowestFrameRate == CurrentLowestFrameRate) && (PreviousLowestFrameRate != CurrentLowestFrameRate);
 
                 var timeConversion = TimeConversion(TotalElapsedTime.ElapsedTime);
 
@@ -194,10 +193,10 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
                 var timeConversion = TimeConversion(0);
 
                 // Reset ui.
-                var highestFrameRateText = "max (0 fps)\n";
+                var highestFrameRateText = string.Format("max (0 fps)\n");
                 HighestFrameRateUi.text = string.Concat(highestFrameRateText, timeConversion);
 
-                var lowesttFrameRateText = "min (0 fps)\n";
+                var lowesttFrameRateText = string.Format("min (0 fps)\n");
                 LowestFrameRateUi.text = string.Concat(lowesttFrameRateText, timeConversion);
 
                 // Reset variables.
@@ -211,7 +210,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        ///     Convert seconds to "hours:minutes:seconds".
+        /// Convert seconds to "hours:minutes:seconds".
         /// </summary>
         /// <param name="second">Number of seconds it conversion source.</param>
         /// <returns>String type converted to "hours:minutes:seconds" notation.</returns>

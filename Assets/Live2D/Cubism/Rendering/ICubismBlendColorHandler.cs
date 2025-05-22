@@ -6,7 +6,9 @@
  */
 
 
+using Live2D.Cubism.Core;
 using UnityEngine;
+
 
 namespace Live2D.Cubism.Rendering
 {

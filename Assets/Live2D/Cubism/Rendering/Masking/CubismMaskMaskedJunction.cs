@@ -8,21 +8,57 @@
 
 using UnityEngine.Rendering;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Many-to-many <see cref="CubismRenderer" />-<see cref="CubismMaskRenderer" /> map.
+    /// Many-to-many <see cref="CubismRenderer"/>-<see cref="CubismMaskRenderer"/> map.
     /// </summary>
     internal sealed class CubismMaskMaskedJunction
     {
+        /// <summary>
+        /// Shared buffer for <see cref="CubismMaskProperties"/>s.
+        /// </summary>
+        private static CubismMaskProperties SharedMaskProperties { get; set; }
+
+
+        /// <summary>
+        /// Masks.
+        /// </summary>
+        private CubismMaskRenderer[] Masks { get; set; }
+
+        /// <summary>
+        /// Masked drawables.
+        /// </summary>
+        private CubismRenderer[] Maskeds { get; set; }
+
+
+        /// <summary>
+        /// Mask texture to be referenced by <see cref="Maskeds"/>.
+        /// </summary>
+        private CubismMaskTexture MaskTexture { get; set; }
+
+        /// <summary>
+        /// Mask tile to write to and read from.
+        /// </summary>
+        private CubismMaskTile MaskTile { get; set; }
+
+        /// <summary>
+        /// Mask transform
+        /// </summary>
+        private CubismMaskTransform MaskTransform { get; set; }
+
         #region Ctors
 
         /// <summary>
-        ///     Makes sure statics are initialized.
+        /// Makes sure statics are initialized.
         /// </summary>
         public CubismMaskMaskedJunction()
         {
-            if (SharedMaskProperties != null) return;
+            if (SharedMaskProperties != null)
+            {
+                return;
+            }
 
 
             SharedMaskProperties = new CubismMaskProperties();
@@ -30,63 +66,10 @@ namespace Live2D.Cubism.Rendering.Masking
 
         #endregion
 
-        /// <summary>
-        ///     Shared buffer for <see cref="CubismMaskProperties" />s.
-        /// </summary>
-        private static CubismMaskProperties SharedMaskProperties { get; set; }
-
-
-        /// <summary>
-        ///     Masks.
-        /// </summary>
-        private CubismMaskRenderer[] Masks { get; set; }
-
-        /// <summary>
-        ///     Masked drawables.
-        /// </summary>
-        private CubismRenderer[] Maskeds { get; set; }
-
-
-        /// <summary>
-        ///     Mask texture to be referenced by <see cref="Maskeds" />.
-        /// </summary>
-        private CubismMaskTexture MaskTexture { get; set; }
-
-        /// <summary>
-        ///     Mask tile to write to and read from.
-        /// </summary>
-        private CubismMaskTile MaskTile { get; set; }
-
-        /// <summary>
-        ///     Mask transform
-        /// </summary>
-        private CubismMaskTransform MaskTransform { get; set; }
-
-
-        /// <summary>
-        ///     Updates <see cref="MaskTransform" /> and <see cref="Maskeds" />.
-        /// </summary>
-        private void RecalculateMaskTransform()
-        {
-            // Compute bounds and scale.
-            var bounds = Masks.GetBounds();
-            var scale = bounds.size.x > bounds.size.y
-                ? bounds.size.x
-                : bounds.size.y;
-
-
-            // Compute mask transform.
-            MaskTransform = new CubismMaskTransform
-            {
-                Offset = bounds.center,
-                Scale = 1f / scale
-            };
-        }
-
         #region Interface For CubismMaskController
 
         /// <summary>
-        ///     Sets the masks.
+        /// Sets the masks.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -99,7 +82,7 @@ namespace Live2D.Cubism.Rendering.Masking
         }
 
         /// <summary>
-        ///     Sets the masked drawables.
+        /// Sets the masked drawables.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -112,7 +95,7 @@ namespace Live2D.Cubism.Rendering.Masking
         }
 
         /// <summary>
-        ///     Sets the mask texture to read from.
+        /// Sets the mask texture to read from.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -125,7 +108,7 @@ namespace Live2D.Cubism.Rendering.Masking
         }
 
         /// <summary>
-        ///     Sets the mask tile to write to and read from.
+        /// Sets the mask tile to write to and read from.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -139,7 +122,7 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
         /// <summary>
-        ///     Appends junction draw commands to a buffer.
+        /// Appends junction draw commands to a buffer.
         /// </summary>
         /// <param name="buffer">Buffer to append commands to.</param>
         public void AddToCommandBuffer(CommandBuffer buffer, bool isUsingMultipleBuffer, int renderTextureIndex)
@@ -150,9 +133,13 @@ namespace Live2D.Cubism.Rendering.Masking
 
             // Initialize and enqueue masks.
             for (var i = 0; i < Masks.Length; ++i)
+            {
                 if (isUsingMultipleBuffer)
                 {
-                    if (MaskTile.RenderTextureIndex != renderTextureIndex) continue;
+                    if (MaskTile.RenderTextureIndex != renderTextureIndex)
+                    {
+                        continue;
+                    }
 
                     Masks[i]
                         .SetMaskTile(MaskTile)
@@ -166,11 +153,12 @@ namespace Live2D.Cubism.Rendering.Masking
                         .SetMaskTransform(MaskTransform)
                         .AddToCommandBuffer(buffer);
                 }
+            }
         }
 
 
         /// <summary>
-        ///     Updates the junction and all related data.
+        /// Updates the junction and all related data.
         /// </summary>
         internal void Update()
         {
@@ -179,7 +167,10 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
             // Apply transform to masks.
-            for (var i = 0; i < Masks.Length; ++i) Masks[i].SetMaskTransform(MaskTransform);
+            for (var i = 0; i < Masks.Length; ++i)
+            {
+                Masks[i].SetMaskTransform(MaskTransform);
+            }
 
 
             // Apply transform and other properties to maskeds.
@@ -191,9 +182,34 @@ namespace Live2D.Cubism.Rendering.Masking
             maskProperties.Transform = MaskTransform;
 
 
-            for (var i = 0; i < Maskeds.Length; ++i) Maskeds[i].OnMaskPropertiesDidChange(maskProperties);
+            for (var i = 0; i < Maskeds.Length; ++i)
+            {
+                Maskeds[i].OnMaskPropertiesDidChange(maskProperties);
+            }
         }
 
+
         #endregion
+
+
+        /// <summary>
+        /// Updates <see cref="MaskTransform"/> and <see cref="Maskeds"/>.
+        /// </summary>
+        private void RecalculateMaskTransform()
+        {
+            // Compute bounds and scale.
+            var bounds = Masks.GetBounds();
+            var scale = (bounds.size.x > bounds.size.y)
+                ? bounds.size.x
+                : bounds.size.y;
+
+
+            // Compute mask transform.
+            MaskTransform = new CubismMaskTransform
+            {
+                Offset = bounds.center,
+                Scale = 1f / scale
+            };
+        }
     }
 }

@@ -11,63 +11,81 @@ using Live2D.Cubism.Framework.Motion;
 using Live2D.Cubism.Framework.MotionFade;
 using Live2D.Cubism.Framework.Pose;
 using Live2D.Cubism.Framework.Raycasting;
-using Live2D.Cubism.Rendering;
+using Live2D.Cubism.Rendering.Masking;
 using UnityEngine;
-// using Live2D.Cubism.Framework.Physics;
 
 namespace Kiraio.Azure.Components
 {
     [AddComponentMenu("Azure Gravure/Components/Character Viewer")]
     public class CharacterViewer : CubismViewerBase
     {
-        [SerializeField] private string m_Path;
-
         // TouchBody = Upper Body, TouchHead = Head, TouchSpecial = Bust
         private readonly string[] _touchAreas = { "TouchBody", "TouchHead", "TouchSpecial" };
 
-        public override void Awake()
+        private void OnDestroy()
         {
-            base.Awake();
-            Initialize().AsAsyncUnitUniTask();
+            foreach (var clip in Animations.Select(animationClip => animationClip.Value))
+                clip.events = Array.Empty<AnimationEvent>();
         }
 
-        private async UniTask Initialize()
+        public async UniTask Initialize()
         {
-            ModelJson = CubismModel3Json.LoadAtPath(StorageHelper.NormalizePath(m_Path), LoadAssetAtPath);
-            ModelJson.FileReferences.Physics = Path.GetFileName(m_Path.Replace(".model3.json", ".physics3.json"));
+            // Load the *.model3.json file
+            var physicsJson = Path.GetFileName(ModelJsonFile.Replace(".model3.json", ".physics3.json"));
+            var poseJson = Path.GetFileName(ModelJsonFile.Replace(".model3.json", ".pose3.json"));
+            ModelJson = CubismModel3Json.LoadAtPath(
+                StorageHelper.NormalizePath(ModelJsonFile),
+                LoadAssetAtPath
+            );
+            ModelJson.FileReferences.Physics = File.Exists(physicsJson)
+                ? physicsJson
+                : string.Empty;
+            ModelJson.FileReferences.Pose = File.Exists(poseJson) ? poseJson : string.Empty;
+            PoseJson = CubismPose3Json.LoadFrom(await WebRequestHelper.GetTextDataAsync(ModelJson.FileReferences.Pose));
 
             Model = ModelJson.ToModel();
             Model.transform.parent = transform;
-            gameObject.name = Model.name;
             Model.gameObject.SetActive(false); // Disable the model gameObject to stop the components being initialized
+            gameObject.name = Model.name;
 
             Model.gameObject.AddComponent<CubismUpdateController>();
             Model.gameObject.AddComponent<CubismParameterStore>();
             Model.gameObject.AddComponent<CubismPoseController>();
             Model.gameObject.AddComponent<CubismExpressionController>();
+            Raycaster = Model.gameObject.AddComponent<CubismRaycaster>();
+            Animator = GetComponentInChildren<Animator>(true);
+            VoiceSource = Model.gameObject.AddComponent<AudioSource>();
+
             //! Physics Rig is somehow became null after the initialization, disable the Physics for now
             // Model.gameObject.AddComponent<CubismPhysicsController>();
-
-            // Add Raycaster
-            Raycaster = Model.gameObject.AddComponent<CubismRaycaster>();
 
             // Add CubismMotionController after assigning CubismFadeMotionList
             MotionController = Model.gameObject.AddComponent<CubismMotionController>();
             FadeController = Model.gameObject.GetComponent<CubismFadeController>();
             MotionController.enabled = false;
-            MotionController.LayerCount = 2;
+            MotionController.LayerCount = 3;
 
-            // Fix AnimationEvent errors by bypassing the "InstanceId" AnimationEvent with empty callback
-            Model.gameObject.AddComponent<FixAnimationEvent>();
-            Animator = GetComponentInChildren<Animator>(true);
+            // Workaround for the "InstanceId" AnimationEvent error
+            Model.gameObject
+                    .AddComponent<
+                        FixAnimationEvent>(); // Fix AnimationEvent errors by bypassing the "InstanceId" AnimationEvent with empty callback
+            // fixAnimationEvent.Viewer = this;
+
+            // Create Mask Texture
+            MaskController = Model.gameObject.GetComponent<CubismMaskController>();
+            var modelMaskTexture =
+                ScriptableObject.CreateInstance<CubismMaskTexture>();
+            modelMaskTexture.name = $"{Model.name}MaskTexture";
+            MaskController.MaskTexture = modelMaskTexture;
 
             // Create Fade Motion List
-            var fadeMotionList =
-                ScriptableObject.CreateInstance<CubismFadeMotionList>();
-            fadeMotionList.name = $"{Path.GetFileNameWithoutExtension(m_Path).Split(".")[0]}";
+            // Ref: https://docs.live2d.com/en/cubism-sdk-manual/motionfade/
+            var fadeMotionList = ScriptableObject.CreateInstance<CubismFadeMotionList>();
+            fadeMotionList.name =
+                $"{Path.GetFileNameWithoutExtension(ModelJsonFile).Split(".")[0]}";
+            var motionsData = new Dictionary<int, CubismFadeMotionData>();
 
-            var motionsData =
-                new Dictionary<int, CubismFadeMotionData>();
+            int fps = 30;
 
             foreach (
                 var motion in ModelJson
@@ -77,10 +95,16 @@ namespace Kiraio.Azure.Components
             )
             {
                 var motionName = motion[0].File.Split('/', '.')[1];
-                var motionJsonPath = Path.Combine(Path.GetDirectoryName(m_Path) ?? string.Empty, motion[0].File);
+                var motionJsonPath = Path.Combine(
+                    Path.GetDirectoryName(ModelJsonFile) ?? string.Empty,
+                    motion[0].File
+                );
                 var motionJson = CubismMotion3Json.LoadFrom(
                     await WebRequestHelper.GetTextDataAsync(motionJsonPath)
                 );
+                motionJson.Meta.FadeInTime = 1f;
+                motionJson.Meta.FadeOutTime = 1f;
+                fps = Convert.ToInt16(motionJson.Meta.Fps);
 
                 // Create FadeMotionData
                 var fadeMotion = CubismFadeMotionData.CreateInstance(
@@ -88,31 +112,32 @@ namespace Kiraio.Azure.Components
                     Path.GetFileName(motionJsonPath),
                     motionJson.Meta.Duration,
                     true,
-                    true
+                    true,
+                    ModelJson
                 );
                 fadeMotion.name = $"{motionName}.fade";
-
-                // fadeMotion.FadeOutTime = 2f;
-                // fadeMotion.FadeInTime = 2f;
-                // for (int i = 0; i < fadeMotion.ParameterFadeInTimes.Length; i++)
-                // {
-                //     fadeMotion.ParameterFadeInTimes[i] = 2f;
-                //     fadeMotion.ParameterFadeOutTimes[i] = 2f;
-                // }
+                fadeMotion.FadeInTime = 1f;
+                fadeMotion.FadeOutTime = 1f;
 
                 // Create AnimationClip
-                var animationClip = motionJson.ToAnimationClip();
+                var animationClip = motionJson.ToAnimationClip(true, false, true, PoseJson);
                 animationClip.name = motionName;
+                animationClip.legacy = false;
 
+                // NOTE: Not clearing animation events first causing fade motion list errors.
                 // Create "InstanceId" AnimationEvent at the start
-                var instanceEvent = new AnimationEvent
+                // var animationClipEvents = animationClip.events;
+                animationClip.events = Array.Empty<AnimationEvent>(); // Clear any events
+                // for (var i = 0; i < animationClipEvents.Length; i++)
+                // {
+                var newEvent = new AnimationEvent
                 {
                     functionName = "InstanceId",
                     time = 0,
                     intParameter = animationClip.GetInstanceID()
                 };
-                animationClip.events = Array.Empty<AnimationEvent>(); // Clear any events
-                animationClip.AddEvent(instanceEvent);
+                animationClip.AddEvent(newEvent);
+                // }
 
                 motionsData.Add(animationClip.GetInstanceID(), fadeMotion);
                 Animations.Add(motionName, animationClip);
@@ -132,15 +157,46 @@ namespace Kiraio.Azure.Components
                 {
                     var touchArea = target.AddComponent<Touch>();
                     touchArea.CharacterViewer = this;
+
+                    switch (touchArea.name)
+                    {
+                        case "TouchBody":
+                            touchArea.PlayData.Add("touch_body", "touch");
+                            break;
+                        case "TouchHead":
+                            touchArea.PlayData.Add("touch_head", "headtouch");
+                            break;
+                        case "TouchSpecial":
+                            touchArea.PlayData.Add("touch_special", "touch2");
+                            break;
+                        default:
+                            Debug.LogError("No touch data.");
+                            break;
+                    }
                 });
+
+            // Fetch voices audio
+            if (Directory.Exists(VoicesDirectory))
+            {
+                var directoryInfo = new DirectoryInfo(VoicesDirectory);
+                var files = directoryInfo.GetFiles();
+
+                foreach (var file in files)
+                    try
+                    {
+                        var clip = await WebRequestHelper.GetAudioClip(file.FullName);
+                        if (clip != null)
+                            Voices.Add(Path.GetFileNameWithoutExtension(file.Name), clip);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"Can't load audio: {ex.Message}");
+                    }
+            }
 
             // Enable the model gameObject to initialize the components
             MotionController.enabled = true;
             Model.gameObject.SetActive(true);
-
-            // Animator.runtimeAnimatorController =
-            //     Instantiate(Resources.Load<RuntimeAnimatorController>("BaseController"));
-            // Animator.runtimeAnimatorController.name = Model.name;
 
             UpdateController = GetComponentInChildren<CubismUpdateController>();
             PoseController = GetComponentInChildren<CubismPoseController>();
@@ -148,17 +204,32 @@ namespace Kiraio.Azure.Components
             FadeController.Refresh();
             UpdateController.Refresh();
 
+            Application.targetFrameRate = fps;
+
             // Play the login animation
-            await UniTask.WaitForSeconds(0.1f);
-            PlayMotion("login");
-            MotionController.AnimationEndHandler += OnLoginComplete;
+            PlayInitialMotions();
         }
 
-        private void OnLoginComplete(float instanceId)
+        private void PlayInitialMotions()
         {
+            // Play the effect motion on layer 2
+            PlayMotion("effect", true, 2);
+
+            // Play the login motion on layer 0
+            PlayMotion("login", onComplete: OnLoginComplete);
+
+            PlayVoice("login");
+        }
+
+        private void OnLoginComplete(int instanceId)
+        {
+            // Play the idle motion on layer 0 after login completes
             PlayMotion("idle", true);
+
+            // Unregister the completion handler
             MotionController.AnimationEndHandler -= OnLoginComplete;
-            ResetMotionPriorities(MotionController);
+
+            // Allow interactions
             AllowInteraction = true;
         }
     }

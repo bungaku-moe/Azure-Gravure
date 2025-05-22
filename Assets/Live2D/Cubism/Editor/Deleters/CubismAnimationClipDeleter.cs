@@ -6,22 +6,24 @@
  */
 
 
-using System;
 using Live2D.Cubism.Framework.MotionFade;
+using System;
 using UnityEditor;
+
 
 namespace Live2D.Cubism.Editor.Deleters
 {
     /// <summary>
-    ///     Handles importing of Cubism models.
+    /// Handles importing of Cubism models.
     /// </summary>
     [Serializable]
     public sealed class CubismAnimationClipDeleter : CubismDeleterBase
     {
+
         #region Unity Event Handling
 
         /// <summary>
-        ///     Registers deleter.
+        /// Registers deleter.
         /// </summary>
         [InitializeOnLoadMethod]
         // ReSharper disable once UnusedMember.Local
@@ -35,7 +37,7 @@ namespace Live2D.Cubism.Editor.Deleters
         #region CubismDeleterBase
 
         /// <summary>
-        ///     Deleters the corresponding asset.
+        /// Deleters the corresponding asset.
         /// </summary>
         public override void Delete()
         {
@@ -43,7 +45,10 @@ namespace Live2D.Cubism.Editor.Deleters
             var fadeAsset = AssetDatabase.LoadAssetAtPath<CubismFadeMotionData>(fadeAssetPath);
 
             // Fail silently...
-            if (fadeAsset == null) return;
+            if (fadeAsset == null)
+            {
+                return;
+            }
 
             // Delete fade motion asset.
             AssetDatabase.DeleteAsset(fadeAssetPath);
@@ -52,11 +57,15 @@ namespace Live2D.Cubism.Editor.Deleters
             var fadeMotionDeleter = CubismDeleter.GetDeleterAsPath(fadeAssetPath);
 
             // Fail silently...
-            if (fadeMotionDeleter == null) return;
+            if (fadeMotionDeleter == null)
+            {
+                return;
+            }
 
             fadeMotionDeleter.Delete();
         }
 
         #endregion
+
     }
 }

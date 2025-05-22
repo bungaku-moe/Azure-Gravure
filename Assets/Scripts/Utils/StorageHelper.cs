@@ -1,6 +1,8 @@
+using System;
 using System.IO;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using SimpleFileBrowser;
-using TMPro;
 using UnityEngine;
 
 namespace Kiraio.Azure.Utils
@@ -23,58 +25,59 @@ namespace Kiraio.Azure.Utils
         }
 
         /// <summary>
-        ///     Open file dialog and fill the <paramref name="inputField" />.
+        ///     Open File Dialog.
         /// </summary>
-        /// <param name="inputField"></param>
         /// <param name="windowTitle"></param>
-        public static string[] OpenFileDialog(
-            TMP_InputField inputField,
+        /// <param name="allowMultiple"></param>
+        /// <param name="filters"></param>
+        /// <returns></returns>
+        public static async UniTask<string[]> OpenFileDialogAsync(
             string windowTitle = "Load File",
-            bool allowMultiple = false
+            bool allowMultiple = false,
+            string[] filters = null
         )
         {
-            var selectedPaths = new string[0];
+            var tcs = new UniTaskCompletionSource<string[]>();
+            FileBrowser.SetFilters(true, filters);
+            FileBrowser.SetDefaultFilter(filters?[0]);
             FileBrowser.ShowLoadDialog(
-                paths =>
-                {
-                    selectedPaths = paths;
-                    inputField.text = string.Join(", ", paths);
-                },
-                () => { },
+                paths => tcs.TrySetResult(paths),
+                () => tcs.TrySetResult(Array.Empty<string>()),
                 FileBrowser.PickMode.Files,
                 allowMultiple,
                 GetApplicationPath(),
                 null,
                 windowTitle
             );
-            return selectedPaths;
+            return await tcs.Task;
         }
 
         /// <summary>
-        ///     Open directory dialog and fill the <paramref name="inputField" />.
+        ///     Open Directory Dialog.
         /// </summary>
-        /// <param name="inputField"></param>
-        public static string[] OpenDirectoryDialog(
-            TMP_InputField inputField,
+        /// <param name="windowTitle"></param>
+        /// <param name="allowMultiple"></param>
+        /// <param name="filters"></param>
+        /// <returns></returns>
+        public static async UniTask<string[]> OpenDirectoryDialogAsync(
             string windowTitle = "Load Directory",
-            bool allowMultiple = false
+            bool allowMultiple = false,
+            string[] filters = null
         )
         {
-            var directories = new string[0];
+            var tcs = new UniTaskCompletionSource<string[]>();
+            FileBrowser.SetFilters(true, filters);
+            FileBrowser.SetDefaultFilter(filters?[0]);
             FileBrowser.ShowLoadDialog(
-                paths =>
-                {
-                    directories = paths;
-                    inputField.text = string.Join(", ", paths);
-                },
-                () => { },
+                paths => tcs.TrySetResult(paths),
+                () => tcs.TrySetResult(Array.Empty<string>()),
                 FileBrowser.PickMode.Folders,
                 allowMultiple,
                 GetApplicationPath(),
                 null,
                 windowTitle
             );
-            return directories;
+            return await tcs.Task;
         }
 
         /// <summary>
@@ -84,10 +87,8 @@ namespace Kiraio.Azure.Utils
         /// <returns></returns>
         public static string NormalizePath(string path)
         {
-            foreach (var invalidChar in Path.GetInvalidPathChars())
-                path = path.Replace(invalidChar.ToString(), "");
-
-            return Path.GetFullPath(path);
+            var sanitizedPath = string.Concat(path.Where(c => !Path.GetInvalidPathChars().Contains(c)));
+            return Path.GetFullPath(sanitizedPath);
         }
     }
 }

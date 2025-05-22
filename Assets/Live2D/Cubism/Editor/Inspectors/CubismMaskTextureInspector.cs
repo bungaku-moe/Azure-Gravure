@@ -10,10 +10,11 @@ using Live2D.Cubism.Rendering.Masking;
 using UnityEditor;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    ///     Inspector for <see cref="CubismMaskTexture" />s.
+    /// Inspector for <see cref="CubismMaskTexture"/>s.
     /// </summary>
     [CustomEditor(typeof(CubismMaskTexture))]
     internal sealed class CubismMaskTextureInspector : UnityEditor.Editor
@@ -23,7 +24,7 @@ namespace Live2D.Cubism.Editor.Inspectors
         private bool _foldoutStatus = true;
 
         /// <summary>
-        ///     Draws inspector.
+        /// Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
@@ -31,7 +32,10 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Fail silently.
-            if (texture == null) return;
+            if (texture == null)
+            {
+                return;
+            }
 
 
             // Show settings.
@@ -47,16 +51,14 @@ namespace Live2D.Cubism.Editor.Inspectors
             EditorGUI.indentLevel++;
             texture.Size = EditorGUILayout.IntField("Size (In Pixels)", texture.Size);
             texture.Subdivisions = EditorGUILayout.IntSlider("Subdivisions", texture.Subdivisions, 1, 5);
-            EditorGUILayout.ObjectField("Render Texture (Read-only)", (RenderTexture)texture, typeof(RenderTexture),
-                false);
+            EditorGUILayout.ObjectField("Render Texture (Read-only)", (RenderTexture) texture, typeof(RenderTexture), false);
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Multiple RenderTexture", EditorStyles.boldLabel);
 
             EditorGUI.indentLevel++;
-            texture.RenderTextureCount =
-                EditorGUILayout.IntSlider("RenderTextureCount", texture.RenderTextureCount, 0, 5);
+            texture.RenderTextureCount = EditorGUILayout.IntSlider("RenderTextureCount", texture.RenderTextureCount, 0, 5);
             EditorGUILayout.Space();
 
             _foldoutStatus = EditorGUILayout.Foldout(_foldoutStatus, "Render Textures (Read-only)");
@@ -66,20 +68,21 @@ namespace Live2D.Cubism.Editor.Inspectors
 
                 // Make it practically ReadOnly.
                 GUI.enabled = false;
-                for (var renderTextureIndex = 0;
-                     renderTextureIndex < texture.RenderTextures.Length;
-                     renderTextureIndex++)
-                    EditorGUILayout.ObjectField($"element {renderTextureIndex} (Read-only)",
-                        texture.RenderTextures[renderTextureIndex], typeof(RenderTexture), false);
+                for (int renderTextureIndex = 0; renderTextureIndex < texture.RenderTextures.Length; renderTextureIndex++)
+                {
+                    EditorGUILayout.ObjectField($"element {renderTextureIndex} (Read-only)", texture.RenderTextures[renderTextureIndex], typeof(RenderTexture), false);
+                }
                 GUI.enabled = true;
                 EditorGUILayout.EndVertical();
             }
-
             EditorGUI.indentLevel--;
 
 
             // Save any changes.
-            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(texture);
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(texture);
+            }
         }
 
         #endregion

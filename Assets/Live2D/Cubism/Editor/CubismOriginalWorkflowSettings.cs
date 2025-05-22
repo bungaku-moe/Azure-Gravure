@@ -10,25 +10,28 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Editor.OriginalWorkflow
 {
     /// <summary>
-    ///     ScriptableObject to save cubism original workflow setting.
+    /// ScriptableObject to save cubism original workflow setting.
     /// </summary>
-    public class CubismOriginalWorkflowSettings : ScriptableObject
+    public class CubismOriginalWorkflowSettings: ScriptableObject
     {
         /// <summary>
-        ///     Should import as original workflow.
+        /// Should import as original workflow.
         /// </summary>
-        [SerializeField] [HideInInspector] public bool ShouldImportAsOriginalWorkflow = true;
+        [SerializeField, HideInInspector]
+        public bool ShouldImportAsOriginalWorkflow = true;
 
         /// <summary>
-        ///     Should clear animation clip curves.
+        /// Should clear animation clip curves.
         /// </summary>
-        [SerializeField] [HideInInspector] public bool ShouldClearAnimationCurves;
+        [SerializeField, HideInInspector]
+        public bool ShouldClearAnimationCurves = false;
 
         /// <summary>
-        ///     The cubism original workflow settings.
+        /// The cubism original workflow settings.
         /// </summary>
         /// <returns></returns>
         public static CubismOriginalWorkflowSettings OriginalWorkflowSettings
@@ -37,18 +40,20 @@ namespace Live2D.Cubism.Editor.OriginalWorkflow
             {
                 var setting = Resources.Load<CubismOriginalWorkflowSettings>("Live2D/Cubism/OriginalWorkflowSettings");
 
-                if (setting == null)
+                if(setting == null)
                 {
                     setting = CreateInstance<CubismOriginalWorkflowSettings>();
 
                     var directory = "Assets/Live2D/Cubism/Editor/Resources/Live2D/Cubism/";
-                    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                    if(!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
 
-                    AssetDatabase.CreateAsset(setting,
-                        "Assets/Live2D/Cubism/Editor/Resources/Live2D/Cubism/OriginalWorkflowSettings.asset");
+                    AssetDatabase.CreateAsset(setting, "Assets/Live2D/Cubism/Editor/Resources/Live2D/Cubism/OriginalWorkflowSettings.asset");
                 }
 
-                return setting;
+               return setting;
             }
         }
     }

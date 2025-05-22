@@ -11,25 +11,25 @@ using System;
 namespace Live2D.Cubism.Editor.Deleters
 {
     /// <summary>
-    ///     Base class for Cubism asset deleters.
+    /// Base class for Cubism asset deleters.
     /// </summary>
     [Serializable]
     public abstract class CubismDeleterBase : ICubismDeleter
     {
         /// <summary>
-        ///     Gets the path to the imported asset.
+        /// Gets the path to the imported asset.
         /// </summary>
         public string AssetPath { get; private set; }
 
         /// <summary>
-        ///     Imports the corresponding asset.
+        /// Imports the corresponding asset.
         /// </summary>
         public abstract void Delete();
 
         #region ICubismDeleter
 
         /// <summary>
-        ///     Sets the asset path.
+        /// Sets the asset path.
         /// </summary>
         void ICubismDeleter.SetAssetPath(string value)
         {
@@ -37,7 +37,7 @@ namespace Live2D.Cubism.Editor.Deleters
         }
 
         /// <summary>
-        ///     Imports the corresponding asset.
+        /// Imports the corresponding asset.
         /// </summary>
         void ICubismDeleter.Delete()
         {

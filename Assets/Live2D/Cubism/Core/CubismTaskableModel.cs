@@ -6,23 +6,127 @@
  */
 
 
-using System.Threading;
 using Live2D.Cubism.Core.Unmanaged;
+using System.Threading;
 using UnityEngine;
+
 
 namespace Live2D.Cubism.Core
 {
     /// <summary>
-    ///     'Atomic' <see cref="CubismModel" /> update task.
+    /// 'Atomic' <see cref="CubismModel"/> update task.
     /// </summary>
     internal sealed class CubismTaskableModel : ICubismTask
     {
+        #region Factory Methods
+
+        /// <summary>
+        /// Creates a <see cref="CubismTaskableModel"/> from a <see cref="CubismMoc"/>.
+        /// </summary>
+        /// <param name="moc">Moc source.</param>
+        /// <returns>Instance.</returns>
+        public static CubismTaskableModel CreateTaskableModel(CubismMoc moc)
+        {
+            return new CubismTaskableModel(moc);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Handle to unmanaged model.
+        /// </summary>
+        public CubismUnmanagedModel UnmanagedModel { get; private set; }
+
+        /// <summary>
+        /// <see cref="CubismMoc"/> the model was instantiated from.
+        /// </summary>
+        public CubismMoc Moc { get; private set; }
+
+
         private CubismDynamicDrawableData[] _dynamicDrawableData;
+
+        /// <summary>
+        /// Buffer to write dynamic data to.
+        /// </summary>
+        public CubismDynamicDrawableData[] DynamicDrawableData
+        {
+            get
+            {
+                CubismDynamicDrawableData[] dynamicDrawableData = null;
+
+                if (Monitor.TryEnter(Lock))
+                {
+                    dynamicDrawableData = _dynamicDrawableData;
+
+                    Monitor.Exit(Lock);
+                }
+
+
+                return dynamicDrawableData;
+            }
+
+
+            private set
+            {
+                _dynamicDrawableData = value;
+            }
+        }
+
+
+        /// <summary>
+        /// True if task is currently executing.
+        /// </summary>
+        public bool IsExecuting
+        {
+            get
+            {
+                var isExecuting = false;
+
+
+                if (Monitor.TryEnter(Lock))
+                {
+                    isExecuting = (State == TaskState.Enqueued || State == TaskState.Executing);
+
+
+                    Monitor.Exit(Lock);
+                }
+
+
+                return isExecuting;
+            }
+        }
+
+        /// <summary>
+        /// True if did run to completion at least once.
+        /// </summary>
+        public bool DidExecute
+        {
+            get
+            {
+                var didExecute = false;
+
+
+                if (Monitor.TryEnter(Lock))
+                {
+                    didExecute = (State == TaskState.Executed);
+
+                    Monitor.Exit(Lock);
+                }
+
+
+                return didExecute;
+            }
+        }
+
+        /// <summary>
+        /// True if unmanaged model and moc should be released.
+        /// </summary>
+        private bool ShouldReleaseUnmanaged { get; set; }
 
         #region Constructor
 
         /// <summary>
-        ///     Initializes instance.
+        /// Initializes instance.
         /// </summary>
         /// <param name="moc">Moc unmanaged model was instantiated from.</param>
         public CubismTaskableModel(CubismMoc moc)
@@ -54,124 +158,17 @@ namespace Live2D.Cubism.Core
         #endregion
 
         /// <summary>
-        ///     Handle to unmanaged model.
-        /// </summary>
-        public CubismUnmanagedModel UnmanagedModel { get; private set; }
-
-        /// <summary>
-        ///     <see cref="CubismMoc" /> the model was instantiated from.
-        /// </summary>
-        public CubismMoc Moc { get; }
-
-        /// <summary>
-        ///     Buffer to write dynamic data to.
-        /// </summary>
-        public CubismDynamicDrawableData[] DynamicDrawableData
-        {
-            get
-            {
-                CubismDynamicDrawableData[] dynamicDrawableData = null;
-
-                if (Monitor.TryEnter(Lock))
-                {
-                    dynamicDrawableData = _dynamicDrawableData;
-
-                    Monitor.Exit(Lock);
-                }
-
-
-                return dynamicDrawableData;
-            }
-
-
-            private set => _dynamicDrawableData = value;
-        }
-
-
-        /// <summary>
-        ///     True if task is currently executing.
-        /// </summary>
-        public bool IsExecuting
-        {
-            get
-            {
-                var isExecuting = false;
-
-
-                if (Monitor.TryEnter(Lock))
-                {
-                    isExecuting = State == TaskState.Enqueued || State == TaskState.Executing;
-
-
-                    Monitor.Exit(Lock);
-                }
-
-
-                return isExecuting;
-            }
-        }
-
-        /// <summary>
-        ///     True if did run to completion at least once.
-        /// </summary>
-        public bool DidExecute
-        {
-            get
-            {
-                var didExecute = false;
-
-
-                if (Monitor.TryEnter(Lock))
-                {
-                    didExecute = State == TaskState.Executed;
-
-                    Monitor.Exit(Lock);
-                }
-
-
-                return didExecute;
-            }
-        }
-
-        /// <summary>
-        ///     True if unmanaged model and moc should be released.
-        /// </summary>
-        private bool ShouldReleaseUnmanaged { get; set; }
-
-        #region Implementation of ICubismTask
-
-        void ICubismTask.Execute()
-        {
-            Execute();
-        }
-
-        #endregion
-
-        #region Factory Methods
-
-        /// <summary>
-        ///     Creates a <see cref="CubismTaskableModel" /> from a <see cref="CubismMoc" />.
-        /// </summary>
-        /// <param name="moc">Moc source.</param>
-        /// <returns>Instance.</returns>
-        public static CubismTaskableModel CreateTaskableModel(CubismMoc moc)
-        {
-            return new CubismTaskableModel(moc);
-        }
-
-        #endregion
-
-        /// <summary>
-        ///     Tries to read parameters into a buffer.
+        /// Tries to read parameters into a buffer.
         /// </summary>
         /// <param name="parameters">Buffer to write to.</param>
-        /// <returns><see langword="true" /> on success; <see langword="false" /> otherwise.</returns>
+        /// <returns><see langword="true"/> on success; <see langword="false"/> otherwise.</returns>
         public bool TryReadParameters(CubismParameter[] parameters)
         {
             var didRead = false;
 
 
             if (Monitor.TryEnter(Lock))
+            {
                 try
                 {
                     if (State == TaskState.Executed)
@@ -186,23 +183,25 @@ namespace Live2D.Cubism.Core
                 {
                     Monitor.Exit(Lock);
                 }
+            }
 
 
             return didRead;
         }
 
         /// <summary>
-        ///     Tries to write parameters to a buffer.
+        /// Tries to write parameters to a buffer.
         /// </summary>
         /// <param name="parameters">Buffer to read from.</param>
         /// <param name="parts">Buffer to read from.</param>
-        /// <returns><see langword="true" /> on success; <see langword="false" /> otherwise.</returns>
+        /// <returns><see langword="true"/> on success; <see langword="false"/> otherwise.</returns>
         public bool TryWriteParametersAndParts(CubismParameter[] parameters, CubismPart[] parts)
         {
             var didWrite = false;
 
 
             if (Monitor.TryEnter(Lock))
+            {
                 try
                 {
                     if (State != TaskState.Executing)
@@ -218,6 +217,7 @@ namespace Live2D.Cubism.Core
                 {
                     Monitor.Exit(Lock);
                 }
+            }
 
 
             return didWrite;
@@ -225,14 +225,17 @@ namespace Live2D.Cubism.Core
 
 
         /// <summary>
-        ///     Dispatches the task for (maybe async) execution.
+        /// Dispatches the task for (maybe async) execution.
         /// </summary>
         public void Update()
         {
             // Validate state.
             lock (Lock)
             {
-                if (State == TaskState.Enqueued || State == TaskState.Executing) return;
+                if (State == TaskState.Enqueued || State == TaskState.Executing)
+                {
+                    return;
+                }
 
 
                 // Update state.
@@ -244,14 +247,17 @@ namespace Live2D.Cubism.Core
         }
 
         /// <summary>
-        ///     Forces the task to run now to completion.
+        /// Forces the task to run now to completion.
         /// </summary>
         public bool UpdateNow()
         {
             // Validate state.
             lock (Lock)
             {
-                if (State == TaskState.Enqueued || State == TaskState.Executing) return false;
+                if (State == TaskState.Enqueued || State == TaskState.Executing)
+                {
+                    return false;
+                }
 
 
                 // Update state.
@@ -268,7 +274,7 @@ namespace Live2D.Cubism.Core
 
 
         /// <summary>
-        ///     Releases unmanaged resource.
+        /// Releases unmanaged resource.
         /// </summary>
         public void ReleaseUnmanaged()
         {
@@ -278,7 +284,10 @@ namespace Live2D.Cubism.Core
             // Return if task is ongoing.
             lock (Lock)
             {
-                if (State == TaskState.Enqueued || State == TaskState.Executing) return;
+                if (State == TaskState.Enqueued || State == TaskState.Executing)
+                {
+                    return;
+                }
             }
 
 
@@ -290,7 +299,7 @@ namespace Live2D.Cubism.Core
 
 
         /// <summary>
-        ///     Runs the task.
+        /// Runs the task.
         /// </summary>
         private void Execute()
         {
@@ -316,13 +325,16 @@ namespace Live2D.Cubism.Core
 
 
                 // Release native if requested.
-                if (ShouldReleaseUnmanaged) OnReleaseUnmanaged();
+                if (ShouldReleaseUnmanaged)
+                {
+                    OnReleaseUnmanaged();
+                }
             }
         }
 
 
         /// <summary>
-        ///     Actually releases native resource(s).
+        /// Actually releases native resource(s).
         /// </summary>
         private void OnReleaseUnmanaged()
         {
@@ -333,42 +345,51 @@ namespace Live2D.Cubism.Core
             UnmanagedModel = null;
         }
 
+        #region Implementation of ICubismTask
+
+        void ICubismTask.Execute()
+        {
+            Execute();
+        }
+
+        #endregion
+
         #region Threading
 
         /// <summary>
-        ///     Task states.
+        /// Task states.
         /// </summary>
         private enum TaskState
         {
             /// <summary>
-            ///     Idle state.
+            /// Idle state.
             /// </summary>
             Idle,
 
             /// <summary>
-            ///     Waiting-for-execution state.
+            /// Waiting-for-execution state.
             /// </summary>
             Enqueued,
 
             /// <summary>
-            ///     Executing state.
+            /// Executing state.
             /// </summary>
             Executing,
 
             /// <summary>
-            ///     Executed state.
+            /// Executed state.
             /// </summary>
             Executed
         }
 
 
         /// <summary>
-        ///     Lock.
+        /// Lock.
         /// </summary>
-        private object Lock { get; }
+        private object Lock { get; set; }
 
         /// <summary>
-        ///     Internal state.
+        /// Internal state.
         /// </summary>
         private TaskState State { get; set; }
 

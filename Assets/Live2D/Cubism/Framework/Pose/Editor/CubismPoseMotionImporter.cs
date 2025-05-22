@@ -6,27 +6,28 @@
  */
 
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.Json;
 using Live2D.Cubism.Framework.MotionFade;
 using Live2D.Cubism.Framework.Pose;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
+
 
 namespace Live2D.Cubism.Editor.Importers
 {
     /// <summary>
-    ///     Cubism pose motion importer.
+    /// Cubism pose motion importer.
     /// </summary>
     internal static class CubismPoseMotionImporter
     {
         #region Unity Event Handling
 
         /// <summary>
-        ///     Registers processor.
+        /// Registers processor.
         /// </summary>
         [InitializeOnLoadMethod]
         private static void RegisterModelImporter()
@@ -39,7 +40,7 @@ namespace Live2D.Cubism.Editor.Importers
         #region Cubism Import Event Handling
 
         /// <summary>
-        ///     Create pose motions.
+        /// Create pose motions.
         /// </summary>
         /// <param name="sender">Event source.</param>
         /// <param name="model">Imported model.</param>
@@ -50,7 +51,10 @@ namespace Live2D.Cubism.Editor.Importers
             var pose3Json = sender.Model3Json.Pose3Json;
 
             // Fail silently...
-            if (!shouldImportAsOriginalWorkflow || pose3Json == null) return;
+            if(!shouldImportAsOriginalWorkflow || pose3Json == null)
+            {
+                return;
+            }
 
             var assetsDirectoryPath = Application.dataPath.Replace("Assets", "");
             var assetPath = sender.AssetPath.Replace(assetsDirectoryPath, "");
@@ -60,18 +64,25 @@ namespace Live2D.Cubism.Editor.Importers
             var motions = new List<CubismModel3Json.SerializableMotion>();
 
             if (fileReferences.Motions.GroupNames != null)
+            {
                 for (var i = 0; i < fileReferences.Motions.GroupNames.Length; i++)
+                {
                     motions.AddRange(fileReferences.Motions.Motions[i]);
+                }
+            }
 
 
-            for (var i = 0; i < motions.Count; ++i)
+            for(var i = 0; i < motions.Count; ++i)
             {
                 var motionPath = Path.GetDirectoryName(assetPath) + "/" + motions[i].File;
                 var jsonString = string.IsNullOrEmpty(motionPath)
-                    ? null
-                    : File.ReadAllText(motionPath);
+                                    ? null
+                                    : File.ReadAllText(motionPath);
 
-                if (jsonString == null) continue;
+                if(jsonString == null)
+                {
+                    continue;
+                }
 
                 var directoryPath = Path.GetDirectoryName(assetPath) + "/";
                 var motion3Json = CubismMotion3Json.LoadFrom(jsonString);
@@ -85,17 +96,15 @@ namespace Live2D.Cubism.Editor.Importers
                     ? assetList.AssetPaths.IndexOf(animationClipPath)
                     : -1;
 
-                var oldAnimationClip = shouldImportAsOriginalWorkflow
-                    ? assetListIndex >= 0
+                var oldAnimationClip = (shouldImportAsOriginalWorkflow)
+                    ? (assetListIndex >= 0)
                         ? (AnimationClip)assetList.Assets[assetListIndex]
                         : AssetDatabase.LoadAssetAtPath<AnimationClip>(animationClipPath)
                     : null;
 
-                var newAnimationClip = oldAnimationClip == null
-                    ? motion3Json.ToAnimationClip(shouldImportAsOriginalWorkflow, shouldClearAnimationCurves, true,
-                        pose3Json)
-                    : motion3Json.ToAnimationClip(oldAnimationClip, shouldImportAsOriginalWorkflow,
-                        shouldClearAnimationCurves, true,
+                var newAnimationClip = (oldAnimationClip == null)
+                    ? motion3Json.ToAnimationClip(shouldImportAsOriginalWorkflow, shouldClearAnimationCurves, true, pose3Json)
+                    : motion3Json.ToAnimationClip(oldAnimationClip, shouldImportAsOriginalWorkflow, shouldClearAnimationCurves, true,
                         pose3Json);
                 newAnimationClip.name = animationName;
 
@@ -127,15 +136,18 @@ namespace Live2D.Cubism.Editor.Importers
                     var sourceAnimationEvents = AnimationUtility.GetAnimationEvents(newAnimationClip);
                     var index = -1;
 
-                    for (var j = 0; j < sourceAnimationEvents.Length; ++j)
+                    for(var j = 0; j < sourceAnimationEvents.Length; ++j)
                     {
-                        if (sourceAnimationEvents[j].functionName != "InstanceId") continue;
+                        if(sourceAnimationEvents[j].functionName != "InstanceId")
+                        {
+                            continue;
+                        }
 
                         index = j;
                         break;
                     }
 
-                    if (index == -1)
+                    if(index == -1)
                     {
                         index = sourceAnimationEvents.Length;
                         Array.Resize(ref sourceAnimationEvents, sourceAnimationEvents.Length + 1);
@@ -168,11 +180,10 @@ namespace Live2D.Cubism.Editor.Importers
                 }
 
                 // Motion references for Fade added to list.
-                var directoryName = Path.GetDirectoryName(fadeMotionPath);
-                var modelDir = Path.GetDirectoryName(directoryName);
-                var modelName = Path.GetFileName(modelDir);
-                var fadeMotionListPath =
-                    Path.GetDirectoryName(directoryName) + "/" + modelName + ".fadeMotionList.asset";
+                var directoryName = Path.GetDirectoryName(fadeMotionPath).ToString();
+                var modelDir = Path.GetDirectoryName(directoryName).ToString();
+                var modelName = Path.GetFileName(modelDir).ToString();
+                var fadeMotionListPath = Path.GetDirectoryName(directoryName).ToString() + "/" + modelName + ".fadeMotionList.asset";
 
                 assetList = CubismCreatedAssetList.GetInstance();
                 assetListIndex = assetList.AssetPaths.Contains(fadeMotionListPath)
@@ -192,7 +203,6 @@ namespace Live2D.Cubism.Editor.Importers
                         fadeMotions.CubismFadeMotionObjects = new CubismFadeMotionData[0];
                         AssetDatabase.CreateAsset(fadeMotions, fadeMotionListPath);
                     }
-
                     assetList.Assets.Add(fadeMotions);
                     assetList.AssetPaths.Add(fadeMotionListPath);
                     assetList.IsImporterDirties.Add(true);
@@ -211,12 +221,12 @@ namespace Live2D.Cubism.Editor.Importers
                 var motionIndex = -1;
                 var motionName = Path.GetFileName(motions[i].File);
 
-                for (var fadeMotionIndex = 0;
-                     fadeMotionIndex < fadeMotions.CubismFadeMotionObjects.Length;
-                     fadeMotionIndex++)
+                for (var fadeMotionIndex = 0; fadeMotionIndex < fadeMotions.CubismFadeMotionObjects.Length; fadeMotionIndex++)
                 {
-                    if (Path.GetFileName(fadeMotions.CubismFadeMotionObjects[fadeMotionIndex].MotionName) !=
-                        motionName) continue;
+                    if (Path.GetFileName(fadeMotions.CubismFadeMotionObjects[fadeMotionIndex].MotionName) != motionName)
+                    {
+                        continue;
+                    }
 
                     motionIndex = fadeMotionIndex;
                     break;
@@ -230,14 +240,20 @@ namespace Live2D.Cubism.Editor.Importers
                     var events = newAnimationClip.events;
                     for (var k = 0; k < events.Length; ++k)
                     {
-                        if (events[k].functionName != "InstanceId") continue;
+                        if (events[k].functionName != "InstanceId")
+                        {
+                            continue;
+                        }
 
                         instanceId = events[k].intParameter;
                         isExistInstanceId = true;
                         break;
                     }
 
-                    if (!isExistInstanceId) instanceId = newAnimationClip.GetInstanceID();
+                    if (!isExistInstanceId)
+                    {
+                        instanceId = newAnimationClip.GetInstanceID();
+                    }
 
                     fadeMotions.MotionInstanceIds[motionIndex] = instanceId;
                     fadeMotions.CubismFadeMotionObjects[motionIndex] = fadeMotion;
@@ -260,23 +276,19 @@ namespace Live2D.Cubism.Editor.Importers
 
                     if (curve.Target == "PartOpacity")
                     {
-                        if (pose3Json.FadeInTime == 0.0f)
+                        if(pose3Json.FadeInTime == 0.0f)
                         {
                             fadeMotion.ParameterIds[curveIndex] = curve.Id;
                             fadeMotion.ParameterFadeInTimes[curveIndex] = pose3Json.FadeInTime;
-                            fadeMotion.ParameterFadeOutTimes[curveIndex] =
-                                curve.FadeOutTime < 0.0f ? -1.0f : curve.FadeOutTime;
-                            fadeMotion.ParameterCurves[curveIndex] =
-                                new AnimationCurve(CubismMotion3Json.ConvertCurveSegmentsToKeyframes(curve.Segments));
+                            fadeMotion.ParameterFadeOutTimes[curveIndex] = (curve.FadeOutTime < 0.0f) ? -1.0f : curve.FadeOutTime;
+                            fadeMotion.ParameterCurves[curveIndex] = new AnimationCurve(CubismMotion3Json.ConvertCurveSegmentsToKeyframes(curve.Segments));
                         }
                         else
                         {
                             fadeMotion.ParameterIds[curveIndex] = curve.Id;
                             fadeMotion.ParameterFadeInTimes[curveIndex] = pose3Json.FadeInTime;
-                            fadeMotion.ParameterFadeOutTimes[curveIndex] =
-                                curve.FadeOutTime < 0.0f ? -1.0f : curve.FadeOutTime;
-                            fadeMotion.ParameterCurves[curveIndex] =
-                                CubismMotion3Json.ConvertSteppedCurveToLinerCurver(curve, pose3Json.FadeInTime);
+                            fadeMotion.ParameterFadeOutTimes[curveIndex] = (curve.FadeOutTime < 0.0f) ? -1.0f : curve.FadeOutTime;
+                            fadeMotion.ParameterCurves[curveIndex] = CubismMotion3Json.ConvertSteppedCurveToLinerCurver(curve, pose3Json.FadeInTime);
                         }
                     }
                 }
@@ -288,38 +300,50 @@ namespace Live2D.Cubism.Editor.Importers
         }
 
         /// <summary>
-        ///     Initialize pose part.
+        /// Initialize pose part.
         /// </summary>
         /// <param name="parts">Model parts.</param>
         /// <param name="groups">Pose groups.</param>
         private static void InitializePosePart(CubismPart[] parts, CubismPose3Json.SerializablePoseGroup[][] groups)
         {
             // Fail silently...
-            if (parts == null || groups == null) return;
+            if (parts == null || groups == null)
+            {
+                return;
+            }
 
             for (var groupIndex = 0; groupIndex < groups.Length; ++groupIndex)
             {
                 var group = groups[groupIndex];
 
                 // Fail silently...
-                if (group == null) continue;
+                if(group == null)
+                {
+                    continue;
+                }
 
                 for (var partIndex = 0; partIndex < group.Length; ++partIndex)
                 {
                     var part = parts.FindById(group[partIndex].Id);
 
-                    if (part == null) continue;
+                    if(part == null)
+                    {
+                        continue;
+                    }
 
                     var posePart = part.gameObject.GetComponent<CubismPosePart>();
 
-                    if (posePart == null) posePart = part.gameObject.AddComponent<CubismPosePart>();
+                    if(posePart == null)
+                    {
+                        posePart = part.gameObject.AddComponent<CubismPosePart>();
+                    }
 
                     posePart.GroupIndex = groupIndex;
                     posePart.PartIndex = partIndex;
                     posePart.Link = group[partIndex].Link;
                 }
             }
-        }
+         }
 
         #endregion
     }

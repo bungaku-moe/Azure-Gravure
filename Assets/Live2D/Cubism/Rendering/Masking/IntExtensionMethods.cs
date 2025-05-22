@@ -8,18 +8,19 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Extensions for <see cref="System.Int32" />s.
+    /// Extensions for <see cref="System.Int32"/>s.
     /// </summary>
     internal static class IntExtensionMethods
     {
         /// <summary>
-        ///     Checks whether an integer is a power of two.
+        /// Checks whether an integer is a power of two.
         /// </summary>
         /// <param name="self">Value to check.</param>
-        /// <returns><see langword="true" /> if power of two; <see langword="false" /> otherwise.</returns>
+        /// <returns><see langword="true"/> if power of two; <see langword="false"/> otherwise.</returns>
         public static bool IsPowerOfTwo(this int self)
         {
             return Mathf.ClosestPowerOfTwo(self) == self;

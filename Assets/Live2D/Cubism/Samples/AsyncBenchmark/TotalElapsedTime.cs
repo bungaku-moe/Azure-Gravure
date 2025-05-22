@@ -15,32 +15,33 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
     public class TotalElapsedTime : MonoBehaviour
     {
         /// <summary>
-        ///     Total benchmark uptime.
-        /// </summary>
-        [SerializeField] [HideInInspector] public int ElapsedTime;
-
-        /// <summary>
-        ///     Interval time before the model can spawn.
+        /// Interval time before the model can spawn.
         /// </summary>
         public readonly int UpdateInterval = 1;
 
         /// <summary>
-        ///     Add delta time.
+        /// Total benchmark uptime.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        public int ElapsedTime = 0;
+
+        /// <summary>
+        /// Add delta time.
         /// </summary>
         private float UpdateIntervalCount { get; set; }
 
         /// <summary>
-        ///     UI to display total benchmark uptime.
+        /// UI to display total benchmark uptime.
         /// </summary>
         private Text TotalElapsedTimeText { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.FrameRateUiHolder" /> Component.
+        /// <see cref="AsyncBenchmark.FrameRateUiHolder"/> Component.
         /// </summary>
         private FrameRateUiHolder FrameRateUiHolder { get; set; }
 
         /// <summary>
-        ///     Called by Unity. Getting FpsObservation Component and Getting Component from FpsObservation.
+        /// Called by Unity. Getting FpsObservation Component and Getting Component from FpsObservation.
         /// </summary>
         private void Start()
         {
@@ -49,7 +50,7 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        ///     Called by Unity. Update Total Operating Time.
+        /// Called by Unity. Update Total Operating Time.
         /// </summary>
         private void Update()
         {
@@ -63,14 +64,17 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
             // Update total benchmark uptime.
             ElapsedTime += UpdateInterval;
 
-            if (TotalElapsedTimeText != null) TotalElapsedTimeText.text = TimeConversion(ElapsedTime);
+            if (TotalElapsedTimeText != null)
+            {
+                TotalElapsedTimeText.text = TimeConversion(ElapsedTime);
+            }
 
             // Reset variable.
             UpdateIntervalCount = 0.0f;
         }
 
         /// <summary>
-        ///     Convert seconds to "hours:minutes:seconds".
+        /// Convert seconds to "hours:minutes:seconds".
         /// </summary>
         /// <param name="second">Number of seconds it conversion source.</param>
         /// <returns>String type converted to "hours:minutes:seconds" notation.</returns>

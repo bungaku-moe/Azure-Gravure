@@ -6,107 +6,262 @@
  */
 
 
+using Live2D.Cubism.Core;
 using System;
 using System.IO;
-using Live2D.Cubism.Core;
-using Live2D.Cubism.Framework.Expression;
-using Live2D.Cubism.Framework.MotionFade;
 using Live2D.Cubism.Framework.MouthMovement;
 using Live2D.Cubism.Framework.Physics;
-using Live2D.Cubism.Framework.Pose;
-using Live2D.Cubism.Framework.Raycasting;
 using Live2D.Cubism.Framework.UserData;
+using Live2D.Cubism.Framework.Pose;
+using Live2D.Cubism.Framework.Expression;
+using Live2D.Cubism.Framework.MotionFade;
+using Live2D.Cubism.Framework.Raycasting;
 using Live2D.Cubism.Rendering;
 using Live2D.Cubism.Rendering.Masking;
-using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine;
 
 
 namespace Live2D.Cubism.Framework.Json
 {
     /// <summary>
-    ///     Exposes moc3.json asset data.
+    /// Exposes moc3.json asset data.
     /// </summary>
     [Serializable]
     // ReSharper disable once ClassCannotBeInstantiated
     public sealed class CubismModel3Json
     {
-        /// <summary>
-        ///     <see cref="Expression3Jsons" /> backing field.
-        /// </summary>
-        [NonSerialized] private CubismExp3Json[] _expression3Jsons;
+        #region Delegates
 
         /// <summary>
-        ///     <see cref="CubismPose3Json" /> backing field.
+        /// Handles the loading of assets.
         /// </summary>
-        [NonSerialized] private CubismPose3Json _pose3Json;
+        /// <param name="assetType">The asset type to load.</param>
+        /// <param name="assetPath">The path to the asset.</param>
+        /// <returns></returns>
+        public delegate object LoadAssetAtPathHandler(Type assetType, string assetPath);
+
 
         /// <summary>
-        ///     <see cref="Textures" /> backing field.
+        /// Picks a <see cref="Material"/> for a <see cref="CubismDrawable"/>.
         /// </summary>
-        [NonSerialized] private Texture2D[] _textures;
-
-        #region Constructors
+        /// <param name="sender">Event source.</param>
+        /// <param name="drawable">Drawable to pick for.</param>
+        /// <returns>Picked material.</returns>
+        public delegate Material MaterialPicker(CubismModel3Json sender, CubismDrawable drawable);
 
         /// <summary>
-        ///     Makes construction only possible through factories.
+        /// Picks a <see cref="Texture2D"/> for a <see cref="CubismDrawable"/>.
         /// </summary>
-        private CubismModel3Json()
+        /// <param name="sender">Event source.</param>
+        /// <param name="drawable">Drawable to pick for.</param>
+        /// <returns>Picked texture.</returns>
+        public delegate Texture2D TexturePicker(CubismModel3Json sender, CubismDrawable drawable);
+
+        #endregion
+
+        #region Load Methods
+
+        /// <summary>
+        /// Loads a model.json asset.
+        /// </summary>
+        /// <param name="assetPath">The path to the asset.</param>
+        /// <returns>The <see cref="CubismModel3Json"/> on success; <see langword="null"/> otherwise.</returns>
+        public static CubismModel3Json LoadAtPath(string assetPath)
         {
+            // Use default asset load handler.
+            return LoadAtPath(assetPath, BuiltinLoadAssetAtPath);
+        }
+
+        /// <summary>
+        /// Loads a model.json asset.
+        /// </summary>
+        /// <param name="assetPath">The path to the asset.</param>
+        /// <param name="loadAssetAtPath">Handler for loading assets.</param>
+        /// <returns>The <see cref="CubismModel3Json"/> on success; <see langword="null"/> otherwise.</returns>
+        public static CubismModel3Json LoadAtPath(string assetPath, LoadAssetAtPathHandler loadAssetAtPath)
+        {
+            // Load Json asset.
+            var modelJsonAsset = loadAssetAtPath(typeof(string), assetPath) as string;
+
+            // Return early in case Json asset wasn't loaded.
+            if (modelJsonAsset == null)
+            {
+                return null;
+            }
+
+
+            // Deserialize Json.
+            var modelJson = JsonUtility.FromJson<CubismModel3Json>(modelJsonAsset);
+
+
+            // Finalize deserialization.
+            modelJson.AssetPath = assetPath;
+            modelJson.LoadAssetAtPath = loadAssetAtPath;
+
+
+            // Set motion references.
+            var value = CubismJsonParser.ParseFromString(modelJsonAsset);
+
+            // Return early if there is no references.
+            if (!value.Get("FileReferences").GetMap(null).ContainsKey("Motions"))
+            {
+                return modelJson;
+            }
+
+
+            var motionGroupNames = value.Get("FileReferences").Get("Motions").KeySet().ToArray();
+            modelJson.FileReferences.Motions.GroupNames = motionGroupNames;
+
+            var motionGroupNamesCount = motionGroupNames.Length;
+            modelJson.FileReferences.Motions.Motions = new SerializableMotion[motionGroupNamesCount][];
+
+            for (var i = 0; i < motionGroupNamesCount; i++)
+            {
+                var motionGroup = value.Get("FileReferences").Get("Motions").Get(motionGroupNames[i]);
+                var motionCount = motionGroup.GetVector(null).ToArray().Length;
+
+                modelJson.FileReferences.Motions.Motions[i] = new SerializableMotion[motionCount];
+
+
+                var fadeInTime = -1.0f;
+                var fadeOutTime = -1.0f;
+                for (var j = 0; j < motionCount; j++)
+                {
+                    // Reset fade time cache.
+                    fadeInTime = -1.0f;
+                    fadeOutTime = -1.0f;
+
+                    if (motionGroup.Get(j).GetMap(null).ContainsKey("File"))
+                    {
+                        modelJson.FileReferences.Motions.Motions[i][j].File = motionGroup.Get(j).Get("File").toString();
+                    }
+
+                    if (motionGroup.Get(j).GetMap(null).ContainsKey("Sound"))
+                    {
+                        modelJson.FileReferences.Motions.Motions[i][j].Sound = motionGroup.Get(j).Get("Sound").toString();
+                    }
+
+                    if (motionGroup.Get(j).GetMap(null).ContainsKey("FadeInTime"))
+                    {
+                        fadeInTime = motionGroup.Get(j).Get("FadeInTime").ToFloat();
+                    }
+                    modelJson.FileReferences.Motions.Motions[i][j].FadeInTime = fadeInTime;
+
+                    if (motionGroup.Get(j).GetMap(null).ContainsKey("FadeOutTime"))
+                    {
+                        fadeOutTime = motionGroup.Get(j).Get("FadeOutTime").ToFloat();
+                    }
+                    modelJson.FileReferences.Motions.Motions[i][j].FadeOutTime = fadeOutTime;
+                }
+            }
+
+
+            return modelJson;
         }
 
         #endregion
 
         /// <summary>
-        ///     Path to <see langword="this" />.
+        /// Path to <see langword="this"/>.
         /// </summary>
         public string AssetPath { get; private set; }
 
 
         /// <summary>
-        ///     Method for loading assets.
+        /// Method for loading assets.
         /// </summary>
         private LoadAssetAtPathHandler LoadAssetAtPath { get; set; }
 
-        /// <summary>
-        ///     The contents of the referenced moc3 asset.
-        /// </summary>
-        /// <remarks>
-        ///     The contents isn't cached internally.
-        /// </remarks>
-        public byte[] Moc3 => LoadReferencedAsset<byte[]>(FileReferences.Moc);
+        #region Json Data
 
         /// <summary>
-        ///     The contents of pose3.json asset.
+        /// The motion3.json format version.
+        /// </summary>
+        [SerializeField]
+        public int Version;
+
+        /// <summary>
+        /// The file references.
+        /// </summary>
+        [SerializeField]
+        public SerializableFileReferences FileReferences;
+
+        /// <summary>
+        /// Groups.
+        /// </summary>
+        [SerializeField]
+        public SerializableGroup[] Groups;
+
+        /// <summary>
+        /// Hit areas.
+        /// </summary>
+        [SerializeField]
+        public SerializableHitArea[] HitAreas;
+
+        #endregion
+
+        /// <summary>
+        /// The contents of the referenced moc3 asset.
+        /// </summary>
+        /// <remarks>
+        /// The contents isn't cached internally.
+        /// </remarks>
+        public byte[] Moc3
+        {
+            get
+            {
+                return LoadReferencedAsset<byte[]>(FileReferences.Moc);
+            }
+        }
+
+        /// <summary>
+        /// <see cref="CubismPose3Json"/> backing field.
+        /// </summary>
+        [NonSerialized]
+        private CubismPose3Json _pose3Json;
+
+        /// <summary>
+        /// The contents of pose3.json asset.
         /// </summary>
         public CubismPose3Json Pose3Json
         {
             get
             {
-                if (_pose3Json != null) return _pose3Json;
+                if(_pose3Json != null)
+                {
+                    return _pose3Json;
+                }
 
-                var jsonString = string.IsNullOrEmpty(FileReferences.Pose)
-                    ? null
-                    : LoadReferencedAsset<string>(FileReferences.Pose);
+                var jsonString = string.IsNullOrEmpty(FileReferences.Pose) ? null : LoadReferencedAsset<String>(FileReferences.Pose);
                 _pose3Json = CubismPose3Json.LoadFrom(jsonString);
                 return _pose3Json;
             }
         }
 
         /// <summary>
-        ///     The referenced expression assets.
+        /// <see cref="Expression3Jsons"/> backing field.
+        /// </summary>
+        [NonSerialized]
+        private CubismExp3Json[] _expression3Jsons;
+
+        /// <summary>
+        /// The referenced expression assets.
         /// </summary>
         /// <remarks>
-        ///     The references aren't cached internally.
+        /// The references aren't cached internally.
         /// </remarks>
         public CubismExp3Json[] Expression3Jsons
         {
             get
             {
                 // Fail silently...
-                if (FileReferences.Expressions == null) return null;
+                if(FileReferences.Expressions == null)
+                {
+                    return null;
+                }
 
                 // Load expression only if necessary.
                 if (_expression3Jsons == null)
@@ -115,9 +270,9 @@ namespace Live2D.Cubism.Framework.Json
 
                     for (var i = 0; i < _expression3Jsons.Length; ++i)
                     {
-                        var expressionJson = string.IsNullOrEmpty(FileReferences.Expressions[i].File)
-                            ? null
-                            : LoadReferencedAsset<string>(FileReferences.Expressions[i].File);
+                        var expressionJson = (string.IsNullOrEmpty(FileReferences.Expressions[i].File))
+                                                ? null
+                                                : LoadReferencedAsset<string>(FileReferences.Expressions[i].File);
                         _expression3Jsons[i] = CubismExp3Json.LoadFrom(expressionJson);
                     }
                 }
@@ -127,28 +282,46 @@ namespace Live2D.Cubism.Framework.Json
         }
 
         /// <summary>
-        ///     The contents of physics3.json asset.
+        /// The contents of physics3.json asset.
         /// </summary>
-        public string Physics3Json => string.IsNullOrEmpty(FileReferences.Physics)
-            ? null
-            : LoadReferencedAsset<string>(FileReferences.Physics);
+        public string Physics3Json
+        {
+            get
+            {
+                return string.IsNullOrEmpty(FileReferences.Physics) ? null : LoadReferencedAsset<string>(FileReferences.Physics);
+            }
+        }
 
-        public string UserData3Json => string.IsNullOrEmpty(FileReferences.UserData)
-            ? null
-            : LoadReferencedAsset<string>(FileReferences.UserData);
+        public string UserData3Json
+        {
+            get
+            {
+                return string.IsNullOrEmpty(FileReferences.UserData) ? null : LoadReferencedAsset<string>(FileReferences.UserData);
+            }
+        }
 
         /// <summary>
-        ///     The contents of cdi3.json asset.
+        /// The contents of cdi3.json asset.
         /// </summary>
-        public string DisplayInfo3Json => string.IsNullOrEmpty(FileReferences.DisplayInfo)
-            ? null
-            : LoadReferencedAsset<string>(FileReferences.DisplayInfo);
+        public string DisplayInfo3Json
+        {
+            get
+            {
+                return string.IsNullOrEmpty(FileReferences.DisplayInfo) ? null : LoadReferencedAsset<string>(FileReferences.DisplayInfo);
+            }
+        }
 
         /// <summary>
-        ///     The referenced texture assets.
+        /// <see cref="Textures"/> backing field.
+        /// </summary>
+        [NonSerialized]
+        private Texture2D[] _textures;
+
+        /// <summary>
+        /// The referenced texture assets.
         /// </summary>
         /// <remarks>
-        ///     The references aren't cached internally.
+        /// The references aren't cached internally.
         /// </remarks>
         public Texture2D[] Textures
         {
@@ -161,7 +334,9 @@ namespace Live2D.Cubism.Framework.Json
 
 
                     for (var i = 0; i < _textures.Length; ++i)
+                    {
                         _textures[i] = LoadReferencedAsset<Texture2D>(FileReferences.Textures[i]);
+                    }
                 }
 
 
@@ -169,33 +344,44 @@ namespace Live2D.Cubism.Framework.Json
             }
         }
 
+        #region Constructors
+
         /// <summary>
-        ///     Instantiates a <see cref="CubismMoc">model source</see> and a <see cref="CubismModel">model</see> with the default
-        ///     texture set.
+        /// Makes construction only possible through factories.
+        /// </summary>
+        private CubismModel3Json()
+        {
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Instantiates a <see cref="CubismMoc">model source</see> and a <see cref="CubismModel">model</see> with the default texture set.
         /// </summary>
         /// <param name="shouldImportAsOriginalWorkflow">Should import as original workflow.</param>
-        /// <returns>The instantiated <see cref="CubismModel">model</see> on success; <see langword="null" /> otherwise.</returns>
+        /// <returns>The instantiated <see cref="CubismModel">model</see> on success; <see langword="null"/> otherwise.</returns>
         public CubismModel ToModel(bool shouldImportAsOriginalWorkflow = false)
         {
-            return ToModel(CubismBuiltinPickers.MaterialPicker, CubismBuiltinPickers.TexturePicker,
-                shouldImportAsOriginalWorkflow);
+            return ToModel(CubismBuiltinPickers.MaterialPicker, CubismBuiltinPickers.TexturePicker, shouldImportAsOriginalWorkflow);
         }
 
         /// <summary>
-        ///     Instantiates a <see cref="CubismMoc">model source</see> and a <see cref="CubismModel">model</see>.
+        /// Instantiates a <see cref="CubismMoc">model source</see> and a <see cref="CubismModel">model</see>.
         /// </summary>
         /// <param name="pickMaterial">The material mapper to use.</param>
         /// <param name="pickTexture">The texture mapper to use.</param>
         /// <param name="shouldImportAsOriginalWorkflow">Should import as original workflow.</param>
-        /// <returns>The instantiated <see cref="CubismModel">model</see> on success; <see langword="null" /> otherwise.</returns>
-        public CubismModel ToModel(MaterialPicker pickMaterial, TexturePicker pickTexture,
-            bool shouldImportAsOriginalWorkflow = false)
+        /// <returns>The instantiated <see cref="CubismModel">model</see> on success; <see langword="null"/> otherwise.</returns>
+        public CubismModel ToModel(MaterialPicker pickMaterial, TexturePicker pickTexture, bool shouldImportAsOriginalWorkflow = false)
         {
             // Initialize model source and instantiate it.
             var mocAsBytes = Moc3;
 
 
-            if (mocAsBytes == null) return null;
+            if (mocAsBytes == null)
+            {
+                return null;
+            }
 
 
             var moc = CubismMoc.CreateFrom(mocAsBytes);
@@ -203,7 +389,10 @@ namespace Live2D.Cubism.Framework.Json
 
             var model = CubismModel.InstantiateFrom(moc);
 
-            if (model == null) return null;
+            if (model == null)
+            {
+                return null;
+            }
 
             model.name = Path.GetFileNameWithoutExtension(FileReferences.Moc);
 
@@ -220,14 +409,23 @@ namespace Live2D.Cubism.Framework.Json
 
             var drawables = model.Drawables;
 
-            if (renderers == null || drawables == null) return null;
+            if (renderers == null || drawables  == null)
+            {
+                return null;
+            }
 
             // Initialize materials.
-            for (var i = 0; i < renderers.Length; ++i) renderers[i].Material = pickMaterial(this, drawables[i]);
+            for (var i = 0; i < renderers.Length; ++i)
+            {
+                renderers[i].Material = pickMaterial(this, drawables[i]);
+            }
 
 
             // Initialize textures.
-            for (var i = 0; i < renderers.Length; ++i) renderers[i].MainTexture = pickTexture(this, drawables[i]);
+            for (var i = 0; i < renderers.Length; ++i)
+            {
+                renderers[i].MainTexture = pickTexture(this, drawables[i]);
+            }
 
 
             if (model.Parts != null)
@@ -235,7 +433,7 @@ namespace Live2D.Cubism.Framework.Json
                 var parts = model.Parts;
 
                 // Create and initialize partColorsEditors.
-                for (var i = 0; i < parts.Length; i++)
+                for (int i = 0; i < parts.Length; i++)
                 {
                     var partColorsEditor = parts[i].gameObject.AddComponent<CubismPartColorsEditor>();
                     partColorsEditor.TryInitialize(model);
@@ -245,17 +443,23 @@ namespace Live2D.Cubism.Framework.Json
 
             // Initialize drawables.
             if (HitAreas != null)
+            {
                 for (var i = 0; i < HitAreas.Length; i++)
-                for (var j = 0; j < drawables.Length; j++)
-                    if (drawables[j].Id == HitAreas[i].Id)
+                {
+                    for (var j = 0; j < drawables.Length; j++)
                     {
-                        // Add components for hit judgement to HitArea target Drawables.
-                        var hitDrawable = drawables[j].gameObject.AddComponent<CubismHitDrawable>();
-                        hitDrawable.Name = HitAreas[i].Name;
+                        if (drawables[j].Id == HitAreas[i].Id)
+                        {
+                            // Add components for hit judgement to HitArea target Drawables.
+                            var hitDrawable = drawables[j].gameObject.AddComponent<CubismHitDrawable>();
+                            hitDrawable.Name = HitAreas[i].Name;
 
-                        drawables[j].gameObject.AddComponent<CubismRaycastable>();
-                        break;
+                            drawables[j].gameObject.AddComponent<CubismRaycastable>();
+                            break;
+                        }
                     }
+                }
+            }
 
             //Load from cdi3.json
             var DisplayInfo3JsonAsString = DisplayInfo3Json;
@@ -269,7 +473,9 @@ namespace Live2D.Cubism.Framework.Json
                 if (IsParameterInGroup(parameters[i], "EyeBlink"))
                 {
                     if (model.gameObject.GetComponent<CubismEyeBlinkController>() == null)
+                    {
                         model.gameObject.AddComponent<CubismEyeBlinkController>();
+                    }
 
 
                     parameters[i].gameObject.AddComponent<CubismEyeBlinkParameter>();
@@ -280,7 +486,9 @@ namespace Live2D.Cubism.Framework.Json
                 if (IsParameterInGroup(parameters[i], "LipSync"))
                 {
                     if (model.gameObject.GetComponent<CubismMouthController>() == null)
+                    {
                         model.gameObject.AddComponent<CubismMouthController>();
+                    }
 
 
                     parameters[i].gameObject.AddComponent<CubismMouthParameter>();
@@ -290,23 +498,23 @@ namespace Live2D.Cubism.Framework.Json
                 // Setting up the parameter name for display.
                 if (cdi3Json != null)
                 {
-                    var cubismDisplayInfoParameterName =
-                        parameters[i].gameObject.AddComponent<CubismDisplayInfoParameterName>();
+                    var cubismDisplayInfoParameterName = parameters[i].gameObject.AddComponent<CubismDisplayInfoParameterName>();
                     cubismDisplayInfoParameterName.Name = parameters[i].Id;
-                    for (var j = 0; j < cdi3Json.Parameters.Length; j++)
+                    for (int j = 0; j < cdi3Json.Parameters.Length; j++)
+                    {
                         if (cdi3Json.Parameters[j].Id == parameters[i].Id)
                         {
                             cubismDisplayInfoParameterName.Name = cdi3Json.Parameters[j].Name;
                             break;
                         }
-
+                    }
                     cubismDisplayInfoParameterName.DisplayName = string.Empty;
                 }
             }
 
-            // Setting up the part name for display.
             if (cdi3Json != null)
             {
+                // Setting up the part name for display.
                 // Initialize groups.
                 var parts = model.Parts;
 
@@ -314,21 +522,57 @@ namespace Live2D.Cubism.Framework.Json
                 {
                     var cubismDisplayInfoPartNames = parts[i].gameObject.AddComponent<CubismDisplayInfoPartName>();
                     cubismDisplayInfoPartNames.Name = parts[i].Id;
-                    for (var j = 0; j < cdi3Json.Parts.Length; j++)
+                    for (int j = 0; j < cdi3Json.Parts.Length; j++)
+                    {
                         if (cdi3Json.Parts[j].Id == parts[i].Id)
                         {
                             cubismDisplayInfoPartNames.Name = cdi3Json.Parts[j].Name;
                             break;
                         }
-
+                    }
                     cubismDisplayInfoPartNames.DisplayName = string.Empty;
+                }
+
+                // Get combined parameter information
+                var combinedParameters = cdi3Json.CombinedParameters;
+
+                if (combinedParameters != null)
+                {
+                    // Parameters are always combined in pairs of two.
+                    const int combinedParameterCount = 2;
+
+                    // Set up CubismDisplayInfoCombinedParameterInfo component.
+                    var combinedParameterInfo = model.gameObject.AddComponent<CubismDisplayInfoCombinedParameterInfo>();
+                    combinedParameterInfo.CombinedParameters = new CubismDisplayInfo3Json.CombinedParameter[combinedParameters.Length];
+
+                    for (var index = 0; index < combinedParameters.Length; index++)
+                    {
+                        // Skip if the combined parameter is invalid.
+                        if (combinedParameters[index].Ids == null || combinedParameters[index].Ids.Length != combinedParameterCount)
+                        {
+                            Debug.LogWarning($"The data contains invalid CombinedParameters in {model.Moc.name}.cdi3.json.");
+                            continue;
+                        }
+
+                        var combinedParameterIds = combinedParameters[index].Ids;
+
+                        // Set CombinedParameter.
+                        combinedParameterInfo.CombinedParameters[index] = new CubismDisplayInfo3Json.CombinedParameter
+                        {
+                            HorizontalParameterId = combinedParameterIds[0],
+                            VerticalParameterId = combinedParameterIds[1]
+                        };
+                    }
                 }
             }
 
             // Add mask controller if required.
             for (var i = 0; i < drawables.Length; ++i)
             {
-                if (!drawables[i].IsMasked) continue;
+                if (!drawables[i].IsMasked)
+                {
+                    continue;
+                }
 
 
                 // Add controller exactly once...
@@ -339,35 +583,49 @@ namespace Live2D.Cubism.Framework.Json
             }
 
             // Add original workflow component if is original workflow.
-            if (shouldImportAsOriginalWorkflow)
+            if(shouldImportAsOriginalWorkflow)
             {
                 // Add cubism update manager.
                 var updateManager = model.gameObject.GetComponent<CubismUpdateController>();
 
-                if (updateManager == null) model.gameObject.AddComponent<CubismUpdateController>();
+                if(updateManager == null)
+                {
+                    model.gameObject.AddComponent<CubismUpdateController>();
+                }
 
                 // Add parameter store.
                 var parameterStore = model.gameObject.GetComponent<CubismParameterStore>();
 
-                if (parameterStore == null) parameterStore = model.gameObject.AddComponent<CubismParameterStore>();
+                if(parameterStore == null)
+                {
+                    parameterStore = model.gameObject.AddComponent<CubismParameterStore>();
+                }
 
                 // Add pose controller.
                 var poseController = model.gameObject.GetComponent<CubismPoseController>();
 
-                if (poseController == null) poseController = model.gameObject.AddComponent<CubismPoseController>();
+                if(poseController == null)
+                {
+                    poseController = model.gameObject.AddComponent<CubismPoseController>();
+                }
 
                 // Add expression controller.
                 var expressionController = model.gameObject.GetComponent<CubismExpressionController>();
 
-                if (expressionController == null)
+                if(expressionController == null)
+                {
                     expressionController = model.gameObject.AddComponent<CubismExpressionController>();
+                }
 
 
                 // Add fade controller.
                 var motionFadeController = model.gameObject.GetComponent<CubismFadeController>();
 
-                if (motionFadeController == null)
+                if(motionFadeController == null)
+                {
                     motionFadeController = model.gameObject.AddComponent<CubismFadeController>();
+                }
+
             }
 
 
@@ -381,7 +639,10 @@ namespace Live2D.Cubism.Framework.Json
                 var physicsController = model.gameObject.GetComponent<CubismPhysicsController>();
 
                 if (physicsController == null)
+                {
                     physicsController = model.gameObject.AddComponent<CubismPhysicsController>();
+
+                }
 
                 physicsController.Initialize(physics3Json.ToRig());
             }
@@ -406,7 +667,10 @@ namespace Live2D.Cubism.Framework.Json
                         var tag = drawables[i].gameObject.GetComponent<CubismUserDataTag>();
 
 
-                        if (tag == null) tag = drawables[i].gameObject.AddComponent<CubismUserDataTag>();
+                        if (tag == null)
+                        {
+                            tag = drawables[i].gameObject.AddComponent<CubismUserDataTag>();
+                        }
 
 
                         tag.Initialize(drawableBodies[index]);
@@ -414,7 +678,10 @@ namespace Live2D.Cubism.Framework.Json
                 }
             }
 
-            if (model.gameObject.GetComponent<Animator>() == null) model.gameObject.AddComponent<Animator>();
+            if (model.gameObject.GetComponent<Animator>() == null)
+            {
+                model.gameObject.AddComponent<Animator>();
+            }
 
             // Make sure model is 'fresh'
             model.ForceUpdateNow();
@@ -423,150 +690,14 @@ namespace Live2D.Cubism.Framework.Json
             return model;
         }
 
-        #region Delegates
-
-        /// <summary>
-        ///     Handles the loading of assets.
-        /// </summary>
-        /// <param name="assetType">The asset type to load.</param>
-        /// <param name="assetPath">The path to the asset.</param>
-        /// <returns></returns>
-        public delegate object LoadAssetAtPathHandler(Type assetType, string assetPath);
-
-
-        /// <summary>
-        ///     Picks a <see cref="Material" /> for a <see cref="CubismDrawable" />.
-        /// </summary>
-        /// <param name="sender">Event source.</param>
-        /// <param name="drawable">Drawable to pick for.</param>
-        /// <returns>Picked material.</returns>
-        public delegate Material MaterialPicker(CubismModel3Json sender, CubismDrawable drawable);
-
-        /// <summary>
-        ///     Picks a <see cref="Texture2D" /> for a <see cref="CubismDrawable" />.
-        /// </summary>
-        /// <param name="sender">Event source.</param>
-        /// <param name="drawable">Drawable to pick for.</param>
-        /// <returns>Picked texture.</returns>
-        public delegate Texture2D TexturePicker(CubismModel3Json sender, CubismDrawable drawable);
-
-        #endregion
-
-        #region Load Methods
-
-        /// <summary>
-        ///     Loads a model.json asset.
-        /// </summary>
-        /// <param name="assetPath">The path to the asset.</param>
-        /// <returns>The <see cref="CubismModel3Json" /> on success; <see langword="null" /> otherwise.</returns>
-        public static CubismModel3Json LoadAtPath(string assetPath)
-        {
-            // Use default asset load handler.
-            return LoadAtPath(assetPath, BuiltinLoadAssetAtPath);
-        }
-
-        /// <summary>
-        ///     Loads a model.json asset.
-        /// </summary>
-        /// <param name="assetPath">The path to the asset.</param>
-        /// <param name="loadAssetAtPath">Handler for loading assets.</param>
-        /// <returns>The <see cref="CubismModel3Json" /> on success; <see langword="null" /> otherwise.</returns>
-        public static CubismModel3Json LoadAtPath(string assetPath, LoadAssetAtPathHandler loadAssetAtPath)
-        {
-            // Load Json asset.
-            var modelJsonAsset = loadAssetAtPath(typeof(string), assetPath) as string;
-
-            // Return early in case Json asset wasn't loaded.
-            if (modelJsonAsset == null) return null;
-
-
-            // Deserialize Json.
-            var modelJson = JsonUtility.FromJson<CubismModel3Json>(modelJsonAsset);
-
-
-            // Finalize deserialization.
-            modelJson.AssetPath = assetPath;
-            modelJson.LoadAssetAtPath = loadAssetAtPath;
-
-
-            // Set motion references.
-            var value = CubismJsonParser.ParseFromString(modelJsonAsset);
-
-            // Return early if there is no references.
-            if (!value.Get("FileReferences").GetMap(null).ContainsKey("Motions")) return modelJson;
-
-
-            var motionGroupNames = value.Get("FileReferences").Get("Motions").KeySet().ToArray();
-            modelJson.FileReferences.Motions.GroupNames = motionGroupNames;
-
-            var motionGroupNamesCount = motionGroupNames.Length;
-            modelJson.FileReferences.Motions.Motions = new SerializableMotion[motionGroupNamesCount][];
-
-            for (var i = 0; i < motionGroupNamesCount; i++)
-            {
-                var motionGroup = value.Get("FileReferences").Get("Motions").Get(motionGroupNames[i]);
-                var motionCount = motionGroup.GetVector(null).ToArray().Length;
-
-                modelJson.FileReferences.Motions.Motions[i] = new SerializableMotion[motionCount];
-
-
-                for (var j = 0; j < motionCount; j++)
-                {
-                    if (motionGroup.Get(j).GetMap(null).ContainsKey("File"))
-                        modelJson.FileReferences.Motions.Motions[i][j].File = motionGroup.Get(j).Get("File").toString();
-
-                    if (motionGroup.Get(j).GetMap(null).ContainsKey("Sound"))
-                        modelJson.FileReferences.Motions.Motions[i][j].Sound =
-                            motionGroup.Get(j).Get("Sound").toString();
-
-                    if (motionGroup.Get(j).GetMap(null).ContainsKey("FadeInTime"))
-                        modelJson.FileReferences.Motions.Motions[i][j].FadeInTime =
-                            motionGroup.Get(j).Get("FadeInTime").ToFloat();
-
-                    if (motionGroup.Get(j).GetMap(null).ContainsKey("FadeOutTime"))
-                        modelJson.FileReferences.Motions.Motions[i][j].FadeOutTime =
-                            motionGroup.Get(j).Get("FadeOutTime").ToFloat();
-                }
-            }
-
-
-            return modelJson;
-        }
-
-        #endregion
-
-        #region Json Data
-
-        /// <summary>
-        ///     The motion3.json format version.
-        /// </summary>
-        [SerializeField] public int Version;
-
-        /// <summary>
-        ///     The file references.
-        /// </summary>
-        [SerializeField] public SerializableFileReferences FileReferences;
-
-        /// <summary>
-        ///     Groups.
-        /// </summary>
-        [SerializeField] public SerializableGroup[] Groups;
-
-        /// <summary>
-        ///     Hit areas.
-        /// </summary>
-        [SerializeField] public SerializableHitArea[] HitAreas;
-
-        #endregion
-
         #region Helper Methods
 
         /// <summary>
-        ///     Type-safely loads an asset.
+        /// Type-safely loads an asset.
         /// </summary>
         /// <typeparam name="T">Asset type.</typeparam>
         /// <param name="referencedFile">Path to asset.</param>
-        /// <returns>The asset on success; <see langword="null" /> otherwise.</returns>
+        /// <returns>The asset on success; <see langword="null"/> otherwise.</returns>
         private T LoadReferencedAsset<T>(string referencedFile) where T : class
         {
             var assetPath = Path.GetDirectoryName(AssetPath) + "/" + referencedFile;
@@ -577,11 +708,11 @@ namespace Live2D.Cubism.Framework.Json
 
 
         /// <summary>
-        ///     Builtin method for loading assets.
+        /// Builtin method for loading assets.
         /// </summary>
         /// <param name="assetType">Asset type.</param>
         /// <param name="assetPath">Path to asset.</param>
-        /// <returns>The asset on success; <see langword="null" /> otherwise.</returns>
+        /// <returns>The asset on success; <see langword="null"/> otherwise.</returns>
         private static object BuiltinLoadAssetAtPath(Type assetType, string assetPath)
         {
             // Explicitly deal with byte arrays.
@@ -598,8 +729,7 @@ namespace Live2D.Cubism.Framework.Json
                     : null;
 #endif
             }
-
-            if (assetType == typeof(string))
+            else if (assetType == typeof(string))
             {
 #if UNITY_EDITOR
                 return File.ReadAllText(assetPath);
@@ -623,25 +753,37 @@ namespace Live2D.Cubism.Framework.Json
 
 
         /// <summary>
-        ///     Checks whether the parameter is an eye blink parameter.
+        /// Checks whether the parameter is an eye blink parameter.
         /// </summary>
         /// <param name="parameter">Parameter to check.</param>
         /// <param name="groupName">Name of group to query for.</param>
-        /// <returns><see langword="true" /> if parameter is an eye blink parameter; <see langword="false" /> otherwise.</returns>
+        /// <returns><see langword="true"/> if parameter is an eye blink parameter; <see langword="false"/> otherwise.</returns>
         private bool IsParameterInGroup(CubismParameter parameter, string groupName)
         {
             // Return early if groups aren't available...
-            if (Groups == null || Groups.Length == 0) return false;
+            if (Groups == null || Groups.Length == 0)
+            {
+                return false;
+            }
 
 
             for (var i = 0; i < Groups.Length; ++i)
             {
-                if (Groups[i].Name != groupName) continue;
+                if (Groups[i].Name != groupName)
+                {
+                    continue;
+                }
 
-                if (Groups[i].Ids != null)
+                if(Groups[i].Ids != null)
+                {
                     for (var j = 0; j < Groups[i].Ids.Length; ++j)
+                    {
                         if (Groups[i].Ids[j] == parameter.name)
+                        {
                             return true;
+                        }
+                    }
+                }
             }
 
 
@@ -650,7 +792,7 @@ namespace Live2D.Cubism.Framework.Json
 
 
         /// <summary>
-        ///     Get body index from body array by Id.
+        /// Get body index from body array by Id.
         /// </summary>
         /// <param name="bodies">Target body array.</param>
         /// <param name="id">Id for find.</param>
@@ -658,171 +800,199 @@ namespace Live2D.Cubism.Framework.Json
         private int GetBodyIndexById(CubismUserDataBody[] bodies, string id)
         {
             for (var i = 0; i < bodies.Length; ++i)
+            {
                 if (bodies[i].Id == id)
+                {
                     return i;
+                }
+            }
 
             return -1;
         }
+
 
         #endregion
 
         #region Json Helpers
 
         /// <summary>
-        ///     File references data.
+        /// File references data.
         /// </summary>
         [Serializable]
         public struct SerializableFileReferences
         {
             /// <summary>
-            ///     Relative path to the moc3 asset.
+            /// Relative path to the moc3 asset.
             /// </summary>
-            [SerializeField] public string Moc;
+            [SerializeField]
+            public string Moc;
 
             /// <summary>
-            ///     Relative paths to texture assets.
+            /// Relative paths to texture assets.
             /// </summary>
-            [SerializeField] public string[] Textures;
+            [SerializeField]
+            public string[] Textures;
 
             /// <summary>
-            ///     Relative path to the pose3.json.
+            /// Relative path to the pose3.json.
             /// </summary>
-            [SerializeField] public string Pose;
+            [SerializeField]
+            public string Pose;
 
             /// <summary>
-            ///     Relative path to the expression asset.
+            /// Relative path to the expression asset.
             /// </summary>
-            [SerializeField] public SerializableExpression[] Expressions;
+            [SerializeField]
+            public SerializableExpression[] Expressions;
 
             /// <summary>
-            ///     Relative path to the pose motion3.json.
+            /// Relative path to the pose motion3.json.
             /// </summary>
-            [SerializeField] public SerializableMotions Motions;
+            [SerializeField]
+            public SerializableMotions Motions;
 
             /// <summary>
-            ///     Relative path to the physics asset.
+            /// Relative path to the physics asset.
             /// </summary>
-            [SerializeField] public string Physics;
+            [SerializeField]
+            public string Physics;
 
             /// <summary>
-            ///     Relative path to the user data asset.
+            /// Relative path to the user data asset.
             /// </summary>
-            [SerializeField] public string UserData;
+            [SerializeField]
+            public string UserData;
 
             /// <summary>
-            ///     Relative path to the cdi3.json.
+            /// Relative path to the cdi3.json.
             /// </summary>
-            [SerializeField] public string DisplayInfo;
+            [SerializeField]
+            public string DisplayInfo;
         }
 
         /// <summary>
-        ///     Group data.
+        /// Group data.
         /// </summary>
         [Serializable]
         public struct SerializableGroup
         {
             /// <summary>
-            ///     Target type.
+            /// Target type.
             /// </summary>
-            [SerializeField] public string Target;
+            [SerializeField]
+            public string Target;
 
             /// <summary>
-            ///     Group name.
+            /// Group name.
             /// </summary>
-            [SerializeField] public string Name;
+            [SerializeField]
+            public string Name;
 
             /// <summary>
-            ///     Referenced IDs.
+            /// Referenced IDs.
             /// </summary>
-            [SerializeField] public string[] Ids;
+            [SerializeField]
+            public string[] Ids;
         }
 
         /// <summary>
-        ///     Expression data.
+        /// Expression data.
         /// </summary>
         [Serializable]
         public struct SerializableExpression
         {
             /// <summary>
-            ///     Expression Name.
+            /// Expression Name.
             /// </summary>
-            [SerializeField] public string Name;
+            [SerializeField]
+            public string Name;
 
             /// <summary>
-            ///     Expression File.
+            /// Expression File.
             /// </summary>
-            [SerializeField] public string File;
+            [SerializeField]
+            public string File;
 
             /// <summary>
-            ///     Expression FadeInTime.
+            /// Expression FadeInTime.
             /// </summary>
-            [SerializeField] public float FadeInTime;
+            [SerializeField]
+            public float FadeInTime;
 
             /// <summary>
-            ///     Expression FadeOutTime.
+            /// Expression FadeOutTime.
             /// </summary>
-            [SerializeField] public float FadeOutTime;
+            [SerializeField]
+            public float FadeOutTime;
         }
 
         /// <summary>
-        ///     Motion data.
+        /// Motion data.
         /// </summary>
         [Serializable]
         public struct SerializableMotions
         {
             /// <summary>
-            ///     Motion group names.
+            /// Motion group names.
             /// </summary>
-            [SerializeField] public string[] GroupNames;
+            [SerializeField]
+            public string[] GroupNames;
 
             /// <summary>
-            ///     Motion groups.
+            /// Motion groups.
             /// </summary>
+            [SerializeField]
             public SerializableMotion[][] Motions;
         }
 
         /// <summary>
-        ///     Motion data.
+        /// Motion data.
         /// </summary>
         [Serializable]
         public struct SerializableMotion
         {
             /// <summary>
-            ///     File path.
+            /// File path.
             /// </summary>
-            [SerializeField] public string File;
+            [SerializeField]
+            public string File;
 
             /// <summary>
-            ///     Sound path.
+            /// Sound path.
             /// </summary>
-            [SerializeField] public string Sound;
+            [SerializeField]
+            public string Sound;
 
             /// <summary>
-            ///     Fade in time.
+            /// Fade in time.
             /// </summary>
-            [SerializeField] public float FadeInTime;
+            [SerializeField]
+            public float FadeInTime;
 
             /// <summary>
-            ///     Fade out time.
+            /// Fade out time.
             /// </summary>
-            [SerializeField] public float FadeOutTime;
+            [SerializeField]
+            public float FadeOutTime;
         }
 
         /// <summary>
-        ///     Hit Area.
+        /// Hit Area.
         /// </summary>
         [Serializable]
         public struct SerializableHitArea
         {
             /// <summary>
-            ///     Hit area name.
+            /// Hit area name.
             /// </summary>
-            [SerializeField] public string Name;
+            [SerializeField]
+            public string Name;
 
             /// <summary>
-            ///     Hit area id.
+            /// Hit area id.
             /// </summary>
-            [SerializeField] public string Id;
+            [SerializeField]
+            public string Id;
         }
 
         #endregion

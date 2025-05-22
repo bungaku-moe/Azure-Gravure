@@ -15,15 +15,9 @@ namespace Live2D.Cubism.Framework.Expression
      */
     public struct CubismExpressionParameterValue
     {
-        public CubismParameter Parameter;
-
-        ///< Parameter id.
-        public float AdditiveValue;
-
-        ///< Additive value.
-        public float MultiplyValue;
-
-        ///< Multiply value.
-        public float OverwriteValue; ///< Overwrite value.
+        public CubismParameter Parameter;   ///< Parameter id.
+        public float AdditiveValue;         ///< Additive value.
+        public float MultiplyValue;         ///< Multiply value.
+        public float OverwriteValue;        ///< Overwrite value.
     }
 }

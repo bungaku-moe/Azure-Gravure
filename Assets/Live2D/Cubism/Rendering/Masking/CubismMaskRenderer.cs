@@ -10,21 +10,56 @@ using Live2D.Cubism.Core;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Renders out a single Cubism mask.
+    /// Renders out a single Cubism mask.
     /// </summary>
     /// <remarks>
-    ///     Note that - depending on the model - multiple <see cref="CubismMaskRenderer" /> might be assigned to a single
-    ///     <see cref="CubismDrawable" />.
+    /// Note that - depending on the model - multiple <see cref="CubismMaskRenderer"/> might be assigned to a single <see cref="CubismDrawable"/>.
     /// </remarks>
     internal sealed class CubismMaskRenderer
     {
+        /// <summary>
+        /// Mask properties.
+        /// </summary>
+        private MaterialPropertyBlock MaskProperties { get; set; }
+
+
+        /// <summary>
+        /// Main renderer.
+        /// </summary>
+        private CubismRenderer MainRenderer { get; set; }
+
+
+        /// <summary>
+        /// Mask material.
+        /// </summary>
+        private Material MaskMaterial { get; set; }
+
+        /// <summary>
+        /// Mask culling material.
+        /// </summary>
+        private Material MaskCullingMaterial { get; set; }
+
+        /// <summary>
+        /// Culling setting.
+        /// </summary>
+        private bool IsCulling { get; set; }
+
+        /// <summary>
+        /// Bounds of <see cref="CubismRenderer.Mesh"/>.
+        /// </summary>
+        internal Bounds MeshBounds
+        {
+            get { return MainRenderer.Mesh.bounds; }
+        }
+
         #region Ctors
 
         /// <summary>
-        ///     Initializes fields.
+        /// Initializes fields.
         /// </summary>
         public CubismMaskRenderer()
         {
@@ -35,42 +70,10 @@ namespace Live2D.Cubism.Rendering.Masking
 
         #endregion
 
-        /// <summary>
-        ///     Mask properties.
-        /// </summary>
-        private MaterialPropertyBlock MaskProperties { get; }
-
-
-        /// <summary>
-        ///     Main renderer.
-        /// </summary>
-        private CubismRenderer MainRenderer { get; set; }
-
-
-        /// <summary>
-        ///     Mask material.
-        /// </summary>
-        private Material MaskMaterial { get; }
-
-        /// <summary>
-        ///     Mask culling material.
-        /// </summary>
-        private Material MaskCullingMaterial { get; }
-
-        /// <summary>
-        ///     Culling setting.
-        /// </summary>
-        private bool IsCulling { get; set; }
-
-        /// <summary>
-        ///     Bounds of <see cref="CubismRenderer.Mesh" />.
-        /// </summary>
-        internal Bounds MeshBounds => MainRenderer.Mesh.bounds;
-
         #region Interface For CubismMaskMaskedJunction
 
         /// <summary>
-        ///     Sets the <see cref="CubismRenderer" /> to reference.
+        /// Sets the <see cref="CubismRenderer"/> to reference.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -78,13 +81,13 @@ namespace Live2D.Cubism.Rendering.Masking
         {
             MainRenderer = value;
 
-            IsCulling = !MainRenderer.gameObject.GetComponent<CubismDrawable>().IsDoubleSided;
+            IsCulling = !(MainRenderer.gameObject.GetComponent<CubismDrawable>().IsDoubleSided);
 
             return this;
         }
 
         /// <summary>
-        ///     Sets <see cref="CubismMaskTile" />.
+        /// Sets <see cref="CubismMaskTile"/>.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -97,7 +100,7 @@ namespace Live2D.Cubism.Rendering.Masking
         }
 
         /// <summary>
-        ///     Sets <see cref="CubismMaskTransform" />.
+        /// Sets <see cref="CubismMaskTransform"/>.
         /// </summary>
         /// <param name="value">Value to set.</param>
         /// <returns>Instance.</returns>
@@ -111,7 +114,7 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
         /// <summary>
-        ///     Enqueues
+        /// Enqueues
         /// </summary>
         /// <param name="buffer">Buffer to enqueue in.</param>
         internal void AddToCommandBuffer(CommandBuffer buffer)

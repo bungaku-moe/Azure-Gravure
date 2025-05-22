@@ -8,29 +8,34 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Samples.LookAt
 {
     /// <summary>
-    ///     Forces a <see cref="GameObject" /> to face a camera.
+    /// Forces a <see cref="GameObject"/> to face a camera.
     /// </summary>
     public class Billboarder : MonoBehaviour
     {
         /// <summary>
-        ///     Camera to face.
+        /// Camera to face.
         /// </summary>
         [SerializeField] public Camera CameraToFace;
 
         #region Unity Event Handling
 
         /// <summary>
-        ///     Called by Unity. Updates facing.
+        /// Called by Unity. Updates facing.
         /// </summary>
         private void Update()
         {
             if (CameraToFace.orthographic)
+            {
                 transform.LookAt(transform.position - CameraToFace.transform.forward, CameraToFace.transform.up);
+            }
             else
+            {
                 transform.LookAt(CameraToFace.transform.position, CameraToFace.transform.up);
+            }
         }
 
         #endregion

@@ -8,33 +8,35 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.MouthMovement
 {
     /// <summary>
-    ///     Automatic mouth movement.
+    /// Automatic mouth movement.
     /// </summary>
     public sealed class CubismAutoMouthInput : MonoBehaviour
     {
         /// <summary>
-        ///     Timescale.
+        /// Timescale.
         /// </summary>
-        [SerializeField] public float Timescale = 10f;
+        [SerializeField]
+        public float Timescale = 10f;
 
 
         /// <summary>
-        ///     Target controller.
+        /// Target controller.
         /// </summary>
         private CubismMouthController Controller { get; set; }
 
 
         /// <summary>
-        ///     Current time.
+        /// Current time.
         /// </summary>
         private float T { get; set; }
 
 
         /// <summary>
-        ///     Resets the input.
+        /// Resets the input.
         /// </summary>
         public void Reset()
         {
@@ -44,7 +46,7 @@ namespace Live2D.Cubism.Framework.MouthMovement
         #region Unity Event Handling
 
         /// <summary>
-        ///     Called by Unity. Initializes input.
+        /// Called by Unity. Initializes input.
         /// </summary>
         private void Start()
         {
@@ -53,19 +55,22 @@ namespace Live2D.Cubism.Framework.MouthMovement
 
 
         /// <summary>
-        ///     Called by Unity. Updates controller.
+        /// Called by Unity. Updates controller.
         /// </summary>
         /// <remarks>
-        ///     Make sure this method is called after any animations are evaluated.
+        /// Make sure this method is called after any animations are evaluated.
         /// </remarks>
         private void LateUpdate()
         {
             // Fail silently.
-            if (Controller == null) return;
+            if (Controller == null)
+            {
+                return;
+            }
 
 
             // Progress time.
-            T += Time.deltaTime * Timescale;
+            T += (Time.deltaTime * Timescale);
 
 
             // Evaluate.

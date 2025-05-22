@@ -10,18 +10,19 @@ using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.Expression;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Samples.OriginalWorkflow.Expression
 {
     public class CubismExpressionPreview : MonoBehaviour
     {
         /// <summary>
-        ///     ExpressionController to be operated.
+        /// ExpressionController to be operated.
         /// </summary>
-        private CubismExpressionController _expressionController;
+        CubismExpressionController _expressionController;
 
 
         /// <summary>
-        ///     Get expression controller.
+        /// Get expression controller.
         /// </summary>
         private void Start()
         {
@@ -31,12 +32,15 @@ namespace Live2D.Cubism.Samples.OriginalWorkflow.Expression
         }
 
         /// <summary>
-        ///     Change facial expression.
+        /// Change facial expression.
         /// </summary>
         /// <param name="expressionIndex">index of facial expression to set.</param>
         public void ChangeExpression(int expressionIndex)
         {
-            if (_expressionController != null) _expressionController.CurrentExpressionIndex = expressionIndex;
+            if (_expressionController != null)
+            {
+                _expressionController.CurrentExpressionIndex = expressionIndex;
+            }
         }
     }
 }

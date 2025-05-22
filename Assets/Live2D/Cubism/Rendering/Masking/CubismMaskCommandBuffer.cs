@@ -10,70 +10,64 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Singleton buffer for Cubism mask related draw commands.
+    /// Singleton buffer for Cubism mask related draw commands.
     /// </summary>
     [ExecuteInEditMode]
     public sealed class CubismMaskCommandBuffer : MonoBehaviour
     {
         /// <summary>
-        ///     Draw command sources.
+        /// Draw command sources.
         /// </summary>
         private static List<ICubismMaskCommandSource> Sources { get; set; }
 
         /// <summary>
-        ///     Command buffer.
+        /// Command buffer.
         /// </summary>
         private static CommandBuffer Buffer { get; set; }
 
         /// <summary>
-        ///     Command buffers.
+        /// Command buffers.
         /// </summary>
         private static CommandBuffer[] Buffers { get; set; }
 
         /// <summary>
-        ///     True if <see cref="Sources" /> are empty.
+        /// True if <see cref="Sources"/> are empty.
         /// </summary>
-        private static bool ContainsSources => Sources != null && Sources.Count > 0;
-
-        #region Unity Event Handling
-
-        /// <summary>
-        ///     Executes <see cref="Buffer" /> or <see cref="Buffers" />.
-        /// </summary>
-        private void LateUpdate()
+        private static bool ContainsSources
         {
-            if (!ContainsSources) return;
-
-
-            // Refresh and execute buffer.
-            RefreshCommandBuffer();
-            Graphics.ExecuteCommandBuffer(Buffer);
-            RefreshCommandBuffers();
+            get { return Sources != null && Sources.Count > 0; }
         }
 
-        #endregion
-
 
         /// <summary>
-        ///     Makes sure class is initialized for static usage.
+        /// Makes sure class is initialized for static usage.
         /// </summary>
         private static void Initialize()
         {
             // Initialize containers.
-            if (Sources == null) Sources = new List<ICubismMaskCommandSource>();
+            if (Sources == null)
+            {
+                Sources = new List<ICubismMaskCommandSource>();
+            }
 
 
             if (Buffer == null)
+            {
                 Buffer = new CommandBuffer
                 {
                     name = "cubism_MaskCommandBuffer"
                 };
+            }
 
 
-            if (Buffers == null) Buffers = new CommandBuffer[0];
+            if (Buffers == null)
+            {
+                Buffers = new CommandBuffer[0];
+            }
 
             // Spawn update proxy.
             const string _proxyName = "cubism_MaskCommandBuffer";
@@ -84,11 +78,14 @@ namespace Live2D.Cubism.Rendering.Masking
             {
                 proxy = new GameObject(_proxyName)
                 {
-                    hideFlags = HideFlags.HideAndDontSave
+                     hideFlags = HideFlags.HideAndDontSave
                 };
 
 
-                if (!Application.isEditor || Application.isPlaying) DontDestroyOnLoad(proxy);
+                if (!Application.isEditor || Application.isPlaying)
+                {
+                    DontDestroyOnLoad(proxy);
+                }
 
 
                 proxy.AddComponent<CubismMaskCommandBuffer>();
@@ -97,7 +94,7 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
         /// <summary>
-        ///     Registers a new draw command source.
+        /// Registers a new draw command source.
         /// </summary>
         /// <param name="source">Source to add.</param>
         internal static void AddSource(ICubismMaskCommandSource source)
@@ -107,7 +104,10 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
             // Prevent same source from being added twice.
-            if (Sources.Contains(source)) return;
+            if (Sources.Contains(source))
+            {
+                return;
+            }
 
 
             // Add source and force refresh.
@@ -115,20 +115,25 @@ namespace Live2D.Cubism.Rendering.Masking
 
             if (source.CountOfCommandBuffers > Buffers.Length)
             {
-                for (var bufferIndex = 0; bufferIndex < Buffers.Length; bufferIndex++) Buffers[bufferIndex].Clear();
+                for (int bufferIndex = 0; bufferIndex < Buffers.Length; bufferIndex++)
+                {
+                    Buffers[bufferIndex].Clear();
+                }
 
                 Buffers = new CommandBuffer[source.CountOfCommandBuffers];
 
-                for (var bufferIndex = 0; bufferIndex < Buffers.Length; bufferIndex++)
+                for (int bufferIndex = 0; bufferIndex < Buffers.Length; bufferIndex++)
+                {
                     Buffers[bufferIndex] = new CommandBuffer
                     {
                         name = "cubism_MaskCommandBuffer" + bufferIndex
                     };
+                }
             }
         }
 
         /// <summary>
-        ///     Deregisters a draw command source.
+        /// Deregisters a draw command source.
         /// </summary>
         /// <param name="source">Source to remove.</param>
         internal static void RemoveSource(ICubismMaskCommandSource source)
@@ -143,7 +148,7 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
         /// <summary>
-        ///     Forces the command buffer to be refreshed.
+        /// Forces the command buffer to be refreshed.
         /// </summary>
         private static void RefreshCommandBuffer()
         {
@@ -152,26 +157,52 @@ namespace Live2D.Cubism.Rendering.Masking
 
 
             // Enqueue sources.
-            for (var i = 0; i < Sources.Count; ++i) Sources[i].AddToCommandBuffer(Buffer, false, -1);
+            for (var i = 0; i < Sources.Count; ++i)
+            {
+                Sources[i].AddToCommandBuffer(Buffer, false, -1);
+            }
         }
 
         /// <summary>
-        ///     Forces command buffer in <see cref="Buffers" /> refresh and executes it.
+        /// Forces command buffer in <see cref="Buffers"/> refresh and executes it.
         /// </summary>
         private static void RefreshCommandBuffers()
         {
-            for (var bufferIndex = 0; bufferIndex < Buffers.Length; bufferIndex++)
+            for (int bufferIndex = 0; bufferIndex < Buffers.Length; bufferIndex++)
             {
                 // Clear buffer.
                 Buffers[bufferIndex].Clear();
 
                 // Enqueue sources.
                 for (var i = 0; i < Sources.Count; ++i)
+                {
                     Sources[i].AddToCommandBuffer(Buffers[bufferIndex], true, bufferIndex);
+                }
 
                 // Executes buffer.
                 Graphics.ExecuteCommandBuffer(Buffers[bufferIndex]);
             }
         }
+
+        #region Unity Event Handling
+
+        /// <summary>
+        /// Executes <see cref="Buffer"/> or <see cref="Buffers"/>.
+        /// </summary>
+        private void LateUpdate()
+        {
+            if (!ContainsSources)
+            {
+                return;
+            }
+
+
+            // Refresh and execute buffer.
+            RefreshCommandBuffer();
+            Graphics.ExecuteCommandBuffer(Buffer);
+            RefreshCommandBuffers();
+        }
+
+        #endregion
     }
 }

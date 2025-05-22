@@ -8,17 +8,18 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Single mask tile.
+    /// Single mask tile.
     /// </summary>
     public struct CubismMaskTile
     {
         #region Conversion
 
         /// <summary>
-        ///     Converts a <see cref="CubismMaskTile" /> to a <see cref="Vector4" />.
+        /// Converts a <see cref="CubismMaskTile"/> to a <see cref="Vector4"/>.
         /// </summary>
         /// <param name="value">Value to convert.</param>
         public static implicit operator Vector4(CubismMaskTile value)
@@ -35,40 +36,40 @@ namespace Live2D.Cubism.Rendering.Masking
         #endregion
 
         /// <summary>
-        ///     Color channel of the tile.
+        /// Color channel of the tile.
         /// </summary>
         /// <remarks>
-        ///     Valid values are 0f, 1f, 2, and 3f.
+        /// Valid values are 0f, 1f, 2, and 3f.
         /// </remarks>
         public float Channel;
 
         /// <summary>
-        ///     Column index of the tile in subdivided texture.
+        /// Column index of the tile in subdivided texture.
         /// </summary>
         public float Column;
 
         /// <summary>
-        ///     Row index of the tile in subdivided texture.
+        /// Row index of the tile in subdivided texture.
         /// </summary>
         public float Row;
 
         /// <summary>
-        ///     Size of the tile in texture coordinates.
+        /// Size of the tile in texture coordinates.
         /// </summary>
         public float Size;
 
         /// <summary>
-        ///     Index of RenderTextures where the tile is located.
+        /// Index of RenderTextures where the tile is located.
         /// </summary>
         public int RenderTextureIndex;
 
         /// <summary>
-        ///     Index of HeadOfChannels.
+        /// Index of HeadOfChannels.
         /// </summary>
         public int HeadOfChannelsIndex;
 
         /// <summary>
-        ///     Index of mask tile.
+        /// Index of mask tile.
         /// </summary>
         public int Index;
     }

@@ -8,10 +8,11 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    ///     Allows inspecting <see cref="Core.CubismParameter" />s.
+    /// Allows inspecting <see cref="Core.CubismParameter"/>s.
     /// </summary>
     public sealed class CubismParametersInspector : MonoBehaviour
     {

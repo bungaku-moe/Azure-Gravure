@@ -8,10 +8,11 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    ///     Tagging component for eye blink parameters.
+    /// Tagging component for eye blink parameters.
     /// </summary>
     public sealed class CubismEyeBlinkParameter : MonoBehaviour
     {

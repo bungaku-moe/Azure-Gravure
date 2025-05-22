@@ -8,15 +8,16 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Rendering.Masking
 {
     /// <summary>
-    ///     Extensions for <see cref="CubismMaskRenderer" />.
+    /// Extensions for <see cref="CubismMaskRenderer"/>.
     /// </summary>
     internal static class CubismMaskRendererExtensionMethods
     {
         /// <summary>
-        ///     Combines bounds of multiple <see cref="CubismMaskRenderer" />s.
+        /// Combines bounds of multiple <see cref="CubismMaskRenderer"/>s.
         /// </summary>
         /// <param name="self">Renderers.</param>
         /// <returns>Combined bounds.</returns>
@@ -31,14 +32,26 @@ namespace Live2D.Cubism.Rendering.Masking
                 var boundsI = self[i].MeshBounds;
 
 
-                if (boundsI.min.x < min.x) min.x = boundsI.min.x;
+                if (boundsI.min.x < min.x)
+                {
+                    min.x = boundsI.min.x;
+                }
 
-                if (boundsI.max.x > max.x) max.x = boundsI.max.x;
+                if (boundsI.max.x > max.x)
+                {
+                    max.x = boundsI.max.x;
+                }
 
 
-                if (boundsI.min.y < min.y) min.y = boundsI.min.y;
+                if (boundsI.min.y < min.y)
+                {
+                    min.y = boundsI.min.y;
+                }
 
-                if (boundsI.max.y > max.y) max.y = boundsI.max.y;
+                if (boundsI.max.y > max.y)
+                {
+                    max.y = boundsI.max.y;
+                }
             }
 
 

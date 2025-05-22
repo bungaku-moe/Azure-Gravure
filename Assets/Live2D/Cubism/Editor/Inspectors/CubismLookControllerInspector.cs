@@ -8,13 +8,14 @@
 
 using Live2D.Cubism.Framework.LookAt;
 using UnityEditor;
+
 using Object = UnityEngine.Object;
 
 
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    ///     Inspects <see cref="CubismLookController" />s.
+    /// Inspects <see cref="CubismLookController"/>s.
     /// </summary>
     [CustomEditor(typeof(CubismLookController))]
     internal sealed class CubismLookControllerInspector : UnityEditor.Editor
@@ -22,7 +23,7 @@ namespace Live2D.Cubism.Editor.Inspectors
         #region Editor
 
         /// <summary>
-        ///     Draws the inspector.
+        /// Draws the inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
@@ -30,7 +31,10 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Fail silently.
-            if (controller == null) return;
+            if (controller == null)
+            {
+                return;
+            }
 
 
             EditorGUI.BeginChangeCheck();
@@ -45,7 +49,10 @@ namespace Live2D.Cubism.Editor.Inspectors
 
 
             // Apply changes.
-            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(controller);
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(controller);
+            }
         }
 
         #endregion

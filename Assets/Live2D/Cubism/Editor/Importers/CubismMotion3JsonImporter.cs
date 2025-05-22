@@ -6,59 +6,67 @@
  */
 
 
+using Live2D.Cubism.Framework.Json;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Live2D.Cubism.Framework.Json;
 using UnityEditor;
 using UnityEngine;
+
 
 namespace Live2D.Cubism.Editor.Importers
 {
     /// <summary>
-    ///     Handles importing of Cubism motions.
+    /// Handles importing of Cubism motions.
     /// </summary>
     [Serializable]
     public sealed class CubismMotion3JsonImporter : CubismImporterBase
     {
         /// <summary>
-        ///     GUID of generated clip.
+        /// <see cref="Motion3Json"/> backing field.
         /// </summary>
-        [SerializeField] private string _animationClipGuid;
+        [NonSerialized]
+        private CubismMotion3Json _motion3Json;
 
         /// <summary>
-        ///     <see cref="AnimationClip" /> backing field.
-        /// </summary>
-        [NonSerialized] private AnimationClip _animationClip;
-
-        /// <summary>
-        ///     <see cref="Motion3Json" /> backing field.
-        /// </summary>
-        [NonSerialized] private CubismMotion3Json _motion3Json;
-
-        /// <summary>
-        ///     <see cref="CubismMotion3Json" /> asset.
+        ///<see cref="CubismMotion3Json"/> asset.
         /// </summary>
         public CubismMotion3Json Motion3Json
         {
             get
             {
                 if (_motion3Json == null)
-                    _motion3Json = CubismMotion3Json.LoadFrom(AssetDatabase.LoadAssetAtPath<TextAsset>(AssetPath));
+                {
+                    _motion3Json = CubismMotion3Json.LoadFrom(AssetDatabase.LoadAssetAtPath<TextAsset>((AssetPath)));
+                }
 
 
                 return _motion3Json;
             }
         }
 
+
         /// <summary>
-        ///     Gets the moc3 importer.
+        /// GUID of generated clip.
+        /// </summary>
+        [SerializeField] private string _animationClipGuid;
+
+        /// <summary>
+        /// <see cref="AnimationClip"/> backing field.
+        /// </summary>
+        [NonSerialized] private AnimationClip _animationClip;
+
+        /// <summary>
+        /// Gets the moc3 importer.
         /// </summary>
         private AnimationClip AnimationClip
         {
             get
             {
-                if (_animationClip != null) return _animationClip;
+                if (_animationClip != null)
+                {
+                    return _animationClip;
+                }
 
                 AnimationClip clip;
                 var directoryName = Path.GetDirectoryName(AssetPath);
@@ -86,7 +94,10 @@ namespace Live2D.Cubism.Editor.Importers
                 _animationClipGuid = AssetGuid.GetGuid(_animationClip);
 
                 // When the AnimationClip can be retrieved from a GUID.
-                if (_animationClip != null) return _animationClip;
+                if (_animationClip != null)
+                {
+                    return _animationClip;
+                }
 
                 clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(AssetPath.Replace(".motion3.json", ".anim"));
                 _animationClip = clip;
@@ -102,19 +113,31 @@ namespace Live2D.Cubism.Editor.Importers
         }
 
         /// <summary>
-        ///     Should import as original workflow.
+        /// Should import as original workflow.
         /// </summary>
-        private bool ShouldImportAsOriginalWorkflow => CubismUnityEditorMenu.ShouldImportAsOriginalWorkflow;
+        private bool ShouldImportAsOriginalWorkflow
+        {
+            get
+            {
+                return CubismUnityEditorMenu.ShouldImportAsOriginalWorkflow;
+            }
+        }
 
         /// <summary>
-        ///     Should clear animation clip curves.
+        /// Should clear animation clip curves.
         /// </summary>
-        private bool ShouldClearAnimationCurves => CubismUnityEditorMenu.ShouldClearAnimationCurves;
+        private bool ShouldClearAnimationCurves
+        {
+            get
+            {
+                return CubismUnityEditorMenu.ShouldClearAnimationCurves;
+            }
+        }
 
         #region Unity Event Handling
 
         /// <summary>
-        ///     Registers importer.
+        /// Registers importer.
         /// </summary>
         [InitializeOnLoadMethod]
         // ReSharper disable once UnusedMember.Local
@@ -128,7 +151,7 @@ namespace Live2D.Cubism.Editor.Importers
         #region CubismImporterBase
 
         /// <summary>
-        ///     Imports the corresponding asset.
+        /// Imports the corresponding asset.
         /// </summary>
         public override void Import()
         {
@@ -147,12 +170,12 @@ namespace Live2D.Cubism.Editor.Importers
             AnimationClip clip;
             if (assetListIndex < 0)
             {
-                clip = ShouldImportAsOriginalWorkflow
+                clip = (ShouldImportAsOriginalWorkflow)
                     ? AssetDatabase.LoadAssetAtPath<AnimationClip>(motionPath)
                     : null;
 
                 // Convert motion.
-                var animationClip = clip == null
+                var animationClip = (clip == null)
                     ? Motion3Json.ToAnimationClip(ShouldImportAsOriginalWorkflow, ShouldClearAnimationCurves)
                     : Motion3Json.ToAnimationClip(clip, ShouldImportAsOriginalWorkflow, ShouldClearAnimationCurves);
 
@@ -178,7 +201,7 @@ namespace Live2D.Cubism.Editor.Importers
                 clip = (AnimationClip)assetList.Assets[assetListIndex];
 
                 // Convert motion.
-                var animationClip = clip == null
+                var animationClip = (clip == null)
                     ? Motion3Json.ToAnimationClip(ShouldImportAsOriginalWorkflow, ShouldClearAnimationCurves)
                     : Motion3Json.ToAnimationClip(clip, ShouldImportAsOriginalWorkflow, ShouldClearAnimationCurves);
 
@@ -215,13 +238,19 @@ namespace Live2D.Cubism.Editor.Importers
             }
             else
             {
-                while (assetList.onPostImporting) Task.Delay(1);
+                while (assetList.onPostImporting)
+                {
+                    Task.Delay(1);
+                }
 
                 assetListIndex = assetList.AssetPaths.Contains(motionPath)
                     ? assetList.AssetPaths.IndexOf(motionPath)
                     : -1;
 
-                if (assetListIndex >= 0) assetList.Remove(assetListIndex);
+                if (assetListIndex >= 0)
+                {
+                    assetList.Remove(assetListIndex);
+                }
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }

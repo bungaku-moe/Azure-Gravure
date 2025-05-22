@@ -6,9 +6,10 @@
  */
 
 
-using System.Collections.Generic;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Rendering;
+using System.Collections.Generic;
+using Live2D.Cubism.Framework.Tasking;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = System.Random;
@@ -17,65 +18,57 @@ using Random = System.Random;
 namespace Live2D.Cubism.Samples.AsyncBenchmark
 {
     /// <summary>
-    ///     Spawns models for benchmarking.
+    /// Spawns models for benchmarking.
     /// </summary>
     public sealed class ModelSpawner : MonoBehaviour
     {
         /// <summary>
-        ///     <see cref="CubismModel" /> prefab to spawn.
+        /// <see cref="CubismModel"/> prefab to spawn.
         /// </summary>
-        [SerializeField] public GameObject ModelPrefab;
+        [SerializeField]
+        public GameObject ModelPrefab;
 
 
         /// <summary>
-        ///     UI component representing current model count.
+        /// UI component representing current model count.
         /// </summary>
-        [SerializeField] public Text ModelCountUi;
+        [SerializeField]
+        public Text ModelCountUi;
 
         /// <summary>
-        ///     Holds the number of instances of the model.
+        /// Holds the number of instances of the model.
         /// </summary>
         public int InstancesCount { get; private set; }
 
         /// <summary>
-        ///     Model instances.
+        /// Model instances.
         /// </summary>
         private List<GameObject> Instances { get; set; }
 
         /// <summary>
-        ///     <see cref="AsyncBenchmark.BenchmarkController" /> Component.
+        /// <see cref="AsyncBenchmark.BenchmarkController"/> Component.
         /// </summary>
         private BenchmarkController BenchmarkController { get; set; }
-
-        #region Unity Event Handling
-
-        /// <summary>
-        ///     Called by Unity. Initializes fields.
-        /// </summary>
-        private void Start()
-        {
-            Instances = new List<GameObject>();
-            BenchmarkController = GetComponent<BenchmarkController>();
-        }
-
-        #endregion
 
         #region Interface for UI Elements
 
         /// <summary>
-        ///     Adds a new instance.
+        /// Adds a new instance.
         /// </summary>
         public void IncreaseInstances()
         {
-            if (ModelPrefab == null) return;
+            if (ModelPrefab == null)
+            {
+                return;
+            }
 
             // Spawn new instance.
             var instance = Instantiate(ModelPrefab);
 
 
             var random = new Random();
-            var offsetX = random.Next(-1000, 1000) / 1000f;
-            var offsetY = random.Next(-1000, 1000) / 1000f;
+            var offsetX = (float)random.Next(-1000, 1000) / 1000f;
+            var offsetY = (float)random.Next(-1000, 1000) / 1000f;
 
 
             var screenToWorld = Camera.main.ScreenToWorldPoint(
@@ -108,12 +101,15 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
         }
 
         /// <summary>
-        ///     Removes an instance.
+        /// Removes an instance.
         /// </summary>
         public void DecreaseInstances()
         {
             // Return early if there's nothing to decrease.
-            if (Instances.Count == 0) return;
+            if (Instances.Count == 0)
+            {
+                return;
+            }
 
 
             // Remove last instance and update UI.
@@ -122,6 +118,19 @@ namespace Live2D.Cubism.Samples.AsyncBenchmark
 
 
             ModelCountUi.text = Instances.Count.ToString();
+        }
+
+        #endregion
+
+        #region Unity Event Handling
+
+        /// <summary>
+        /// Called by Unity. Initializes fields.
+        /// </summary>
+        private void Start()
+        {
+            Instances = new List<GameObject>();
+            BenchmarkController = GetComponent<BenchmarkController>();
         }
 
         #endregion

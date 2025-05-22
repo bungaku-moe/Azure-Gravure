@@ -8,16 +8,18 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    ///     Tagging component for Drawable used for hit determination.
+    /// Tagging component for Drawable used for hit determination.
     /// </summary>
     public sealed class CubismHitDrawable : MonoBehaviour
     {
         /// <summary>
-        ///     Name set in HitArea.
+        /// Name set in HitArea.
         /// </summary>
-        [SerializeField] public string Name;
+        [SerializeField]
+        public string Name;
     }
 }

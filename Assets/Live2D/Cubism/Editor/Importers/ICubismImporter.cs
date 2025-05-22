@@ -9,24 +9,24 @@
 namespace Live2D.Cubism.Editor.Importers
 {
     /// <summary>
-    ///     Common interface for Cubism asset importers.
+    /// Common interface for Cubism asset importers.
     /// </summary>
     public interface ICubismImporter
     {
         /// <summary>
-        ///     Sets the asset path.
+        /// Sets the asset path.
         /// </summary>
         void SetAssetPath(string value);
 
 
         /// <summary>
-        ///     Imports the corresponding asset.
+        /// Imports the corresponding asset.
         /// </summary>
         void Import();
 
 
         /// <summary>
-        ///     Saves the importer.
+        /// Saves the importer.
         /// </summary>
         void Save();
     }

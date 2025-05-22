@@ -21,6 +21,9 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
+                if (string.IsNullOrEmpty(url))
+                    return null;
+
                 using var uwr = UnityWebRequest.Get(url);
                 var asyncOperation = uwr.SendWebRequest();
                 // Wait for the request to complete (blocking the thread)
@@ -48,6 +51,9 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
+                if (string.IsNullOrEmpty(url))
+                    return null;
+
                 using var uwr = UnityWebRequest.Get(url);
                 UniTaskCompletionSource<string> tcs = new();
 
@@ -77,6 +83,9 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
+                if (string.IsNullOrEmpty(url))
+                    return null;
+
                 using var uwr = UnityWebRequest.Get(url);
                 var asyncOperation = uwr.SendWebRequest();
                 // Wait for the request to complete (blocking the thread)
@@ -104,6 +113,9 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
+                if (string.IsNullOrEmpty(url))
+                    return null;
+
                 using var uwr = UnityWebRequest.Get(url);
                 UniTaskCompletionSource<byte[]> tcs = new();
 
@@ -133,6 +145,9 @@ namespace Kiraio.Azure.Utils
         {
             try
             {
+                if (string.IsNullOrEmpty(url))
+                    return null;
+
                 using var uwr = UnityWebRequestMultimedia.GetAudioClip(
                     url,
                     GetAudioType(url)

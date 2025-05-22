@@ -9,62 +9,73 @@
 using System;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.Physics
 {
     /// <summary>
-    ///     Vertex data of physics.
+    /// Vertex data of physics.
     /// </summary>
     [Serializable]
     public struct CubismPhysicsParticle
     {
         /// <summary>
-        ///     Initial position.
+        /// Initial position.
         /// </summary>
-        [SerializeField] public Vector2 InitialPosition;
+        [SerializeField]
+        public Vector2 InitialPosition;
 
         /// <summary>
-        ///     Mobility ratio.
+        /// Mobility ratio.
         /// </summary>
-        [SerializeField] public float Mobility;
+        [SerializeField]
+        public float Mobility;
 
         /// <summary>
-        ///     Delay ratio.
+        /// Delay ratio.
         /// </summary>
-        [SerializeField] public float Delay;
+        [SerializeField]
+        public float Delay;
 
         /// <summary>
-        ///     Current acceleration.
+        /// Current acceleration.
         /// </summary>
-        [SerializeField] public float Acceleration;
+        [SerializeField]
+        public float Acceleration;
 
         /// <summary>
-        ///     Length of radius.
+        /// Length of radius.
         /// </summary>
-        [SerializeField] public float Radius;
+        [SerializeField]
+        public float Radius;
 
         /// <summary>
-        ///     Current position.
+        /// Current position.
         /// </summary>
-        [NonSerialized] public Vector2 Position;
+        [NonSerialized]
+        public Vector2 Position;
 
         /// <summary>
-        ///     Last position.
+        /// Last position.
         /// </summary>
-        [NonSerialized] public Vector2 LastPosition;
+        [NonSerialized]
+        public Vector2 LastPosition;
 
         /// <summary>
-        ///     Last gravity.
+        /// Last gravity.
         /// </summary>
-        [NonSerialized] public Vector2 LastGravity;
+        [NonSerialized]
+        public Vector2 LastGravity;
 
         /// <summary>
-        ///     Current force.
+        /// Current force.
         /// </summary>
-        [NonSerialized] public Vector2 Force;
+        [NonSerialized]
+        public Vector2 Force;
 
         /// <summary>
-        ///     Current velocity.
+        /// Current velocity.
         /// </summary>
-        [NonSerialized] public Vector2 Velocity;
+        [NonSerialized]
+        public Vector2 Velocity;
     }
 }

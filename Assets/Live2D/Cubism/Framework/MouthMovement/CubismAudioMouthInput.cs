@@ -8,85 +8,96 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.MouthMovement
 {
     /// <summary>
-    ///     Real-time <see cref="CubismMouthController" /> input from <see cref="AudioSource" />s.
+    /// Real-time <see cref="CubismMouthController"/> input from <see cref="AudioSource"/>s.
     /// </summary>
     [RequireComponent(typeof(CubismMouthController))]
     public sealed class CubismAudioMouthInput : MonoBehaviour
     {
         /// <summary>
-        ///     Audio source to sample.
+        /// Audio source to sample.
         /// </summary>
-        [SerializeField] public AudioSource AudioInput;
+        [SerializeField]
+        public AudioSource AudioInput;
 
 
         /// <summary>
-        ///     Sampling quality.
+        /// Sampling quality.
         /// </summary>
-        [SerializeField] public CubismAudioSamplingQuality SamplingQuality;
+        [SerializeField]
+        public CubismAudioSamplingQuality SamplingQuality;
 
 
         /// <summary>
-        ///     Audio gain.
+        /// Audio gain.
         /// </summary>
-        [Range(1.0f, 10.0f)] public float Gain = 1.0f;
+        [Range(1.0f, 10.0f)]
+        public float Gain = 1.0f;
 
         /// <summary>
-        ///     Smoothing.
+        /// Smoothing.
         /// </summary>
-        [Range(0.0f, 1.0f)] public float Smoothing;
-
-        /// <summary>
-        ///     Buffer for <see cref="Mathf.SmoothDamp(float, float, ref float, float)" /> velocity.
-        /// </summary>
-        // ReSharper disable once InconsistentNaming
-        private float VelocityBuffer;
+        [Range(0.0f, 1.0f)]
+        public float Smoothing;
 
 
         /// <summary>
-        ///     Current samples.
+        /// Current samples.
         /// </summary>
         private float[] Samples { get; set; }
 
         /// <summary>
-        ///     Last root mean square.
+        /// Last root mean square.
         /// </summary>
         private float LastRms { get; set; }
 
         /// <summary>
-        ///     Targeted <see cref="CubismMouthController" />.
+        /// Buffer for <see cref="Mathf.SmoothDamp(float, float, ref float, float)"/> velocity.
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        private float VelocityBuffer;
+
+        /// <summary>
+        /// Targeted <see cref="CubismMouthController"/>.
         /// </summary>
         private CubismMouthController Target { get; set; }
 
 
         /// <summary>
-        ///     True if instance is initialized.
+        /// True if instance is initialized.
         /// </summary>
-        private bool IsInitialized => Samples != null;
+        private bool IsInitialized
+        {
+            get { return Samples != null; }
+        }
 
 
         /// <summary>
-        ///     Makes sure instance is initialized.
+        /// Makes sure instance is initialized.
         /// </summary>
         private void TryInitialize()
         {
             // Return early if already initialized.
-            if (IsInitialized) return;
+            if (IsInitialized)
+            {
+                return;
+            }
 
 
             // Initialize samples buffer.
             switch (SamplingQuality)
             {
-                case CubismAudioSamplingQuality.VeryHigh:
+                case (CubismAudioSamplingQuality.VeryHigh):
                 {
-                    Samples = new float[256];
+                        Samples = new float[256];
 
 
-                    break;
-                }
-                case CubismAudioSamplingQuality.Maximum:
+                        break;
+                    }
+                case (CubismAudioSamplingQuality.Maximum):
                 {
                     Samples = new float[512];
 
@@ -110,12 +121,15 @@ namespace Live2D.Cubism.Framework.MouthMovement
         #region Unity Event Handling
 
         /// <summary>
-        ///     Samples audio input and applies it to mouth controller.
+        /// Samples audio input and applies it to mouth controller.
         /// </summary>
         private void Update()
         {
             // 'Fail' silently.
-            if (AudioInput == null) return;
+            if (AudioInput == null)
+            {
+                return;
+            }
 
 
             // Sample audio.
@@ -130,7 +144,7 @@ namespace Live2D.Cubism.Framework.MouthMovement
                 var sample = Samples[i];
 
 
-                total += sample * sample;
+                total += (sample * sample);
             }
 
 
@@ -155,7 +169,7 @@ namespace Live2D.Cubism.Framework.MouthMovement
 
 
         /// <summary>
-        ///     Initializes instance.
+        /// Initializes instance.
         /// </summary>
         private void OnEnable()
         {

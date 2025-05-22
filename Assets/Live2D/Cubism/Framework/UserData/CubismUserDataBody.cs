@@ -9,22 +9,25 @@
 using System;
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.UserData
 {
     /// <summary>
-    ///     Body of user data.
+    /// Body of user data.
     /// </summary>
     [Serializable]
     public struct CubismUserDataBody
     {
         /// <summary>
-        ///     Id.
+        /// Id.
         /// </summary>
-        [SerializeField] public string Id;
+        [SerializeField]
+        public string Id;
 
         /// <summary>
-        ///     Value.
+        /// Value.
         /// </summary>
-        [SerializeField] public string Value;
+        [SerializeField]
+        public string Value;
     }
 }

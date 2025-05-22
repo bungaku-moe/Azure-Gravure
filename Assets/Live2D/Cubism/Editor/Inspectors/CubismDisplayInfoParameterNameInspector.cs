@@ -12,21 +12,23 @@ using UnityEditor;
 namespace Live2D.Cubism.Editor.Inspectors
 {
     /// <summary>
-    ///     Inspector for <see cref="CubismHarmonicMotionParameter" />s.
+    /// Inspector for <see cref="CubismHarmonicMotionParameter"/>s.
     /// </summary>
-    [CustomEditor(typeof(CubismDisplayInfoParameterName))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(CubismDisplayInfoParameterName)), CanEditMultipleObjects]
     public class CubismDisplayInfoParameterNameInspector : UnityEditor.Editor
     {
         #region Editor
 
         /// <summary>
-        ///     Draws inspector.
+        /// Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
             // Fail silently.
-            if (serializedObject == null) return;
+            if (serializedObject == null)
+            {
+                return;
+            }
 
 
             serializedObject.Update();
@@ -38,9 +40,11 @@ namespace Live2D.Cubism.Editor.Inspectors
             EditorGUILayout.PropertyField(displayName);
 
             // Save any changes.
-            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            if (EditorGUI.EndChangeCheck())
+            {
+                serializedObject.ApplyModifiedProperties();
+            }
         }
-
         #endregion
     }
 }

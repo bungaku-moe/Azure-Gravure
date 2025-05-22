@@ -6,13 +6,13 @@
  */
 
 
-using Live2D.Cubism.Rendering;
 using UnityEditor;
+using Live2D.Cubism.Rendering;
+
 
 namespace Live2D.Cubism.Editor.Inspectors
 {
-    [CustomEditor(typeof(CubismPartColorsEditor))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(CubismPartColorsEditor)), CanEditMultipleObjects]
     internal sealed class PortfolioPartBlendColorEditorInspector : UnityEditor.Editor
     {
         private SerializedProperty childDrawableRenderers;
@@ -21,49 +21,67 @@ namespace Live2D.Cubism.Editor.Inspectors
         #region Editor
 
         /// <summary>
-        ///     Draws inspector.
+        /// Draws inspector.
         /// </summary>
         public override void OnInspectorGUI()
         {
             var blendColorEditor = target as CubismPartColorsEditor;
 
             // Fail silently.
-            if (blendColorEditor == null) return;
+            if (blendColorEditor == null)
+            {
+                return;
+            }
 
             // Obtains a property from a component.
             if (childDrawableRenderers == null)
+            {
                 childDrawableRenderers = serializedObject.FindProperty("_childDrawableRenderers");
-            if (childParts == null) childParts = serializedObject.FindProperty("_childParts");
+            }
+            if (childParts == null)
+            {
+                childParts = serializedObject.FindProperty("_childParts");
+            }
 
             if (childDrawableRenderers != null)
+            {
                 // Show renderers.
                 EditorGUILayout.PropertyField(childDrawableRenderers);
+            }
             if (childParts != null)
+            {
                 // Show parts.
                 EditorGUILayout.PropertyField(childParts);
+            }
 
             EditorGUI.BeginChangeCheck();
 
             // Display OverwriteColorForPartMultiplyColors.
             using (var scope = new EditorGUI.ChangeCheckScope())
             {
-                var overwriteColorForPartMultiplyColors = EditorGUILayout.Toggle("OverwriteColorForPartMultiplyColors",
-                    blendColorEditor.OverwriteColorForPartMultiplyColors);
+                var overwriteColorForPartMultiplyColors = EditorGUILayout.Toggle("OverwriteColorForPartMultiplyColors", blendColorEditor.OverwriteColorForPartMultiplyColors);
 
                 if (scope.changed)
+                {
                     foreach (CubismPartColorsEditor partBlendColorEditor in targets)
+                    {
                         partBlendColorEditor.OverwriteColorForPartMultiplyColors = overwriteColorForPartMultiplyColors;
+                    }
+                }
             }
 
             // Display OverwriteColorForPartScreenColors.
             using (var scope = new EditorGUI.ChangeCheckScope())
             {
-                var overwriteColorForPartScreenColors = EditorGUILayout.Toggle("OverwriteColorForPartScreenColors",
-                    blendColorEditor.OverwriteColorForPartScreenColors);
+                var overwriteColorForPartScreenColors = EditorGUILayout.Toggle("OverwriteColorForPartScreenColors", blendColorEditor.OverwriteColorForPartScreenColors);
 
                 if (scope.changed)
+                {
                     foreach (CubismPartColorsEditor partBlendColorEditor in targets)
+                    {
                         partBlendColorEditor.OverwriteColorForPartScreenColors = overwriteColorForPartScreenColors;
+                    }
+                }
             }
 
             // Display multiply color.
@@ -72,8 +90,12 @@ namespace Live2D.Cubism.Editor.Inspectors
                 var multiplyColor = EditorGUILayout.ColorField("MultiplyColor", blendColorEditor.MultiplyColor);
 
                 if (scope.changed)
+                {
                     foreach (CubismPartColorsEditor partBlendColorEditor in targets)
+                    {
                         partBlendColorEditor.MultiplyColor = multiplyColor;
+                    }
+                }
             }
 
             // Display screen color.
@@ -82,13 +104,18 @@ namespace Live2D.Cubism.Editor.Inspectors
                 var screenColor = EditorGUILayout.ColorField("ScreenColor", blendColorEditor.ScreenColor);
 
                 if (scope.changed)
+                {
                     foreach (CubismPartColorsEditor partBlendColorEditor in targets)
+                    {
                         partBlendColorEditor.ScreenColor = screenColor;
+                    }
+                }
             }
 
 
             // Save any changes.
             if (EditorGUI.EndChangeCheck())
+            {
                 foreach (CubismPartColorsEditor partBlendColorEditor in targets)
                 {
                     EditorUtility.SetDirty(partBlendColorEditor);
@@ -100,6 +127,7 @@ namespace Live2D.Cubism.Editor.Inspectors
                         EditorUtility.SetDirty(renderer.MeshRenderer);
                     }
                 }
+            }
         }
 
         #endregion

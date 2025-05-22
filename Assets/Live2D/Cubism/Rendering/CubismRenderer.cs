@@ -6,85 +6,43 @@
  */
 
 
-using System;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Rendering.Masking;
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
+
 
 namespace Live2D.Cubism.Rendering
 {
     /// <summary>
-    ///     Wrapper for drawing <see cref="CubismDrawable" />s.
+    /// Wrapper for drawing <see cref="CubismDrawable"/>s.
     /// </summary>
-    [ExecuteInEditMode]
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+    [ExecuteInEditMode, RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class CubismRenderer : MonoBehaviour
     {
         /// <summary>
-        ///     <see cref="SharedPropertyBlock" /> backing field.
+        /// <see cref="LocalSortingOrder"/> backing field.
         /// </summary>
-        private static MaterialPropertyBlock _sharedPropertyBlock;
+        [SerializeField, HideInInspector]
+        private int _localSortingOrder;
 
         /// <summary>
-        ///     <see cref="LocalSortingOrder" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private int _localSortingOrder;
-
-
-        /// <summary>
-        ///     <see cref="Color" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private Color _color = Color.white;
-
-        /// <summary>
-        ///     <see cref="OverwriteFlagForDrawableMultiplyColors" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private bool _isOverwrittenDrawableMultiplyColors;
-
-        /// <summary>
-        ///     <see cref="OverwriteFlagForDrawableScreenColors" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private bool _isOverwrittenDrawableScreenColors;
-
-        /// <summary>
-        ///     <see cref="MultiplyColor" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private Color _multiplyColor = Color.white;
-
-        /// <summary>
-        ///     <see cref="ScreenColor" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private Color _screenColor = Color.clear;
-
-
-        /// <summary>
-        ///     <see cref="MainTexture" /> backing field.
-        /// </summary>
-        [SerializeField] [HideInInspector] private Texture2D _mainTexture;
-
-
-        /// <summary>
-        ///     <see cref="MeshFilter" /> backing field.
-        /// </summary>
-        [NonSerialized] private MeshFilter _meshFilter;
-
-
-        /// <summary>
-        ///     <see cref="MeshRenderer" /> backing field.
-        /// </summary>
-        [NonSerialized] private MeshRenderer _meshRenderer;
-
-        /// <summary>
-        ///     Local sorting order.
+        /// Local sorting order.
         /// </summary>
         public int LocalSortingOrder
         {
-            get => _localSortingOrder;
+            get
+            {
+                return _localSortingOrder;
+            }
             set
             {
                 // Return early if same value given.
-                if (value == _localSortingOrder) return;
+                if (value == _localSortingOrder)
+                {
+                    return;
+                }
 
 
                 // Store value.
@@ -96,16 +54,26 @@ namespace Live2D.Cubism.Rendering
             }
         }
 
+
         /// <summary>
-        ///     Color.
+        /// <see cref="Color"/> backing field.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private Color _color = Color.white;
+
+        /// <summary>
+        /// Color.
         /// </summary>
         public Color Color
         {
-            get => _color;
+            get { return _color; }
             set
             {
                 // Return early if same value given.
-                if (value == _color) return;
+                if (value == _color)
+                {
+                    return;
+                }
 
 
                 // Store value.
@@ -117,111 +85,148 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Whether to overwrite with multiply color from the model.
+        /// <see cref="OverwriteFlagForDrawableMultiplyColors"/> backing field.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private bool _isOverwrittenDrawableMultiplyColors;
+
+        /// <summary>
+        /// Whether to overwrite with multiply color from the model.
         /// </summary>
         public bool OverwriteFlagForDrawableMultiplyColors
         {
-            get => _isOverwrittenDrawableMultiplyColors;
-            set => _isOverwrittenDrawableMultiplyColors = value;
+            get { return _isOverwrittenDrawableMultiplyColors; }
+            set { _isOverwrittenDrawableMultiplyColors = value; }
         }
 
         /// <summary>
-        ///     Last <see cref="OverwriteFlagForDrawableMultiplyColors" />.
+        /// Last <see cref="OverwriteFlagForDrawableMultiplyColors"/>.
         /// </summary>
         public bool LastIsUseUserMultiplyColor { get; set; }
 
         /// <summary>
-        ///     Whether to overwrite with screen color from the model.
+        /// <see cref="OverwriteFlagForDrawableScreenColors"/> backing field.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private bool _isOverwrittenDrawableScreenColors;
+
+        /// <summary>
+        /// Whether to overwrite with screen color from the model.
         /// </summary>
         public bool OverwriteFlagForDrawableScreenColors
         {
-            get => _isOverwrittenDrawableScreenColors;
-            set => _isOverwrittenDrawableScreenColors = value;
+            get { return _isOverwrittenDrawableScreenColors; }
+            set { _isOverwrittenDrawableScreenColors = value; }
         }
 
         /// <summary>
-        ///     Last <see cref="OverwriteFlagForDrawableScreenColors" />.
+        /// Last <see cref="OverwriteFlagForDrawableScreenColors"/>.
         /// </summary>
         public bool LastIsUseUserScreenColors { get; set; }
 
         /// <summary>
-        ///     Drawable Multiply Color.
+        /// <see cref="MultiplyColor"/> backing field.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private Color _multiplyColor = Color.white;
+
+        /// <summary>
+        /// Drawable Multiply Color.
         /// </summary>
         public Color MultiplyColor
         {
             get
             {
                 if (OverwriteFlagForDrawableMultiplyColors || RenderController.OverwriteFlagForModelMultiplyColors)
+                {
                     return _multiplyColor;
+                }
 
                 return Drawable.MultiplyColor;
             }
             set
             {
                 // Return early if same value given.
-                if (value == _multiplyColor) return;
+                if (value == _multiplyColor)
+                {
+                    return;
+                }
 
 
                 // Store value.
-                _multiplyColor = value != null
+                _multiplyColor = (value != null)
                     ? value
                     : Color.white;
             }
         }
 
         /// <summary>
-        ///     Last Drawable Multiply Color.
+        /// Last Drawable Multiply Color.
         /// </summary>
         public Color LastMultiplyColor { get; set; }
 
         /// <summary>
-        ///     Drawable Screen Color.
+        /// <see cref="ScreenColor"/> backing field.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private Color _screenColor = Color.clear;
+
+        /// <summary>
+        /// Drawable Screen Color.
         /// </summary>
         public Color ScreenColor
         {
             get
             {
                 if (OverwriteFlagForDrawableScreenColors || RenderController.OverwriteFlagForModelScreenColors)
+                {
                     return _screenColor;
+                }
 
                 return Drawable.ScreenColor;
             }
             set
             {
                 // Return early if same value given.
-                if (value == _screenColor) return;
+                if (value == _screenColor)
+                {
+                    return;
+                }
 
 
                 // Store value.
-                _screenColor = value != null
+                _screenColor = (value != null)
                     ? value
                     : Color.black;
             }
         }
 
         /// <summary>
-        ///     Last Drawable Screen Color.
+        /// Last Drawable Screen Color.
         /// </summary>
         public Color LastScreenColor { get; set; }
 
 
         /// <summary>
-        ///     <see cref="UnityEngine.Material" />.
+        /// <see cref="UnityEngine.Material"/>.
         /// </summary>
         public Material Material
         {
             get
             {
-#if UNITY_EDITOR
-                if (!Application.isPlaying) return MeshRenderer.sharedMaterial;
-#endif
+                #if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    return MeshRenderer.sharedMaterial;
+                }
+                #endif
 
 
                 return MeshRenderer.material;
             }
             set
             {
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 if (!Application.isPlaying)
                 {
                     MeshRenderer.sharedMaterial = value;
@@ -229,27 +234,37 @@ namespace Live2D.Cubism.Rendering
 
                     return;
                 }
-#endif
+                #endif
 
 
                 MeshRenderer.material = value;
             }
         }
 
+
         /// <summary>
-        ///     <see cref="MeshRenderer" />'s main texture.
+        /// <see cref="MainTexture"/> backing field.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private Texture2D _mainTexture;
+
+        /// <summary>
+        /// <see cref="MeshRenderer"/>'s main texture.
         /// </summary>
         public Texture2D MainTexture
         {
-            get => _mainTexture;
+            get { return _mainTexture; }
             set
             {
                 // Return early if same value given and main texture is valid.
-                if (value == _mainTexture && _mainTexture != null) return;
+                if (value == _mainTexture && _mainTexture != null)
+                {
+                    return;
+                }
 
 
                 // Store value.
-                _mainTexture = value != null
+                _mainTexture = (value != null)
                     ? value
                     : Texture2D.whiteTexture;
 
@@ -261,36 +276,59 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Meshes.
+        /// Meshes.
         /// </summary>
         /// <remarks>
-        ///     Double buffering dynamic meshes increases performance on mobile, so we double-buffer them here.
+        /// Double buffering dynamic meshes increases performance on mobile, so we double-buffer them here.
         /// </remarks>
 
         private Mesh[] Meshes { get; set; }
 
         /// <summary>
-        ///     Index of front buffer mesh.
+        /// Index of front buffer mesh.
         /// </summary>
         private int FrontMesh { get; set; }
 
         /// <summary>
-        ///     Index of back buffer mesh..
+        /// Index of back buffer mesh..
         /// </summary>
         private int BackMesh { get; set; }
 
         /// <summary>
-        ///     <see cref="UnityEngine.Mesh" />.
+        /// <see cref="UnityEngine.Mesh"/>.
         /// </summary>
-        public Mesh Mesh => Meshes[FrontMesh];
+        public Mesh Mesh
+        {
+            get { return Meshes[FrontMesh]; }
+        }
+
 
         /// <summary>
-        ///     <see cref="UnityEngine.MeshFilter" />.
+        /// <see cref="MeshFilter"/> backing field.
         /// </summary>
-        public MeshFilter MeshFilter => _meshFilter;
+        [NonSerialized]
+        private MeshFilter _meshFilter;
 
         /// <summary>
-        ///     <see cref="UnityEngine.MeshRenderer" />.
+        /// <see cref="UnityEngine.MeshFilter"/>.
+        /// </summary>
+        public MeshFilter MeshFilter
+        {
+            get
+            {
+                return _meshFilter;
+            }
+        }
+
+
+        /// <summary>
+        /// <see cref="MeshRenderer"/> backing field.
+        /// </summary>
+        [NonSerialized]
+        private MeshRenderer _meshRenderer;
+
+        /// <summary>
+        /// <see cref="UnityEngine.MeshRenderer"/>.
         /// </summary>
         public MeshRenderer MeshRenderer
         {
@@ -303,395 +341,126 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     <see cref="CubismDrawable" />.
+        /// <see cref="CubismDrawable"/>.
         /// </summary>
         private CubismDrawable Drawable { get; set; }
 
         /// <summary>
-        ///     <see cref="CubismRenderController" />.
+        /// <see cref="CubismRenderController"/>.
         /// </summary>
         private CubismRenderController RenderController { get; set; }
-
-        /// <summary>
-        ///     <see cref="MaterialPropertyBlock" /> that can be shared on the main script thread.
-        /// </summary>
-        private static MaterialPropertyBlock SharedPropertyBlock
-        {
-            get
-            {
-                // Lazily initialize.
-                if (_sharedPropertyBlock == null) _sharedPropertyBlock = new MaterialPropertyBlock();
-
-
-                return _sharedPropertyBlock;
-            }
-        }
-
-
-        #region Unity Events Handling
-
-        /// <summary>
-        ///     Finalizes instance.
-        /// </summary>
-        private void OnDestroy()
-        {
-            if (Meshes == null) return;
-
-
-            for (var i = 0; i < Meshes.Length; i++) DestroyImmediate(Meshes[i]);
-        }
-
-        #endregion
-
-
-        /// <summary>
-        ///     Applies main texture for rendering.
-        /// </summary>
-        private void ApplyMainTexture()
-        {
-            MeshRenderer.GetPropertyBlock(SharedPropertyBlock);
-
-
-            // Write property.
-            SharedPropertyBlock.SetTexture(CubismShaderVariables.MainTexture, MainTexture);
-
-            MeshRenderer.SetPropertyBlock(SharedPropertyBlock);
-        }
-
-        /// <summary>
-        ///     Applies sorting.
-        /// </summary>
-        private void ApplySorting()
-        {
-            // Sort by order.
-            if (SortingMode.SortByOrder())
-            {
-                MeshRenderer.sortingOrder = SortingOrder + (SortingMode == CubismSortingMode.BackToFrontOrder
-                    ? RenderOrder + LocalSortingOrder
-                    : -(RenderOrder + LocalSortingOrder));
-
-
-                transform.localPosition = Vector3.zero;
-
-
-                return;
-            }
-
-
-            // Sort by depth.
-            var offset = SortingMode == CubismSortingMode.BackToFrontZ
-                ? -DepthOffset
-                : DepthOffset;
-
-
-            MeshRenderer.sortingOrder = SortingOrder + LocalSortingOrder;
-
-            transform.localPosition = new Vector3(0f, 0f, RenderOrder * offset);
-        }
-
-        /// <summary>
-        ///     Uploads mesh vertex colors.
-        /// </summary>
-        public void ApplyVertexColors()
-        {
-            var vertexColors = VertexColors;
-            var color = Color;
-
-
-            color.a *= Opacity;
-
-
-            for (var i = 0; i < vertexColors.Length; ++i) vertexColors[i] = color;
-
-
-            // Set swap flag.
-            SetNewVertexColors();
-        }
-
-        /// <summary>
-        ///     Uploads diffuse colors.
-        /// </summary>
-        public void ApplyMultiplyColor()
-        {
-            MeshRenderer.GetPropertyBlock(SharedPropertyBlock);
-
-
-            // Write property.
-            SharedPropertyBlock.SetColor(CubismShaderVariables.MultiplyColor, MultiplyColor);
-
-            MeshRenderer.SetPropertyBlock(SharedPropertyBlock);
-        }
-
-        /// <summary>
-        ///     Initializes the main texture if possible.
-        /// </summary>
-        private void TryInitializeMultiplyColor()
-        {
-            LastIsUseUserMultiplyColor = false;
-
-            LastMultiplyColor = MultiplyColor;
-
-            ApplyMultiplyColor();
-        }
-
-        /// <summary>
-        ///     Uploads tint colors.
-        /// </summary>
-        public void ApplyScreenColor()
-        {
-            MeshRenderer.GetPropertyBlock(SharedPropertyBlock);
-
-
-            // Write property.
-            SharedPropertyBlock.SetColor(CubismShaderVariables.ScreenColor, ScreenColor);
-
-            MeshRenderer.SetPropertyBlock(SharedPropertyBlock);
-        }
-
-        /// <summary>
-        ///     Initializes the main texture if possible.
-        /// </summary>
-        private void TryInitializeScreenColor()
-        {
-            LastIsUseUserScreenColors = false;
-
-            LastScreenColor = ScreenColor;
-
-            ApplyScreenColor();
-        }
-
-        /// <summary>
-        ///     Initializes the mesh renderer.
-        /// </summary>
-        private void TryInitializeMeshRenderer()
-        {
-            if (_meshRenderer == null)
-            {
-                _meshRenderer = GetComponent<MeshRenderer>();
-
-
-                // Lazily add component.
-                if (_meshRenderer == null)
-                {
-                    _meshRenderer = gameObject.AddComponent<MeshRenderer>();
-                    _meshRenderer.hideFlags = HideFlags.HideInInspector;
-                    _meshRenderer.receiveShadows = false;
-                    _meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-                    _meshRenderer.lightProbeUsage = LightProbeUsage.BlendProbes;
-                }
-            }
-        }
-
-
-        /// <summary>
-        ///     Initializes the mesh filter.
-        /// </summary>
-        private void TryInitializeMeshFilter()
-        {
-            if (_meshFilter == null)
-            {
-                _meshFilter = GetComponent<MeshFilter>();
-
-
-                // Lazily add component.
-                if (_meshFilter == null)
-                {
-                    _meshFilter = gameObject.AddComponent<MeshFilter>();
-                    _meshFilter.hideFlags = HideFlags.HideInInspector;
-                }
-            }
-        }
-
-
-        /// <summary>
-        ///     Initializes the mesh if necessary.
-        /// </summary>
-        private void TryInitializeMesh()
-        {
-            // Only create mesh if necessary.
-            // HACK 'Mesh.vertex > 0' makes sure mesh is recreated in case of runtime instantiation.
-            if (Meshes != null && Mesh.vertexCount > 0) return;
-
-
-            if (Meshes == null) Meshes = new Mesh[2];
-
-
-            for (var i = 0; i < 2; ++i)
-            {
-                var mesh = new Mesh
-                {
-                    name = Drawable.name,
-                    vertices = Drawable.VertexPositions,
-                    uv = Drawable.VertexUvs,
-                    triangles = Drawable.Indices
-                };
-
-
-                mesh.MarkDynamic();
-                mesh.RecalculateBounds();
-
-
-                // Store mesh.
-                Meshes[i] = mesh;
-            }
-        }
-
-        /// <summary>
-        ///     Initializes vertex colors.
-        /// </summary>
-        private void TryInitializeVertexColor()
-        {
-            var mesh = Mesh;
-
-
-            VertexColors = new Color[mesh.vertexCount];
-
-
-            for (var i = 0; i < VertexColors.Length; ++i)
-            {
-                VertexColors[i] = Color;
-                VertexColors[i].a *= Opacity;
-            }
-        }
-
-        /// <summary>
-        ///     Initializes the main texture if possible.
-        /// </summary>
-        private void TryInitializeMainTexture()
-        {
-            if (MainTexture == null) MainTexture = null;
-
-
-            ApplyMainTexture();
-        }
-
-
-        /// <summary>
-        ///     Initializes components if possible.
-        /// </summary>
-        public void TryInitialize(CubismRenderController renderController)
-        {
-            Drawable = GetComponent<CubismDrawable>();
-            RenderController = renderController;
-
-            TryInitializeMeshRenderer();
-            TryInitializeMeshFilter();
-
-            TryInitializeMesh();
-            TryInitializeVertexColor();
-            TryInitializeMainTexture();
-            TryInitializeMultiplyColor();
-            TryInitializeScreenColor();
-
-            ApplySorting();
-        }
 
 
         #region Interface For CubismRenderController
 
         /// <summary>
-        ///     <see cref="SortingMode" /> backing field.
+        /// <see cref="SortingMode"/> backing field.
         /// </summary>
-        [SerializeField] [HideInInspector] private CubismSortingMode _sortingMode;
+        [SerializeField, HideInInspector]
+        private CubismSortingMode _sortingMode;
 
         /// <summary>
-        ///     Sorting mode.
+        /// Sorting mode.
         /// </summary>
         private CubismSortingMode SortingMode
         {
-            get => _sortingMode;
-            set => _sortingMode = value;
+            get { return _sortingMode; }
+            set { _sortingMode = value; }
         }
 
 
         /// <summary>
-        ///     <see cref="SortingOrder" /> backing field.
+        /// <see cref="SortingOrder"/> backing field.
         /// </summary>
-        [SerializeField] [HideInInspector] private int _sortingOrder;
+        [SerializeField, HideInInspector]
+        private int _sortingOrder;
 
         /// <summary>
-        ///     Sorting mode.
+        /// Sorting mode.
         /// </summary>
         private int SortingOrder
         {
-            get => _sortingOrder;
-            set => _sortingOrder = value;
+            get { return _sortingOrder; }
+            set { _sortingOrder = value; }
         }
 
 
         /// <summary>
-        ///     <see cref="RenderOrder" /> backing field.
+        /// <see cref="RenderOrder"/> backing field.
         /// </summary>
-        [SerializeField] [HideInInspector] private int _renderOrder;
+        [SerializeField, HideInInspector]
+        private int _renderOrder;
 
         /// <summary>
-        ///     Sorting mode.
+        /// Sorting mode.
         /// </summary>
         private int RenderOrder
         {
-            get => _renderOrder;
-            set => _renderOrder = value;
+            get { return _renderOrder; }
+            set { _renderOrder = value; }
         }
 
 
         /// <summary>
-        ///     <see cref="DepthOffset" /> backing field.
+        /// <see cref="DepthOffset"/> backing field.
         /// </summary>
-        [SerializeField] [HideInInspector] private float _depthOffset = 0.00001f;
+        [SerializeField, HideInInspector]
+        private float _depthOffset = 0.00001f;
 
         /// <summary>
-        ///     Offset to apply in case of depth sorting.
+        /// Offset to apply in case of depth sorting.
         /// </summary>
         private float DepthOffset
         {
-            get => _depthOffset;
-            set => _depthOffset = value;
+            get { return _depthOffset; }
+            set { _depthOffset = value; }
         }
 
 
         /// <summary>
-        ///     <see cref="Opacity" /> backing field.
+        /// <see cref="Opacity"/> backing field.
         /// </summary>
-        [SerializeField] [HideInInspector] private float _opacity;
+        [SerializeField, HideInInspector]
+        private float _opacity;
 
         /// <summary>
-        ///     Opacity.
+        /// Opacity.
         /// </summary>
         private float Opacity
         {
-            get => _opacity;
-            set => _opacity = value;
+            get { return _opacity; }
+            set { _opacity = value; }
         }
 
 
         /// <summary>
-        ///     Buffer for vertex colors.
+        /// Buffer for vertex colors.
         /// </summary>
         private Color[] VertexColors { get; set; }
 
 
         /// <summary>
-        ///     Allows tracking of what vertex data was updated last swap.
+        /// Allows tracking of what vertex data was updated last swap.
         /// </summary>
         private SwapInfo LastSwap { get; set; }
 
         /// <summary>
-        ///     Allows tracking of what vertex data will be swapped.
+        /// Allows tracking of what vertex data will be swapped.
         /// </summary>
         private SwapInfo ThisSwap { get; set; }
 
 
         /// <summary>
-        ///     Swaps mesh buffers.
+        /// Swaps mesh buffers.
         /// </summary>
         /// <remarks>
-        ///     Make sure to manually call this method in case you changed the <see cref="Color" />.
+        /// Make sure to manually call this method in case you changed the <see cref="Color"/>.
         /// </remarks>
         public void SwapMeshes()
         {
             // Perform internal swap.
             BackMesh = FrontMesh;
-            FrontMesh = FrontMesh == 0 ? 1 : 0;
+            FrontMesh = (FrontMesh == 0) ? 1 : 0;
 
 
             var mesh = Meshes[FrontMesh];
@@ -725,13 +494,18 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Updates visibility.
+        /// Updates visibility.
         /// </summary>
         public void UpdateVisibility()
         {
             if (LastSwap.DidBecomeVisible)
+            {
                 MeshRenderer.enabled = true;
-            else if (LastSwap.DidBecomeInvisible) MeshRenderer.enabled = false;
+            }
+            else if (LastSwap.DidBecomeInvisible)
+            {
+                MeshRenderer.enabled = false;
+            }
 
 
             ResetVisibilityFlags();
@@ -739,18 +513,21 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Updates render order.
+        /// Updates render order.
         /// </summary>
         public void UpdateRenderOrder()
         {
-            if (LastSwap.NewRenderOrder) ApplySorting();
+            if (LastSwap.NewRenderOrder)
+            {
+                ApplySorting();
+            }
 
 
             ResetRenderOrderFlag();
         }
 
         /// <summary>
-        ///     Updates sorting layer.
+        /// Updates sorting layer.
         /// </summary>
         /// <param name="newSortingLayer">New sorting layer.</param>
         internal void OnControllerSortingLayerDidChange(int newSortingLayer)
@@ -759,7 +536,7 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Updates sorting mode.
+        /// Updates sorting mode.
         /// </summary>
         /// <param name="newSortingMode">New sorting mode.</param>
         internal void OnControllerSortingModeDidChange(CubismSortingMode newSortingMode)
@@ -771,7 +548,7 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Updates sorting order.
+        /// Updates sorting order.
         /// </summary>
         /// <param name="newSortingOrder">New sorting order.</param>
         internal void OnControllerSortingOrderDidChange(int newSortingOrder)
@@ -783,7 +560,7 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Updates depth offset.
+        /// Updates depth offset.
         /// </summary>
         /// <param name="newDepthOffset"></param>
         internal void OnControllerDepthOffsetDidChange(float newDepthOffset)
@@ -796,7 +573,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Sets the opacity.
+        /// Sets the opacity.
         /// </summary>
         /// <param name="newOpacity">New opacity.</param>
         internal void OnDrawableOpacityDidChange(float newOpacity)
@@ -808,7 +585,7 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Updates render order.
+        /// Updates render order.
         /// </summary>
         /// <param name="newRenderOrder">New render order.</param>
         internal void OnDrawableRenderOrderDidChange(int newRenderOrder)
@@ -823,7 +600,7 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Sets the <see cref="UnityEngine.Mesh.vertices" />.
+        /// Sets the <see cref="UnityEngine.Mesh.vertices"/>.
         /// </summary>
         /// <param name="newVertexPositions">Vertex positions to set.</param>
         internal void OnDrawableVertexPositionsDidChange(Vector3[] newVertexPositions)
@@ -843,21 +620,25 @@ namespace Live2D.Cubism.Rendering
         }
 
         /// <summary>
-        ///     Sets visibility.
+        /// Sets visibility.
         /// </summary>
         /// <param name="newVisibility">New visibility.</param>
         internal void OnDrawableVisiblityDidChange(bool newVisibility)
         {
             // Set swap flag if visible.
             if (newVisibility)
+            {
                 BecomeVisible();
+            }
             else
+            {
                 BecomeInvisible();
+            }
         }
 
 
         /// <summary>
-        ///     Sets mask properties.
+        /// Sets mask properties.
         /// </summary>
         /// <param name="newMaskProperties">Value to set.</param>
         internal void OnMaskPropertiesDidChange(CubismMaskProperties newMaskProperties)
@@ -866,8 +647,7 @@ namespace Live2D.Cubism.Rendering
 
             var renderTextureIndex = newMaskProperties.Tile.RenderTextureIndex;
 
-            if (newMaskProperties.Texture.RenderTextureCount > 0 &&
-                !(renderTextureIndex < newMaskProperties.Texture.RenderTextures.Length))
+            if (newMaskProperties.Texture.RenderTextureCount > 0 && !(renderTextureIndex < newMaskProperties.Texture.RenderTextures.Length))
             {
                 Debug.LogError("An invalid value has been entered for `newMaskProperties.Tile.RenderTextureIndex`.\n" +
                                $"[Details] newMaskProperties.Tile.RenderTextureIndex: {renderTextureIndex}, newMaskProperties.Texture.RenderTextureCount: {newMaskProperties.Texture.RenderTextureCount}");
@@ -888,7 +668,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Sets model opacity.
+        /// Sets model opacity.
         /// </summary>
         /// <param name="newModelOpacity">Opacity to set.</param>
         internal void OnModelOpacityDidChange(float newModelOpacity)
@@ -904,10 +684,288 @@ namespace Live2D.Cubism.Rendering
 
         #endregion
 
+        /// <summary>
+        /// <see cref="SharedPropertyBlock"/> backing field.
+        /// </summary>
+        private static MaterialPropertyBlock _sharedPropertyBlock;
+
+        /// <summary>
+        /// <see cref="MaterialPropertyBlock"/> that can be shared on the main script thread.
+        /// </summary>
+        private static MaterialPropertyBlock SharedPropertyBlock
+        {
+            get
+            {
+                // Lazily initialize.
+                if (_sharedPropertyBlock == null)
+                {
+                    _sharedPropertyBlock = new MaterialPropertyBlock();
+                }
+
+
+                return _sharedPropertyBlock;
+            }
+        }
+
+
+        /// <summary>
+        /// Applies main texture for rendering.
+        /// </summary>
+        private void ApplyMainTexture()
+        {
+            MeshRenderer.GetPropertyBlock(SharedPropertyBlock);
+
+
+            // Write property.
+            SharedPropertyBlock.SetTexture(CubismShaderVariables.MainTexture, MainTexture);
+
+            MeshRenderer.SetPropertyBlock(SharedPropertyBlock);
+        }
+
+        /// <summary>
+        /// Applies sorting.
+        /// </summary>
+        private void ApplySorting()
+        {
+            // Sort by order.
+            if (SortingMode.SortByOrder())
+            {
+                MeshRenderer.sortingOrder = SortingOrder + ((SortingMode == CubismSortingMode.BackToFrontOrder)
+                    ? (RenderOrder + LocalSortingOrder)
+                    : -(RenderOrder + LocalSortingOrder));
+
+
+                transform.localPosition = Vector3.zero;
+
+
+                return;
+            }
+
+
+            // Sort by depth.
+            var offset = (SortingMode == CubismSortingMode.BackToFrontZ)
+                    ? -DepthOffset
+                    : DepthOffset;
+
+
+            MeshRenderer.sortingOrder = SortingOrder + LocalSortingOrder;
+
+            transform.localPosition = new Vector3(0f, 0f, RenderOrder * offset);
+        }
+
+        /// <summary>
+        /// Uploads mesh vertex colors.
+        /// </summary>
+        public void ApplyVertexColors()
+        {
+            var vertexColors = VertexColors;
+            var color = Color;
+
+
+            color.a *= Opacity;
+
+
+            for (var i = 0; i < vertexColors.Length; ++i)
+            {
+                vertexColors[i] = color;
+            }
+
+
+            // Set swap flag.
+            SetNewVertexColors();
+        }
+
+        /// <summary>
+        /// Uploads diffuse colors.
+        /// </summary>
+        public void ApplyMultiplyColor()
+        {
+            MeshRenderer.GetPropertyBlock(SharedPropertyBlock);
+
+
+            // Write property.
+            SharedPropertyBlock.SetColor(CubismShaderVariables.MultiplyColor, MultiplyColor);
+
+            MeshRenderer.SetPropertyBlock(SharedPropertyBlock);
+        }
+
+        /// <summary>
+        /// Initializes the main texture if possible.
+        /// </summary>
+        private void TryInitializeMultiplyColor()
+        {
+            LastIsUseUserMultiplyColor = false;
+
+            LastMultiplyColor = MultiplyColor;
+
+            ApplyMultiplyColor();
+        }
+
+        /// <summary>
+        /// Uploads tint colors.
+        /// </summary>
+        public void ApplyScreenColor()
+        {
+            MeshRenderer.GetPropertyBlock(SharedPropertyBlock);
+
+
+            // Write property.
+            SharedPropertyBlock.SetColor(CubismShaderVariables.ScreenColor, ScreenColor);
+
+            MeshRenderer.SetPropertyBlock(SharedPropertyBlock);
+        }
+
+        /// <summary>
+        /// Initializes the main texture if possible.
+        /// </summary>
+        private void TryInitializeScreenColor()
+        {
+            LastIsUseUserScreenColors = false;
+
+            LastScreenColor = ScreenColor;
+
+            ApplyScreenColor();
+        }
+
+        /// <summary>
+        /// Initializes the mesh renderer.
+        /// </summary>
+        private void TryInitializeMeshRenderer()
+        {
+            if (_meshRenderer == null)
+            {
+                _meshRenderer = GetComponent<MeshRenderer>();
+
+
+                // Lazily add component.
+                if (_meshRenderer == null)
+                {
+                    _meshRenderer = gameObject.AddComponent<MeshRenderer>();
+                    _meshRenderer.hideFlags = HideFlags.HideInInspector;
+                    _meshRenderer.receiveShadows = false;
+                    _meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+                    _meshRenderer.lightProbeUsage = LightProbeUsage.BlendProbes;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Initializes the mesh filter.
+        /// </summary>
+        private void TryInitializeMeshFilter()
+        {
+            if (_meshFilter == null)
+            {
+                _meshFilter = GetComponent<MeshFilter>();
+
+
+                // Lazily add component.
+                if (_meshFilter == null)
+                {
+                    _meshFilter = gameObject.AddComponent<MeshFilter>();
+                    _meshFilter.hideFlags = HideFlags.HideInInspector;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Initializes the mesh if necessary.
+        /// </summary>
+        private void TryInitializeMesh()
+        {
+            // Only create mesh if necessary.
+            // HACK 'Mesh.vertex > 0' makes sure mesh is recreated in case of runtime instantiation.
+            if (Meshes != null && Mesh.vertexCount > 0)
+            {
+                return;
+            }
+
+
+            if (Meshes == null)
+            {
+                Meshes = new Mesh[2];
+            }
+
+
+            for (var i = 0; i < 2; ++i)
+            {
+                var mesh = new Mesh
+                {
+                    name = Drawable.name,
+                    vertices = Drawable.VertexPositions,
+                    uv = Drawable.VertexUvs,
+                    triangles = Drawable.Indices
+                };
+
+
+                mesh.MarkDynamic();
+                mesh.RecalculateBounds();
+
+
+                // Store mesh.
+                Meshes[i] = mesh;
+            }
+        }
+
+        /// <summary>
+        /// Initializes vertex colors.
+        /// </summary>
+        private void TryInitializeVertexColor()
+        {
+            var mesh = Mesh;
+
+
+            VertexColors = new Color[mesh.vertexCount];
+
+
+            for (var i = 0; i < VertexColors.Length; ++i)
+            {
+                VertexColors[i] = Color;
+                VertexColors[i].a *= Opacity;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the main texture if possible.
+        /// </summary>
+        private void TryInitializeMainTexture()
+        {
+            if (MainTexture == null)
+            {
+                MainTexture = null;
+            }
+
+
+            ApplyMainTexture();
+        }
+
+
+        /// <summary>
+        /// Initializes components if possible.
+        /// </summary>
+        public void TryInitialize(CubismRenderController renderController)
+        {
+            Drawable = GetComponent<CubismDrawable>();
+            RenderController = renderController;
+
+            TryInitializeMeshRenderer();
+            TryInitializeMeshFilter();
+
+            TryInitializeMesh();
+            TryInitializeVertexColor();
+            TryInitializeMainTexture();
+            TryInitializeMultiplyColor();
+            TryInitializeScreenColor();
+
+            ApplySorting();
+        }
+
         #region Swap Info
 
         /// <summary>
-        ///     Sets <see cref="NewVertexPositions" />.
+        /// Sets <see cref="NewVertexPositions"/>.
         /// </summary>
         private void SetNewVertexPositions()
         {
@@ -918,7 +976,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Sets <see cref="NewVertexColors" />.
+        /// Sets <see cref="NewVertexColors"/>.
         /// </summary>
         private void SetNewVertexColors()
         {
@@ -929,7 +987,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Sets <see cref="DidBecomeVisible" /> on visible.
+        /// Sets <see cref="DidBecomeVisible"/> on visible.
         /// </summary>
         private void BecomeVisible()
         {
@@ -940,7 +998,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Sets <see cref="DidBecomeInvisible" /> on invisible.
+        /// Sets <see cref="DidBecomeInvisible"/> on invisible.
         /// </summary>
         private void BecomeInvisible()
         {
@@ -951,7 +1009,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Sets <see cref="SetNewRenderOrder" />.
+        /// Sets <see cref="SetNewRenderOrder"/>.
         /// </summary>
         private void SetNewRenderOrder()
         {
@@ -962,7 +1020,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Resets flags.
+        /// Resets flags.
         /// </summary>
         private void ResetSwapInfoFlags()
         {
@@ -971,7 +1029,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Reset visibility flags.
+        /// Reset visibility flags.
         /// </summary>
         private void ResetVisibilityFlags()
         {
@@ -983,7 +1041,7 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Reset render order flag.
+        /// Reset render order flag.
         /// </summary>
         private void ResetRenderOrderFlag()
         {
@@ -994,34 +1052,57 @@ namespace Live2D.Cubism.Rendering
 
 
         /// <summary>
-        ///     Allows tracking of <see cref="Mesh" /> data changed on a swap.
+        /// Allows tracking of <see cref="Mesh"/> data changed on a swap.
         /// </summary>
         private struct SwapInfo
         {
             /// <summary>
-            ///     Vertex positions were changed.
+            /// Vertex positions were changed.
             /// </summary>
             public bool NewVertexPositions { get; set; }
 
             /// <summary>
-            ///     Vertex colors were changed.
+            /// Vertex colors were changed.
             /// </summary>
             public bool NewVertexColors { get; set; }
 
             /// <summary>
-            ///     Visibility were changed to visible.
+            /// Visibility were changed to visible.
             /// </summary>
             public bool DidBecomeVisible { get; set; }
 
             /// <summary>
-            ///     Visibility were changed to invisible.
+            /// Visibility were changed to invisible.
             /// </summary>
             public bool DidBecomeInvisible { get; set; }
 
             /// <summary>
-            ///     Render order were changed.
+            /// Render order were changed.
             /// </summary>
             public bool NewRenderOrder { get; set; }
+        }
+
+        #endregion
+
+
+
+        #region Unity Events Handling
+
+        /// <summary>
+        /// Finalizes instance.
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (Meshes == null)
+            {
+                return;
+            }
+
+
+            for (var i = 0; i < Meshes.Length; i++)
+            {
+                DestroyImmediate(Meshes[i]);
+            }
         }
 
         #endregion

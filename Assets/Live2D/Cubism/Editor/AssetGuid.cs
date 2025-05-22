@@ -7,18 +7,20 @@
 
 
 using UnityEditor;
+
 using Object = UnityEngine.Object;
 
 
 namespace Live2D.Cubism.Editor.Importers
 {
     /// <summary>
-    ///     Provides helper methods for working with Unity assets.
+    /// Provides helper methods for working with Unity assets.
     /// </summary>
     internal static class AssetGuid
     {
+
         /// <summary>
-        ///     Loads an asset by Guid.
+        /// Loads an asset by Guid.
         /// </summary>
         /// <typeparam name="T">The type of asset to load.</typeparam>
         /// <param name="guid">The guid to query for.</param>
@@ -29,7 +31,7 @@ namespace Live2D.Cubism.Editor.Importers
         }
 
         /// <summary>
-        ///     Gets the Guid of an asset.
+        /// Gets the Guid of an asset.
         /// </summary>
         /// <param name="asset"></param>
         /// <returns></returns>

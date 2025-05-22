@@ -9,18 +9,18 @@
 namespace Live2D.Cubism.Editor.Deleters
 {
     /// <summary>
-    ///     Common interface for Cubism asset deleter.
+    /// Common interface for Cubism asset deleter.
     /// </summary>
     public interface ICubismDeleter
     {
         /// <summary>
-        ///     Sets the asset path.
+        /// Sets the asset path.
         /// </summary>
         void SetAssetPath(string value);
 
 
         /// <summary>
-        ///     Delete the corresponding asset.
+        /// Delete the corresponding asset.
         /// </summary>
         void Delete();
     }

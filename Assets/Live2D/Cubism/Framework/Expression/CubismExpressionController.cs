@@ -6,81 +6,167 @@
  */
 
 
-using System.Collections.Generic;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.MotionFade;
+using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace Live2D.Cubism.Framework.Expression
 {
     /// <summary>
-    ///     Expression controller.
+    /// Expression controller.
     /// </summary>
     public class CubismExpressionController : MonoBehaviour, ICubismUpdatable
     {
+        #region variable
+
         /// <summary>
-        ///     Called by cubism update controller. Order to invoke OnLateUpdate.
+        /// Expressions data list.
         /// </summary>
-        public int ExecutionOrder => CubismUpdateExecutionOrder.CubismExpressionController;
+        [SerializeField]
+        public CubismExpressionList ExpressionsList;
 
         /// <summary>
-        ///     Called by cubism update controller. Needs to invoke OnLateUpdate on Editing.
+        /// Use the expression calculation method.
         /// </summary>
-        public bool NeedsUpdateOnEditing => false;
+        [SerializeField]
+        public bool UseLegacyBlendCalculation = false;
 
         /// <summary>
-        ///     Called by cubism update manager.
+        /// CubismModel cache.
         /// </summary>
-        public void OnLateUpdate()
-        {
-            // Fail silently...
-            if (!enabled || _model == null) return;
-
-            // Start expression when current expression changed.
-            if (CurrentExpressionIndex != _lastExpressionIndex) StartExpression();
-
-            // Update of expressions.
-            if (UseLegacyBlendCalculation)
-                UpdateExpressionLegacy();
-            else
-                UpdateExpression();
-        }
+        private CubismModel _model = null;
 
         /// <summary>
-        ///     Add new expression to playing expressions.
+        /// Playing expressions.
+        /// </summary>
+        private List<CubismPlayingExpression> _playingExpressions = new List<CubismPlayingExpression>();
+
+        /// <summary>
+        /// Playing expressions index.
+        /// </summary>
+        [SerializeField]
+        public int CurrentExpressionIndex = -1;
+
+        /// <summary>
+        /// Last playing expressions index.
+        /// </summary>
+        private int _lastExpressionIndex = -1;
+
+        /// <summary>
+        /// Model has update controller component.
+        /// </summary>
+        [HideInInspector]
+        public bool HasUpdateController { get; set; }
+
+        /// <summary>
+        /// Value of each parameter to be applied to the model.
+        /// </summary>
+        private List<CubismExpressionParameterValue> _expressionParameterValues = new List<CubismExpressionParameterValue>();
+
+        /// <summary>
+        /// Default value for applying additive.
+        /// </summary>
+        private const float DefaultAdditiveValue = 0.0f;
+
+        /// <summary>
+        /// Initial value of multiply applied.
+        /// </summary>
+        private const float DefaultMultiplyValue = 1.0f;
+
+        #endregion
+
+        /// <summary>
+        /// Add new expression to playing expressions.
         /// </summary>
         private void StartExpression()
         {
             // Fail silently...
-            if (ExpressionsList == null || ExpressionsList.CubismExpressionObjects == null) return;
+            if(ExpressionsList == null || ExpressionsList.CubismExpressionObjects == null)
+            {
+                return;
+            }
 
             // Backup expression.
             _lastExpressionIndex = CurrentExpressionIndex;
 
             // Set last expression end time
-            if (_playingExpressions.Count > 0)
+            if(_playingExpressions.Count > 0)
             {
                 var playingExpression = _playingExpressions[_playingExpressions.Count - 1];
-                playingExpression.ExpressionEndTime =
-                    playingExpression.ExpressionUserTime + playingExpression.FadeOutTime;
+                var newExpressionEndTime = playingExpression.ExpressionUserTime + playingExpression.FadeOutTime;
+
+                if (playingExpression.ExpressionEndTime == 0.0f || newExpressionEndTime < playingExpression.ExpressionEndTime)
+                {
+                    playingExpression.ExpressionEndTime = newExpressionEndTime;
+                }
                 _playingExpressions[_playingExpressions.Count - 1] = playingExpression;
             }
 
             // Fail silently...
-            if (CurrentExpressionIndex < 0 ||
-                CurrentExpressionIndex >= ExpressionsList.CubismExpressionObjects.Length) return;
+            if (CurrentExpressionIndex < 0 || CurrentExpressionIndex >= ExpressionsList.CubismExpressionObjects.Length)
+            {
+                return;
+            }
 
-            var palyingExpression = CubismPlayingExpression.Create(_model,
-                ExpressionsList.CubismExpressionObjects[CurrentExpressionIndex]);
+            var palyingExpression = CubismPlayingExpression.Create(_model, ExpressionsList.CubismExpressionObjects[CurrentExpressionIndex]);
 
-            if (palyingExpression == null) return;
+            if(palyingExpression == null)
+            {
+                return;
+            }
 
             // Add to PlayingExList.
             _playingExpressions.Add(palyingExpression);
         }
 
         /// <summary>
-        ///     Update of expressions. (old method)
+        /// Called by cubism update controller. Order to invoke OnLateUpdate.
+        /// </summary>
+        public int ExecutionOrder
+        {
+            get { return CubismUpdateExecutionOrder.CubismExpressionController; }
+        }
+
+        /// <summary>
+        /// Called by cubism update controller. Needs to invoke OnLateUpdate on Editing.
+        /// </summary>
+        public bool NeedsUpdateOnEditing
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Called by cubism update manager.
+        /// </summary>
+        public void OnLateUpdate()
+        {
+            // Fail silently...
+            if(!enabled || _model == null)
+            {
+                return;
+            }
+
+            // Start expression when current expression changed.
+            if(CurrentExpressionIndex != _lastExpressionIndex)
+            {
+                StartExpression();
+            }
+
+            // Update of expressions.
+            if (UseLegacyBlendCalculation)
+            {
+                UpdateExpressionLegacy();
+            }
+            else
+            {
+                UpdateExpression();
+            }
+        }
+
+        /// <summary>
+        /// Update of expressions. (old method)
         /// </summary>
         private void UpdateExpressionLegacy()
         {
@@ -95,22 +181,24 @@ namespace Live2D.Cubism.Framework.Expression
                 for (var i = 0; i < playingExpression.Destinations.Length; ++i)
                 {
                     // Fail silently...
-                    if (playingExpression.Destinations[i] == null) continue;
+                    if (playingExpression.Destinations[i] == null)
+                    {
+                        continue;
+                    }
 
                     switch (playingExpression.Blend[i])
                     {
                         case CubismParameterBlendMode.Additive:
-                            playingExpression.Destinations[i]
-                                .AddToValue(playingExpression.Value[i], playingExpression.FadeWeight);
+                            playingExpression.Destinations[i].AddToValue(playingExpression.Value[i], playingExpression.FadeWeight);
                             break;
                         case CubismParameterBlendMode.Multiply:
-                            playingExpression.Destinations[i].MultiplyValueBy(playingExpression.Value[i],
-                                playingExpression.FadeWeight);
+                            playingExpression.Destinations[i].MultiplyValueBy(playingExpression.Value[i], playingExpression.FadeWeight);
                             break;
                         case CubismParameterBlendMode.Override:
-                            playingExpression.Destinations[i].Value =
-                                playingExpression.Destinations[i].Value * (1 - playingExpression.FadeWeight) +
-                                playingExpression.Value[i] * playingExpression.FadeInWeight;
+                            playingExpression.Destinations[i].Value = playingExpression.Destinations[i].Value * (1 - playingExpression.FadeWeight) + (playingExpression.Value[i] * playingExpression.FadeInWeight);
+                            break;
+                        default:
+                            // When an unspecified value is set, it is already in addition mode.
                             break;
                     }
                 }
@@ -122,14 +210,17 @@ namespace Live2D.Cubism.Framework.Expression
             // Remove expression from playing expressions
             for (var expressionIndex = _playingExpressions.Count - 1; expressionIndex >= 0; --expressionIndex)
             {
-                if (_playingExpressions[expressionIndex].FadeWeight > 0.0f) continue;
+                if (_playingExpressions[expressionIndex].FadeWeight > 0.0f)
+                {
+                    continue;
+                }
 
                 _playingExpressions.RemoveAt(expressionIndex);
             }
         }
 
         /// <summary>
-        ///     Update of expressions.
+        /// Update of expressions.
         /// </summary>
         private void UpdateExpression()
         {
@@ -147,16 +238,22 @@ namespace Live2D.Cubism.Framework.Expression
                     // Search for the presence of a parameter ID in the list.
                     for (var j = 0; j < _expressionParameterValues.Count; j++)
                     {
-                        if (_expressionParameterValues[j].Parameter != playingExpression.Destinations[i]) continue;
+                        if (_expressionParameterValues[j].Parameter != playingExpression.Destinations[i])
+                        {
+                            continue;
+                        }
 
                         index = j;
                         break;
                     }
 
-                    if (index >= 0) continue;
+                    if (index >= 0)
+                    {
+                        continue;
+                    }
 
                     // If the parameter does not exist in the list, add a new one.
-                    var item = new CubismExpressionParameterValue();
+                    CubismExpressionParameterValue item = new CubismExpressionParameterValue();
                     item.Parameter = playingExpression.Destinations[i];
                     item.AdditiveValue = DefaultAdditiveValue;
                     item.MultiplyValue = DefaultMultiplyValue;
@@ -176,12 +273,19 @@ namespace Live2D.Cubism.Framework.Expression
 
             // ----- If the latest Expression fade is complete, delete the earlier one. ------
             if (_playingExpressions.Count > 1 &&
-                _playingExpressions[_playingExpressions.Count - 1].FadeWeight >= 1.0f)
+                _playingExpressions[_playingExpressions.Count-1].FadeWeight >= 1.0f)
+            {
                 // The last element of the array is not deleted.
                 for (var i = _playingExpressions.Count - 2; i >= 0; --i)
+                {
                     _playingExpressions.RemoveAt(i);
+                }
+            }
 
-            if (expressionWeight > 1.0f) expressionWeight = 1.0f;
+            if (expressionWeight > 1.0f)
+            {
+                expressionWeight = 1.0f;
+            }
 
             // Apply each value to the model.
             for (var i = 0; i < _expressionParameterValues.Count; i++)
@@ -189,7 +293,7 @@ namespace Live2D.Cubism.Framework.Expression
                 var expressionParameterValue = _expressionParameterValues[i];
                 expressionParameterValue.Parameter.BlendToValue(CubismParameterBlendMode.Override,
                     (expressionParameterValue.OverwriteValue + expressionParameterValue.AdditiveValue)
-                    * expressionParameterValue.MultiplyValue,
+                        * expressionParameterValue.MultiplyValue,
                     expressionWeight);
 
                 expressionParameterValue.AdditiveValue = DefaultAdditiveValue;
@@ -198,7 +302,7 @@ namespace Live2D.Cubism.Framework.Expression
         }
 
         /// <summary>
-        ///     Update motion weights.
+        /// Update motion weights.
         /// </summary>
         /// <param name="playingExpression">Expression motion during playback.</param>
         private void UpdateFadeWeight(CubismPlayingExpression playingExpression)
@@ -207,23 +311,20 @@ namespace Live2D.Cubism.Framework.Expression
             playingExpression.ExpressionUserTime += Time.deltaTime;
 
             // Update weight
-            playingExpression.FadeInWeight = Mathf.Abs(playingExpression.FadeInTime) < float.Epsilon
+            playingExpression.FadeInWeight = (Mathf.Abs(playingExpression.FadeInTime) < float.Epsilon)
                 ? 1.0f
                 : CubismFadeMath.GetEasingSine(playingExpression.ExpressionUserTime / playingExpression.FadeInTime);
 
-            playingExpression.FadeOutWeight = Mathf.Abs(playingExpression.ExpressionEndTime) < float.Epsilon ||
-                                              playingExpression.ExpressionEndTime < 0.0f
+            playingExpression.FadeOutWeight = ((Mathf.Abs(playingExpression.ExpressionEndTime) < float.Epsilon) || (playingExpression.ExpressionEndTime < 0.0f))
                 ? 1.0f
                 : CubismFadeMath.GetEasingSine(
-                    (playingExpression.ExpressionEndTime - playingExpression.ExpressionUserTime) /
-                    playingExpression.FadeOutTime);
+                    (playingExpression.ExpressionEndTime - playingExpression.ExpressionUserTime) / playingExpression.FadeOutTime);
 
-            playingExpression.FadeWeight = playingExpression.Weight * playingExpression.FadeInWeight *
-                                           playingExpression.FadeOutWeight;
+            playingExpression.FadeWeight = playingExpression.Weight * playingExpression.FadeInWeight * playingExpression.FadeOutWeight;
         }
 
         /// <summary>
-        ///     Calculate parameters related to the model's facial expressions.
+        /// Calculate parameters related to the model's facial expressions.
         /// </summary>
         /// <param name="expressionIndex">Index of currently processed facial expression motion.</param>
         /// <param name="playingExpression">Expression motion during playback.</param>
@@ -235,7 +336,10 @@ namespace Live2D.Cubism.Framework.Expression
             {
                 var expressionParameterValue = _expressionParameterValues[i];
 
-                if (expressionParameterValue.Parameter == null) continue;
+                if (expressionParameterValue.Parameter == null)
+                {
+                    continue;
+                }
 
                 var currentParameterValue = expressionParameterValue.OverwriteValue =
                     expressionParameterValue.Parameter.Value;
@@ -244,7 +348,10 @@ namespace Live2D.Cubism.Framework.Expression
                 var parameterIndex = -1;
                 for (var j = 0; j < expressionParameters.Length; j++)
                 {
-                    if (expressionParameterValue.Parameter != expressionParameters[j]) continue;
+                    if (expressionParameterValue.Parameter != expressionParameters[j])
+                    {
+                        continue;
+                    }
 
                     parameterIndex = j;
 
@@ -331,13 +438,12 @@ namespace Live2D.Cubism.Framework.Expression
                             newSetValue,
                             playingExpression.FadeWeight);
                 }
-
                 _expressionParameterValues[i] = expressionParameterValue;
             }
         }
 
         /// <summary>
-        ///     Blend calculation.
+        /// Blend calculation.
         /// </summary>
         /// <param name="source">Source value.</param>
         /// <param name="destination">Destination value.</param>
@@ -345,84 +451,34 @@ namespace Live2D.Cubism.Framework.Expression
         /// <returns></returns>
         private float CalculateValue(float source, float destination, float fadeWeight)
         {
-            return source * (1.0f - fadeWeight) + destination * fadeWeight;
+            return (source * (1.0f - fadeWeight)) + (destination * fadeWeight);
         }
-
-        #region variable
-
-        /// <summary>
-        ///     Expressions data list.
-        /// </summary>
-        [SerializeField] public CubismExpressionList ExpressionsList;
-
-        /// <summary>
-        ///     Use the expression calculation method.
-        /// </summary>
-        [SerializeField] public bool UseLegacyBlendCalculation;
-
-        /// <summary>
-        ///     CubismModel cache.
-        /// </summary>
-        private CubismModel _model;
-
-        /// <summary>
-        ///     Playing expressions.
-        /// </summary>
-        private readonly List<CubismPlayingExpression> _playingExpressions = new();
-
-        /// <summary>
-        ///     Playing expressions index.
-        /// </summary>
-        [SerializeField] public int CurrentExpressionIndex = -1;
-
-        /// <summary>
-        ///     Last playing expressions index.
-        /// </summary>
-        private int _lastExpressionIndex = -1;
-
-        /// <summary>
-        ///     Model has update controller component.
-        /// </summary>
-        public bool HasUpdateController { get; set; }
-
-        /// <summary>
-        ///     Value of each parameter to be applied to the model.
-        /// </summary>
-        private readonly List<CubismExpressionParameterValue> _expressionParameterValues = new();
-
-        /// <summary>
-        ///     Default value for applying additive.
-        /// </summary>
-        private const float DefaultAdditiveValue = 0.0f;
-
-        /// <summary>
-        ///     Initial value of multiply applied.
-        /// </summary>
-        private const float DefaultMultiplyValue = 1.0f;
-
-        #endregion
 
         #region Unity Event Handling
 
         /// <summary>
-        ///     Called by Unity.
+        /// Called by Unity.
         /// </summary>
         private void OnEnable()
         {
             _model = this.FindCubismModel();
 
             // Get cubism update controller.
-            HasUpdateController = GetComponent<CubismUpdateController>() != null;
+            HasUpdateController = (GetComponent<CubismUpdateController>() != null);
         }
 
         /// <summary>
-        ///     Called by Unity.
+        /// Called by Unity.
         /// </summary>
         private void LateUpdate()
         {
-            if (!HasUpdateController) OnLateUpdate();
+            if(!HasUpdateController)
+            {
+                OnLateUpdate();
+            }
         }
 
         #endregion
+
     }
 }

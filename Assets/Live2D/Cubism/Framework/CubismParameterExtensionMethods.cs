@@ -8,51 +8,60 @@
 
 using Live2D.Cubism.Core;
 
+
 namespace Live2D.Cubism.Framework
 {
     /// <summary>
-    ///     Extensions for <see cref="CubismParameter" />s.
+    /// Extensions for <see cref="CubismParameter"/>s.
     /// </summary>
     public static class CubismParameterExtensionMethods
     {
         /// <summary>
-        ///     Additively blends a value in.
+        /// Additively blends a value in.
         /// </summary>
-        /// <param name="parameter"><see langword="this" />.</param>
+        /// <param name="parameter"><see langword="this"/>.</param>
         /// <param name="value">Value to blend in.</param>
         /// <param name="weight">Blend weight.</param>
         public static void AddToValue(this CubismParameter parameter, float value, float weight = 1f)
         {
-            if (parameter == null) return;
+            if (parameter == null)
+            {
+                return;
+            }
 
-            parameter.Value += value * weight;
+            parameter.Value += (value * weight);
         }
 
 
         /// <summary>
-        ///     Multiply blends a value in.
+        /// Multiply blends a value in.
         /// </summary>
-        /// <param name="parameter"><see langword="this" />.</param>
+        /// <param name="parameter"><see langword="this"/>.</param>
         /// <param name="value">Value to blend in.</param>
         /// <param name="weight">Blend weight.</param>
         public static void MultiplyValueBy(this CubismParameter parameter, float value, float weight = 1f)
         {
-            if (parameter == null) return;
+            if (parameter == null)
+            {
+                return;
+            }
 
-            parameter.Value *= 1f + (value - 1f) * weight;
+            parameter.Value *= (1f + ((value - 1f) * weight));
         }
 
 
         /// <summary>
-        ///     Blends a value in.
+        /// Blends a value in.
         /// </summary>
-        /// <param name="self"><see langword="this" />.</param>
+        /// <param name="self"><see langword="this"/>.</param>
         /// <param name="value">Value to blend in.</param>
         /// <param name="mode">Blend mode to use.</param>
-        public static void BlendToValue(this CubismParameter self, CubismParameterBlendMode mode, float value,
-            float weight = 1.0f)
+        public static void BlendToValue(this CubismParameter self, CubismParameterBlendMode mode, float value, float weight = 1.0f)
         {
-            if (self == null) return;
+            if (self == null)
+            {
+                return;
+            }
 
             if (mode == CubismParameterBlendMode.Additive)
             {
@@ -76,19 +85,24 @@ namespace Live2D.Cubism.Framework
         }
 
         /// <summary>
-        ///     Blends the same value into multiple <see cref="CubismParameter" />s.
+        /// Blends the same value into multiple <see cref="CubismParameter"/>s.
         /// </summary>
-        /// <param name="self"><see langword="this" />.</param>
+        /// <param name="self"><see langword="this"/>.</param>
         /// <param name="value">Value to blend in.</param>
         /// <param name="mode">Blend mode to use.</param>
-        public static void BlendToValue(this CubismParameter[] self, CubismParameterBlendMode mode, float value,
-            float weight = 1.0f)
+        public static void BlendToValue(this CubismParameter[] self, CubismParameterBlendMode mode, float value, float weight = 1.0f)
         {
-            if (self == null) return;
+            if (self == null)
+            {
+                return;
+            }
 
             if (mode == CubismParameterBlendMode.Additive)
             {
-                for (var i = 0; i < self.Length; ++i) self[i].AddToValue(value, weight);
+                for (var i = 0; i < self.Length; ++i)
+                {
+                    self[i].AddToValue(value, weight);
+                }
 
 
                 return;
@@ -97,14 +111,20 @@ namespace Live2D.Cubism.Framework
 
             if (mode == CubismParameterBlendMode.Multiply)
             {
-                for (var i = 0; i < self.Length; ++i) self[i].MultiplyValueBy(value, weight);
+                for (var i = 0; i < self.Length; ++i)
+                {
+                    self[i].MultiplyValueBy(value, weight);
+                }
 
 
                 return;
             }
 
 
-            for (var i = 0; i < self.Length; ++i) self[i].Value = self[i].Value * (1 - weight) + value * weight;
+            for (var i = 0; i < self.Length; ++i)
+            {
+                self[i].Value = self[i].Value * (1 - weight) + value * weight;
+            }
         }
     }
 }

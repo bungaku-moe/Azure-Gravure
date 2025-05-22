@@ -8,21 +8,34 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Rendering
 {
     /// <summary>
-    ///     Default shader assets.
+    /// Default shader assets.
     /// </summary>
     public static class CubismBuiltinShaders
     {
         /// <summary>
-        ///     Default unlit shader.
+        /// Default unlit shader.
         /// </summary>
-        public static Shader Unlit => Shader.Find("Live2D Cubism/Unlit");
+        public static Shader Unlit
+        {
+            get
+            {
+                return Shader.Find("Live2D Cubism/Unlit");
+            }
+        }
 
         /// <summary>
-        ///     Shader for drawing masks.
+        /// Shader for drawing masks.
         /// </summary>
-        public static Shader Mask => Shader.Find("Live2D Cubism/Mask");
+        public static Shader Mask
+        {
+            get
+            {
+                return Shader.Find("Live2D Cubism/Mask");
+            }
+        }
     }
 }

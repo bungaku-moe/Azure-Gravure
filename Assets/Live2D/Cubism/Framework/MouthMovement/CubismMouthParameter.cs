@@ -8,10 +8,11 @@
 
 using UnityEngine;
 
+
 namespace Live2D.Cubism.Framework.MouthMovement
 {
     /// <summary>
-    ///     Tagging component for mouth parameters.
+    /// Tagging component for mouth parameters.
     /// </summary>
     public sealed class CubismMouthParameter : MonoBehaviour
     {
