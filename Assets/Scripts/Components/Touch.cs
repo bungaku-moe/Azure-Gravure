@@ -1,5 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Gilzoide.SerializableCollections;
+using Live2D.Cubism.Core;
+using Live2D.Cubism.Framework;
 using Live2D.Cubism.Framework.Raycasting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,10 +11,13 @@ using UnityEngine.InputSystem;
 namespace Kiraio.Azure.Components
 {
     [AddComponentMenu("")]
+    [RequireComponent(typeof(CubismHitDrawable))]
     [RequireComponent(typeof(CubismRaycastable))]
     public class Touch : MonoBehaviour
     {
         public SerializableDictionary<string, string> PlayData = new();
+        private CubismDrawable _drawable;
+        private CubismHitDrawable _hitDrawable;
         private CubismRaycastable _raycastable;
 
         public CharacterViewer CharacterViewer { get; set; }
@@ -19,8 +26,12 @@ namespace Kiraio.Azure.Components
 
         private void Awake()
         {
+            _drawable = GetComponent<CubismDrawable>();
+            _hitDrawable = GetComponent<CubismHitDrawable>();
             _raycastable = GetComponent<CubismRaycastable>();
             _raycastable.Precision = CubismRaycastablePrecision.Triangles;
+
+            _hitDrawable.Name = _drawable.name;
         }
 
         private void OnEnable()
@@ -60,46 +71,14 @@ namespace Kiraio.Azure.Components
                 if (touch == null && touch != this) return;
 
                 CharacterViewer.AllowInteraction = false;
-                // CharacterViewer.MotionController.StopAnimation(0);
-                // StartCoroutine(PlayTouch());
                 var randomData = PlayData.ElementAt(Random.Range(0, PlayData.Count));
-                CharacterViewer.PlayMotion(randomData.Key, layerIndex: 0, priority: 2,
-                    onComplete: OnTouchBodyComplete);
-                CharacterViewer.PlayVoice(randomData.Value);
+                CharacterViewer.PlayMotion(randomData.Key, layerIndex: 1, onAnimationEnd: () => CharacterViewer.AllowInteraction = true);
+                // CharacterViewer.PlayVoice(randomData.Value);
             }
             else
             {
                 Debug.LogWarning("Main Camera is null. Can'\t process Touch interaction.");
             }
-        }
-
-        // private IEnumerator PlayTouch()
-        // {
-        //     var elapsed = 0f;
-        //
-        //     while (elapsed < CharacterViewer.FadeDuration)
-        //     {
-        //         CharacterViewer.MotionController.SetLayerWeight(0,
-        //             Mathf.Lerp(1f, 0f, elapsed / CharacterViewer.FadeDuration));
-        //         CharacterViewer.MotionController.SetLayerWeight(1,
-        //             Mathf.Lerp(0f, 1f, elapsed / CharacterViewer.FadeDuration));
-        //         elapsed += Time.smoothDeltaTime;
-        //         yield return null;
-        //     }
-        // }
-
-        private void OnTouchBodyComplete(int instanceId)
-        {
-            // CharacterViewer.MotionController.StopAllAnimation();
-
-            CharacterViewer.PlayMotion(
-                "idle",
-                true, priority: 3
-            );
-            CubismViewerBase.ResetMotionPriorities(CharacterViewer.MotionController);
-
-            CharacterViewer.MotionController.AnimationEndHandler -= OnTouchBodyComplete;
-            CharacterViewer.AllowInteraction = true;
         }
     }
 }

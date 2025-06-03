@@ -60,7 +60,7 @@ MonoBehaviour:
   _moc: {fileID: 11400000, guid: 0cd25900b6821d346824476d7529af29, type: 2}
 --- !u!114 &114524724953595766
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 16
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -72,7 +72,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
 --- !u!114 &114777655263784816
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 16
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -96,8 +96,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Opacity: 1
   _lastOpacity: 0
-  _isOverwrittenModelMultiplyColors: 0
-  _isOverwrittenModelScreenColors: 0
+  _isOverriddenModelMultiplyColors: 0
+  _isOverriddenModelScreenColors: 0
   _modelMultiplyColor: {r: 0, g: 0, b: 0, a: 0}
   _modelScreenColor: {r: 0, g: 0, b: 0, a: 0}
   _sortingLayerId: 0
@@ -432,8 +432,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _localSortingOrder: 0
   _color: {r: 1, g: 1, b: 1, a: 1}
-  _isOverwrittenDrawableMultiplyColors: 0
-  _isOverwrittenDrawableScreenColors: 0
+  _isOverriddenDrawableMultiplyColors: 0
+  _isOverriddenDrawableScreenColors: 0
   _multiplyColor: {r: 1, g: 1, b: 1, a: 1}
   _screenColor: {r: 0, g: 0, b: 0, a: 1}
   _mainTexture: {fileID: 2800000, guid: b6eee2f53dbd5ef44b673113e84be2e3, type: 3}
@@ -555,8 +555,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _localSortingOrder: 0
   _color: {r: 1, g: 1, b: 1, a: 1}
-  _isOverwrittenDrawableMultiplyColors: 0
-  _isOverwrittenDrawableScreenColors: 0
+  _isOverriddenDrawableMultiplyColors: 0
+  _isOverriddenDrawableScreenColors: 0
   _multiplyColor: {r: 1, g: 1, b: 1, a: 1}
   _screenColor: {r: 0, g: 0, b: 0, a: 1}
   _mainTexture: {fileID: 2800000, guid: b6eee2f53dbd5ef44b673113e84be2e3, type: 3}
@@ -757,8 +757,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _localSortingOrder: 0
   _color: {r: 1, g: 1, b: 1, a: 1}
-  _isOverwrittenDrawableMultiplyColors: 0
-  _isOverwrittenDrawableScreenColors: 0
+  _isOverriddenDrawableMultiplyColors: 0
+  _isOverriddenDrawableScreenColors: 0
   _multiplyColor: {r: 1, g: 1, b: 1, a: 1}
   _screenColor: {r: 0, g: 0, b: 0, a: 1}
   _mainTexture: {fileID: 2800000, guid: b6eee2f53dbd5ef44b673113e84be2e3, type: 3}

@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Azur.unity
     guid: 86fc91d0cfbfa69448873cc2d993430c
+  - enabled: 0
+    path: Assets/Live2D/Cubism/Samples/OriginalWorkflow/Demo/DemoCubism4_2.unity
+    guid: 3e6afd09c2922724883768fc923c30ce
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 5d7555ebb48604d44aad056a46bd9918, type: 2}
   m_UseUCBPForAssetBundles: 0

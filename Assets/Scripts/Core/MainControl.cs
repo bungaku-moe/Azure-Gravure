@@ -21,7 +21,9 @@ namespace Kiraio.Azure.Core
         [Header("UI")] [SerializeField] private TMP_InputField m_ModelJsonField;
         [SerializeField] private TMP_InputField m_VoiceDirectoryField;
 
-        [Space] [SerializeField] private RectTransform m_VoiceSetupContent;
+        [Space]
+        [SerializeField] private RectTransform m_VoiceSetupContent;
+        [SerializeField] private RuntimeAnimatorController m_BaseAnimatorController;
 
         [Space] [SerializeField] private string m_ShipDataPath;
         [SerializeField] private string m_SkinDataPath;
@@ -123,6 +125,7 @@ namespace Kiraio.Azure.Core
             _currentCharacter = InstantiateViewer();
             _currentCharacter.ModelJsonFile = m_ModelJsonField.text;
             _currentCharacter.VoicesDirectory = m_VoiceDirectoryField.text;
+            _currentCharacter.AnimatorController = m_BaseAnimatorController;
 
             // Await the async initialization
             await _currentCharacter.Initialize();

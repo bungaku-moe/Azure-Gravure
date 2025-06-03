@@ -1,18 +1,21 @@
 using System;
 using System.Reflection;
+using Cysharp.Threading.Tasks;
 using Gilzoide.SerializableCollections;
 using Kiraio.Azure.Core;
 using Kiraio.Azure.Utils;
 using Live2D.Cubism.Core;
-using Live2D.Cubism.Framework;
+// using Live2D.Cubism.Framework;
+using Live2D.Cubism.Framework.Expression;
 using Live2D.Cubism.Framework.Json;
 using Live2D.Cubism.Framework.Motion;
 using Live2D.Cubism.Framework.MotionFade;
-using Live2D.Cubism.Framework.Pose;
+// using Live2D.Cubism.Framework.Pose;
 using Live2D.Cubism.Framework.Raycasting;
-using Live2D.Cubism.Rendering;
+// using Live2D.Cubism.Rendering;
 using Live2D.Cubism.Rendering.Masking;
 using UnityEngine;
+using UnityEngine.Playables;
 
 namespace Kiraio.Azure.Components
 {
@@ -22,19 +25,25 @@ namespace Kiraio.Azure.Components
         public string VoicesDirectory { get; set; }
 
         protected CubismModel3Json ModelJson { get; set; }
+
+        // protected CubismPhysics3Json PhysicsJson { get; set; }
         protected CubismPose3Json PoseJson { get; set; }
         protected CubismModel Model { get; set; }
         public CubismRaycaster Raycaster { get; set; }
 
         public CubismMotionController MotionController { get; set; }
-        public CubismMaskController MaskController { get; set; }
-        public CubismFadeController FadeController { get; set; }
-        protected CubismUpdateController UpdateController { get; set; }
-        protected CubismPoseController PoseController { get; set; }
-        protected CubismRenderController RenderController { get; set; }
 
-        public Animator Animator { get; set; }
+        // protected CubismPoseController PoseController { get; set; }
+        protected CubismExpressionController ExpressionController { get; set; }
+        protected CubismMaskController MaskController { get; set; }
 
+        protected CubismFadeController FadeController { get; set; }
+        // protected CubismUpdateController UpdateController { get; set; }
+        // protected CubismRenderController RenderController { get; set; }
+
+        // public Animator Animator { get; set; }
+        public Animation LegacyAnimation { get; set; }
+        public RuntimeAnimatorController AnimatorController { get; set; }
         public AudioSource VoiceSource { get; set; }
 
         // public SerializableDictionary<string, AudioClip> AnimationsVoices { get; set; } = new();
@@ -43,12 +52,22 @@ namespace Kiraio.Azure.Components
 
         public MainControl MainControl { get; set; }
         public InputManager InputManager { get; set; }
-        public bool AllowInteraction { get; set; }
+        public bool AllowInteraction { get; set; } = false;
 
         protected virtual void Awake()
         {
             MainControl = FindObjectsByType<MainControl>(FindObjectsSortMode.None)[0];
             InputManager = FindObjectsByType<InputManager>(FindObjectsSortMode.None)[0];
+        }
+
+        /// <summary>
+        ///     Loads asset.
+        /// </summary>
+        /// <param name="absolutePath">Path to asset.</param>
+        /// <returns>The asset on success; <see langword="null" /> otherwise.</returns>
+        public static T LoadAsset<T>(string absolutePath) where T : class
+        {
+            return LoadAssetAtPath(typeof(T), absolutePath) as T;
         }
 
         /// <summary>
@@ -71,42 +90,45 @@ namespace Kiraio.Azure.Components
         }
 
         /// <summary>
-        ///     A helper method to play the motion.
+        /// Play animation.
         /// </summary>
-        /// <param name="motionName">The animation name.</param>
-        /// <param name="isLoop">Loop the animation?</param>
-        /// <param name="layerIndex">Which layer to play the animation?</param>
-        /// <param name="priority">How important is the animation? Scale from 0 ~ 3.</param>
+        /// <param name="motionName"></param>
+        /// <param name="wrapMode"></param>
+        /// <param name="layerIndex"></param>
+        /// <param name="queueMode"></param>
+        /// <param name="playMode"></param>
+        /// <param name="onAnimationEnd">Callback to invoke when the animation ends.</param>
         public void PlayMotion(
             string motionName,
-            bool isLoop = false,
+            WrapMode wrapMode = WrapMode.Once,
             int layerIndex = 0,
-            int priority = CubismMotionPriority.PriorityIdle,
-            Action<int> onComplete = null
-        )
+            QueueMode queueMode = QueueMode.PlayNow,
+            PlayMode playMode = PlayMode.StopSameLayer,
+            Action onAnimationEnd = null)
         {
-            if (!Animations.TryGetValue(motionName, out var animationClip))
+            if (!Animations.TryGetValue(motionName, out _))
             {
                 Debug.LogWarning($"Motion {motionName} not found.");
                 return;
             }
 
-            // Stop the current motion on the target layer (if not looped)
-            // if (MotionController.IsPlayingAnimation(layerIndex) && !isLoop)
-            // {
-            //     MotionController.StopAnimation(0, layerIndex);
-            // }
+            LegacyAnimation.animatePhysics = true;
+            LegacyAnimation.cullingType = AnimationCullingType.AlwaysAnimate;
+            LegacyAnimation[motionName].wrapMode = wrapMode;
+            LegacyAnimation[motionName].layer = layerIndex;
 
-            // Play the motion with the specified priority
-            MotionController.PlayAnimation(
-                animationClip,
-                layerIndex,
-                priority,
-                isLoop
-            );
+            LegacyAnimation.PlayQueued(motionName, queueMode, playMode);
 
-            // Register completion handler
-            if (onComplete != null) MotionController.AnimationEndHandler += onComplete;
+            if (onAnimationEnd != null)
+                WaitForAnimationEndAsync(motionName, onAnimationEnd).Forget();
+        }
+
+        private async UniTaskVoid WaitForAnimationEndAsync(string motionName, Action onAnimationEnd)
+        {
+            while (LegacyAnimation.IsPlaying(motionName))
+                await UniTask.Yield();
+
+            onAnimationEnd?.Invoke();
         }
 
         public void PlayVoice(string voiceName)
@@ -120,46 +142,6 @@ namespace Kiraio.Azure.Components
             {
                 Debug.LogWarning("No voice clip with the name provided.");
             }
-        }
-
-        /// <summary>
-        ///     Resets the motion priorities for all layers.
-        /// </summary>
-        /// <param name="motionController">The CubismMotionController instance.</param>
-        public static void ResetMotionPriorities(CubismMotionController motionController)
-        {
-            if (motionController == null)
-            {
-                Debug.LogWarning("MotionController is null. Cannot reset priorities.");
-                return;
-            }
-
-            // Access the private _motionPriorities field using reflection
-            var motionPrioritiesField = typeof(CubismMotionController).GetField(
-                "_motionPriorities",
-                BindingFlags.NonPublic | BindingFlags.Instance
-            );
-
-            if (motionPrioritiesField == null)
-            {
-                Debug.LogError("Failed to access _motionPriorities field. Has the Cubism SDK changed?");
-                return;
-            }
-
-            // Get the current _motionPriorities array
-            var motionPriorities = (int[])motionPrioritiesField.GetValue(motionController);
-
-            if (motionPriorities == null || motionPriorities.Length == 0)
-            {
-                Debug.LogWarning("_motionPriorities array is null or empty. Cannot reset priorities.");
-                return;
-            }
-
-            // Reset all priorities to 0 (PriorityNone)
-            for (var i = 0; i < motionPriorities.Length; i++) motionPriorities[i] = CubismMotionPriority.PriorityNone;
-
-            // Update the _motionPriorities field
-            motionPrioritiesField.SetValue(motionController, motionPriorities);
         }
     }
 }

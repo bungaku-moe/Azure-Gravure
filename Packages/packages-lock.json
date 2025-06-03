@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "fbe0bf85155f42f8832205f7b3ac3df571ada33e"
+      "hash": "f213ff497e4ff462a77319cf677cf20cc0860ca9"
     },
     "com.gilzoide.serializable-collections": {
       "version": "https://github.com/gilzoide/unity-serializable-collections.git",
@@ -14,6 +14,39 @@
       "dependencies": {},
       "hash": "e228d97a32e127018b4ba92b0c39c15721df62d4"
     },
+    "com.greenbamboogames.playablegraphmonitor": {
+      "version": "https://github.com/SolarianZ/UnityPlayableGraphMonitorTool.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "79a77b0c18ac605ad3dbf9b7b72e27696beafb75"
+    },
+    "com.unity.2d.animation": {
+      "version": "10.2.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.2d.common": "9.1.0",
+        "com.unity.2d.sprite": "1.0.0",
+        "com.unity.collections": "1.2.4",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.2d.common": {
+      "version": "9.1.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.burst": "1.8.4",
+        "com.unity.2d.sprite": "1.0.0",
+        "com.unity.mathematics": "1.1.0",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
@@ -21,7 +54,7 @@
       "dependencies": {}
     },
     "com.unity.burst": {
-      "version": "1.8.19",
+      "version": "1.8.21",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -32,7 +65,7 @@
     },
     "com.unity.collections": {
       "version": "2.5.1",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.burst": "1.8.17",
@@ -45,12 +78,11 @@
     "com.unity.ext.nunit": {
       "version": "2.0.5",
       "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.ide.rider": {
-      "version": "3.0.34",
+      "version": "3.0.36",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -59,7 +91,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.22",
+      "version": "2.0.23",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -68,7 +100,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.13.1",
+      "version": "1.14.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -85,17 +117,24 @@
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.4",
-      "depth": 3,
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.render-pipelines.core": {
-      "version": "17.0.3",
+      "version": "17.0.4",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
-        "com.unity.burst": "1.8.14",
+        "com.unity.burst": "1.8.20",
         "com.unity.mathematics": "1.3.2",
         "com.unity.ugui": "2.0.0",
         "com.unity.collections": "2.4.3",
@@ -106,12 +145,12 @@
       }
     },
     "com.unity.render-pipelines.universal": {
-      "version": "17.0.3",
+      "version": "17.0.4",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
-        "com.unity.render-pipelines.core": "17.0.3",
-        "com.unity.shadergraph": "17.0.3",
+        "com.unity.render-pipelines.core": "17.0.4",
+        "com.unity.shadergraph": "17.0.4",
         "com.unity.render-pipelines.universal-config": "17.0.3"
       }
     },
@@ -134,19 +173,19 @@
       }
     },
     "com.unity.searcher": {
-      "version": "4.9.2",
+      "version": "4.9.3",
       "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.shadergraph": {
-      "version": "17.0.3",
+      "version": "17.0.4",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
-        "com.unity.render-pipelines.core": "17.0.3",
-        "com.unity.searcher": "4.9.2"
+        "com.unity.render-pipelines.core": "17.0.4",
+        "com.unity.searcher": "4.9.3"
       }
     },
     "com.unity.sysroot": {
@@ -166,22 +205,21 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.4.6",
+      "version": "1.5.1",
       "depth": 1,
-      "source": "registry",
+      "source": "builtin",
       "dependencies": {
         "com.unity.ext.nunit": "2.0.3",
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
+      }
     },
     "com.unity.test-framework.performance": {
-      "version": "3.0.3",
-      "depth": 3,
+      "version": "3.1.0",
+      "depth": 2,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.31",
+        "com.unity.test-framework": "1.1.33",
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
@@ -210,23 +248,29 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "46efccdefcf92771c57d8c4da858beccacfd7092"
+      "hash": "2ce9731b3148fbfda6413d8b9d5bc03111baefae"
     },
     "com.yasirkula.ingamedebugconsole": {
       "version": "https://github.com/yasirkula/UnityIngameDebugConsole.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "b1204706248cea04f1b762dca8591e32ae044652"
+      "hash": "caf88dd56504f4956a3f0433653a042b3c88f333"
     },
     "com.yasirkula.simplefilebrowser": {
       "version": "https://github.com/yasirkula/UnitySimpleFileBrowser.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "07398a29da28adc0f074b5a364e5f209cf20285e"
+      "hash": "9847eb432fcbb825480edc9e95e033ab1472902a"
     },
     "com.unity.modules.accessibility": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.amd": {
       "version": "1.0.0",
       "depth": 0,
       "source": "builtin",
@@ -256,6 +300,15 @@
       "source": "builtin",
       "dependencies": {}
     },
+    "com.unity.modules.director": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.animation": "1.0.0"
+      }
+    },
     "com.unity.modules.hierarchycore": {
       "version": "1.0.0",
       "depth": 1,
@@ -275,6 +328,12 @@
       "dependencies": {}
     },
     "com.unity.modules.jsonserialize": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.nvidia": {
       "version": "1.0.0",
       "depth": 0,
       "source": "builtin",
